@@ -307,6 +307,14 @@ static ngx_command_t ngx_rtmp_hls_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_hls_app_conf_t, frags_per_key),
       NULL },
+    {
+        ngx_string("hls_playlist"),
+        NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+        ngx_conf_set_str_slot,
+        NGX_RTMP_APP_CONF_OFFSET,
+        offsetof(ngx_rtmp_hls_app_conf_t, playlist),
+        NULL
+    },
 
     ngx_null_command
 };
@@ -1414,8 +1422,16 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     /* playlist path */
 
     if (hacf->nested) {
+        if(hacf->playlist.len > 0){
+            if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
+                p = ngx_cpymem(p, "/", sizeof("/"));
+                p = ngx_cpymem(p, hacf->playlist.data, sizeof(hacf->playlist.data) - 1);
+            }else{
+                p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
+            }
+        }
         // p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
-        p = ngx_cpymem(p, "/playlist.m3u8", sizeof("/playlist.m3u8") - 1);
+        // p = ngx_cpymem(p, "/playlist.m3u8", sizeof("/playlist.m3u8") - 1);
     } else {
         p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
     }
