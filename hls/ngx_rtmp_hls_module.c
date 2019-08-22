@@ -114,6 +114,7 @@ typedef struct {
     ngx_str_t                           key_path;
     ngx_str_t                           key_url;
     ngx_uint_t                          frags_per_key;
+    ngx_str_t                           playlist;
 } ngx_rtmp_hls_app_conf_t;
 
 
