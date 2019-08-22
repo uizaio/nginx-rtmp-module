@@ -1352,14 +1352,24 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     len = hacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
     if (hacf->nested) {
-        len += sizeof("/index") - 1;
+        if(hacf->playlist.len > 0){
+            if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
+                len += hacf->playlist.len - 4;
+            }else{
+                len += sizeof("/index") - 1;
+            }
+        }else{
+            len += sizeof("/index") - 1;
+        }
+        
     }
     ctx->playlist.data = ngx_palloc(s->connection->pool, len);
     p = ngx_cpymem(ctx->playlist.data, hacf->path.data, hacf->path.len);    
     if (p[-1] != '/') {
         *p++ = '/';
     }
-    
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "playlist: '%s'", ctx->playlist.data);
     p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
 
     /*
@@ -1375,6 +1385,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
     ctx->stream.data[ctx->stream.len - 1] = (hacf->nested ? '/' : '-');
+    ///data/hls/demo-
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "streamdata: '%s'", ctx->stream.data);
     /* varint playlist path */
