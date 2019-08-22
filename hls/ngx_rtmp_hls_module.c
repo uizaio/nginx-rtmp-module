@@ -1427,7 +1427,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
             if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
                 u_char * slash = "/";
                 u_char * tmp;
-                sprintf(hacf->playlist.data, "%s%s", slash, (tmp = strdup(slash)));
+                sprintf(hacf->playlist.data, "%s%s", slash, (tmp = strdup(hacf->playlist.data)));
                 free(tmp);
                 hacf->playlist.len = hacf->playlist.len + 1;
                 p = ngx_cpymem(p, hacf->playlist.data, hacf->playlist.len - 1);
