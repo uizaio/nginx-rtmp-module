@@ -1430,7 +1430,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
                 sprintf(hacf->playlist.data, "%s%s", slash, (tmp = strdup(hacf->playlist.data)));
                 free(tmp);
                 hacf->playlist.len = hacf->playlist.len + 1;
-                p = ngx_cpymem(p, hacf->playlist.data, hacf->playlist.len - 1);
+                p = ngx_cpymem(p, hacf->playlist.data, hacf->playlist.len);
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: bad stream name: '%s'", hacf->playlist.data);
             }else{
                 p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
