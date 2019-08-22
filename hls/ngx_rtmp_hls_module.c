@@ -1338,7 +1338,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (ctx->name.data == NULL) {
         return NGX_ERROR;
     }
-
+    // v->name: stream name
     *ngx_cpymem(ctx->name.data, v->name, ctx->name.len) = 0;
 
     len = hacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
@@ -1414,7 +1414,8 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     /* playlist path */
 
     if (hacf->nested) {
-        p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
+        // p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
+        p = ngx_cpymem(p, "/playlist.m3u8", sizeof("/playlist.m3u8") - 1);
     } else {
         p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
     }
