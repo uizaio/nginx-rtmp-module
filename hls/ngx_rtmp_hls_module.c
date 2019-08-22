@@ -1430,6 +1430,8 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
             }else{
                 p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
             }
+        }else{
+            p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
         }
         // p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
         // p = ngx_cpymem(p, "/playlist.m3u8", sizeof("/playlist.m3u8") - 1);
