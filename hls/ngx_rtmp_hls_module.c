@@ -1354,10 +1354,10 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (hacf->nested) {
         len += sizeof("/index") - 1;
     }
-
     ctx->playlist.data = ngx_palloc(s->connection->pool, len);
     p = ngx_cpymem(ctx->playlist.data, hacf->path.data, hacf->path.len);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "playlist: '%s'", ctx->playlist.data);
     if (p[-1] != '/') {
         *p++ = '/';
     }
@@ -1431,14 +1431,12 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
                 free(tmp);
                 hacf->playlist.len = hacf->playlist.len + 1;
                 p = ngx_cpymem(p, hacf->playlist.data, hacf->playlist.len);
-                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: bad stream name: '%s'", hacf->playlist.data);
             }else{
                 p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
             }
         }else{
             p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
         }
-        // p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
         // p = ngx_cpymem(p, "/playlist.m3u8", sizeof("/playlist.m3u8") - 1);
     } else {
         p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
