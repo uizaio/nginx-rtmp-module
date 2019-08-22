@@ -1352,16 +1352,16 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     len = hacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
     if (hacf->nested) {
-        if(hacf->playlist.len > 0){
-            if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
-                len += hacf->playlist.len - 4;
-            }else{
-                len += sizeof("/index") - 1;
-            }
-        }else{
-            len += sizeof("/index") - 1;
-        }
-        
+        // if(hacf->playlist.len > 0){
+        //     if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
+        //         len += hacf->playlist.len - 4;
+        //     }else{
+        //         len += sizeof("/index") - 1;
+        //     }
+        // }else{
+        //     len += sizeof("/index") - 1;
+        // }
+        len += sizeof("/index") - 1;
     }
     ctx->playlist.data = ngx_palloc(s->connection->pool, len);
     p = ngx_cpymem(ctx->playlist.data, hacf->path.data, hacf->path.len);    
@@ -1433,21 +1433,22 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     /* playlist path */
 
     if (hacf->nested) {
-        if(hacf->playlist.len > 0){
-            if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
-                u_char * slash = "/";
-                u_char * tmp;
-                sprintf(hacf->playlist.data, "%s%s", slash, (tmp = strdup(hacf->playlist.data)));
-                free(tmp);
-                hacf->playlist.len = hacf->playlist.len + 1;
-                p = ngx_cpymem(p, hacf->playlist.data, hacf->playlist.len);
-            }else{
-                p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
-            }
-        }else{
-            p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
-        }
+        // if(hacf->playlist.len > 0){
+        //     if(ngx_strstr(hacf->playlist.data, ".m3u8") != NULL){
+        //         u_char * slash = "/";
+        //         u_char * tmp;
+        //         sprintf(hacf->playlist.data, "%s%s", slash, (tmp = strdup(hacf->playlist.data)));
+        //         free(tmp);
+        //         hacf->playlist.len = hacf->playlist.len + 1;
+        //         p = ngx_cpymem(p, hacf->playlist.data, hacf->playlist.len);
+        //     }else{
+        //         p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
+        //     }
+        // }else{
+        //     p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
+        // }
         // p = ngx_cpymem(p, "/playlist.m3u8", sizeof("/playlist.m3u8") - 1);
+        p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);
     } else {
         p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
     }
