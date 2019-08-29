@@ -281,6 +281,7 @@ typedef struct {
  *  NGX_OK    - success, may continue
  *  NGX_DONE  - success, input parsed, reply sent; need no
  *      more calls on this event */
+// https://riptutorial.com/c/example/31818/typedef-for-function-pointers
 typedef ngx_int_t (*ngx_rtmp_handler_pt)(ngx_rtmp_session_t *s,
         ngx_rtmp_header_t *h, ngx_chain_t *in);
 

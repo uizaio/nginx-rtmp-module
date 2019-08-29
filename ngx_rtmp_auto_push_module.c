@@ -154,7 +154,7 @@ ngx_rtmp_auto_push_init_process(ngx_cycle_t *cycle)
 
     reuseaddr = 1;
     s = (ngx_socket_t) -1;
-
+    ngx_log_info(NGX_LOG_INFO, cycle->log, 0, "worker on");
     ngx_log_debug0(NGX_LOG_DEBUG_RTMP, cycle->log, 0,
             "auto_push: creating sockets");
 
