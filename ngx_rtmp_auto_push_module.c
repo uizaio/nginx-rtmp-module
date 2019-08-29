@@ -199,11 +199,16 @@ ngx_rtmp_auto_push_init_process(ngx_cycle_t *cycle)
     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, cycle->log, 0,
                    "auto_push: create socket '%s'",
                    saun->sun_path);
-
+    ngx_log_error(NGX_LOG_INFO, cycle->log, 0,
+                   "auto_push: create socket '%s'",
+                   saun->sun_path);
     if (ngx_file_info(saun->sun_path, &fi) != ENOENT) {
         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, cycle->log, 0,
                        "auto_push: delete existing socket '%s'",
                        saun->sun_path);
+        ngx_log_error(NGX_LOG_INFO, cycle->log, 0,
+                       "auto_push: delete existing socket '%s'",
+                       saun->sun_path);               
         ngx_delete_file(saun->sun_path);
     }
 
