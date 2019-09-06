@@ -115,7 +115,7 @@ typedef struct {
 
 #define NGX_RTMP_DEFAULT_CHUNK_SIZE     128
 
-
+// https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol --> package structure
 /* RTMP message types */
 #define NGX_RTMP_MSG_CHUNK_SIZE         1
 #define NGX_RTMP_MSG_ABORT              2
@@ -142,7 +142,7 @@ typedef struct {
 #define NGX_RTMP_HANDSHAKE_DONE         NGX_RTMP_MSG_MAX + 3
 #define NGX_RTMP_MAX_EVENT              NGX_RTMP_MSG_MAX + 4
 
-
+// https://en.wikipedia.org/wiki/Real-Time_Messaging_Protocol --> Control message structure
 /* RMTP control message types */
 #define NGX_RTMP_USER_STREAM_BEGIN      0
 #define NGX_RTMP_USER_STREAM_EOF        1
