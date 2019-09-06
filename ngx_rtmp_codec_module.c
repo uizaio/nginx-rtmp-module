@@ -189,7 +189,7 @@ ngx_rtmp_codec_disconnect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     return NGX_OK;
 }
 
-
+// http://www.mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
 static ngx_int_t
 ngx_rtmp_codec_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         ngx_chain_t *in)

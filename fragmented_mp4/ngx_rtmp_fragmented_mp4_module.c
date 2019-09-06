@@ -61,7 +61,7 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf){
 }
 
 /**
- *  Video processor
+ *  Video message processor
  *  @param s
  * @param h
  * @param in ngx_chain_t is a strucutre that contains a chain of memory buffer
@@ -88,10 +88,28 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_video(ngx_rtmp_session_t *s, ngx_rtmp_h
 }
 
 /**
- * Audio processor 
+ * Audio message processor 
  **/
 static ngx_int_t ngx_rtmp_fragmented_mp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in){
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_codec_ctx_t      *codec_ctx;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+    if (fmacf == NULL || !fmacf->fragmented_mp4 || ctx == NULL ||
+        codec_ctx == NULL || h->mlen < 2)
+    {
+        return NGX_OK;
+    }
 
+    /* Only AAC is supported */
+
+    if (codec_ctx->audio_codec_id != NGX_RTMP_AUDIO_AAC ||
+        codec_ctx->aac_header == NULL)
+    {
+        return NGX_OK;
+    }
 }
 
 /**
