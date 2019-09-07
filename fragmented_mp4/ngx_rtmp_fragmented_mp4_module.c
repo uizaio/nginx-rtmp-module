@@ -311,7 +311,8 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     }
     ctx->name.len = ngx_strlen(v->name);
     ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: streamname: '%s'", ctx->name.data);
     if (ctx->name.data == NULL) {
         return NGX_ERROR;
     }
