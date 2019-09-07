@@ -507,6 +507,32 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
 {
+    ngx_rtmp_dash_ctx_t  *ctx;
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    if (ctx == NULL || !ctx->opened) {
+        return NGX_OK;
+    }
+
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: close fragments");
+
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
+
+    ngx_rtmp_fragmented_mp4_next_frag(s);
+
+    ngx_rtmp_fragmented_mp4_write_playlist(s);
+
+    ctx->id++;
+    ctx->opened = 0;
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
+{
     ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
