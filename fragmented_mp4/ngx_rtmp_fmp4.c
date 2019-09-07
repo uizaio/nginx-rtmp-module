@@ -363,7 +363,7 @@ ngx_rtmp_fmp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b,
 
     ngx_rtmp_fmp4_write_matrix(b, 1, 0, 0, 1, 0, 0);
 
-    if (ttype == NGX_RTMP_fmp4_VIDEO_TRACK) {
+    if (ttype == NGX_RTMP_FMP4_VIDEO_TRACK) {
         ngx_rtmp_fmp4_field_32(b, (uint32_t) codec_ctx->width << 16);
         ngx_rtmp_fmp4_field_32(b, (uint32_t) codec_ctx->height << 16);
     } else {
@@ -424,7 +424,7 @@ ngx_rtmp_fmp4_write_hdlr(ngx_buf_t *b, ngx_rtmp_fmp4_track_type_t ttype)
     /* pre defined */
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    if (ttype == NGX_RTMP_fmp4_VIDEO_TRACK) {
+    if (ttype == NGX_RTMP_FMP4_VIDEO_TRACK) {
         ngx_rtmp_fmp4_box(b, "vide");
     } else {
         ngx_rtmp_fmp4_box(b, "soun");
@@ -781,7 +781,7 @@ ngx_rtmp_fmp4_write_stsd(ngx_rtmp_session_t *s, ngx_buf_t *b,
     /* entry count */
     ngx_rtmp_fmp4_field_32(b, 1);
 
-    if (ttype == NGX_RTMP_fmp4_VIDEO_TRACK) {
+    if (ttype == NGX_RTMP_FMP4_VIDEO_TRACK) {
         ngx_rtmp_fmp4_write_video(s, b);
     } else {
         ngx_rtmp_fmp4_write_audio(s, b);
@@ -886,7 +886,7 @@ ngx_rtmp_fmp4_write_minf(ngx_rtmp_session_t *s, ngx_buf_t *b,
 
     pos = ngx_rtmp_fmp4_start_box(b, "minf");
 
-    if (ttype == NGX_RTMP_fmp4_VIDEO_TRACK) {
+    if (ttype == NGX_RTMP_FMP4_VIDEO_TRACK) {
         ngx_rtmp_fmp4_write_vmhd(b);
     } else {
         ngx_rtmp_fmp4_write_smhd(b);
@@ -1037,22 +1037,22 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     /* data offset present */
     flags = 0x01;
 
-    if (sample_mask & NGX_RTMP_fmp4_SAMPLE_DURATION) {
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
         nitems++;
         flags |= 0x000100;
     }
 
-    if (sample_mask & NGX_RTMP_fmp4_SAMPLE_SIZE) {
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
         nitems++;
         flags |= 0x000200;
     }
 
-    if (sample_mask & NGX_RTMP_fmp4_SAMPLE_KEY) {
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
         nitems++;
         flags |= 0x000400;
     }
 
-    if (sample_mask & NGX_RTMP_fmp4_SAMPLE_DELAY) {
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
         nitems++;
         flags |= 0x000800;
     }
