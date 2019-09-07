@@ -303,6 +303,8 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
         }
     }
     //when recv publish command, we reset id context to 0?
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "fmp4: aaaaaa: '%s'", v->name);
     ctx->id = 0;
     if (ngx_strstr(v->name, "..")) {
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
