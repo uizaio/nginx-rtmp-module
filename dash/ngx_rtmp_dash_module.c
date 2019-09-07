@@ -872,7 +872,7 @@ ngx_rtmp_dash_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     }
 
     ctx->id = 0;
-
+    ngx_log_error(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,"dash - ducla");
     if (ngx_strstr(v->name, "..")) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "dash: bad stream name: '%s'", v->name);
