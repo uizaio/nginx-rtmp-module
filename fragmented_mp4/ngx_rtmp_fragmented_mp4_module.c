@@ -18,10 +18,10 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf);
 
 typedef struct{
     ngx_flag_t fragmented_mp4;
-}ngx_rtmp_fragmented_mp4_app_conf_t
+}ngx_rtmp_fragmented_mp4_app_conf_t;
 
-typedef struct {
-    ngx_str_t                           playlist;
+typedef struct{
+    ngx_str_t  playlist;
 } ngx_rtmp_fragmented_mp4_ctx_t;
 
 static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
@@ -48,7 +48,22 @@ static ngx_rtmp_module_t ngx_rtmp_fragmented_mp4_module_ctx = {
 
     ngx_rtmp_fragmented_mp4_create_app_conf,      /* create location configuration */
     ngx_rtmp_fragmented_mp4_merge_app_conf,       /* merge location configuration */
-}
+};
+
+ngx_module_t  ngx_rtmp_fragmented_mp4_module = {
+    NGX_MODULE_V1,
+    &ngx_rtmp_fragmented_mp4_module_ctx,          /* module context */
+    ngx_rtmp_fragmented_mp4_commands,             /* module directives */
+    NGX_RTMP_MODULE,                    /* module type */
+    NULL,                               /* init master */
+    NULL,                               /* init module */
+    NULL,                               /* init process */
+    NULL,                               /* init thread */
+    NULL,                               /* exit thread */
+    NULL,                               /* exit process */
+    NULL,                               /* exit master */
+    NGX_MODULE_V1_PADDING
+};
 
 /**
  * Allocate memory for location specific configuration
