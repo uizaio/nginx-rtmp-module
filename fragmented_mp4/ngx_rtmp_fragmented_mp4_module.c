@@ -417,6 +417,27 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     //now we need to create a playlist
 }
 
+static void
+ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t)
+{
+    u_char                    *pos, *pos1;
+    size_t                     left;
+    ssize_t                    n;
+    ngx_fd_t                   fd;
+    ngx_buf_t                  b;
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_fragmented_mp4_frag_t      *f;
+
+    static u_char              buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
+
+    if (!t->opened) {
+        return;
+    }
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    done:
+        t->opened = 0;
+}
+
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
 {
@@ -509,32 +530,6 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
 
     return NGX_OK;
 }
-
-
-static void
-ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t)
-{
-    u_char                    *pos, *pos1;
-    size_t                     left;
-    ssize_t                    n;
-    ngx_fd_t                   fd;
-    ngx_buf_t                  b;
-    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
-    ngx_rtmp_fragmented_mp4_frag_t      *f;
-
-    static u_char              buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
-
-    if (!t->opened) {
-        return;
-    }
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-    done:
-        t->opened = 0;
-}
-
-
-
-
 
 /**
  * End of stream
