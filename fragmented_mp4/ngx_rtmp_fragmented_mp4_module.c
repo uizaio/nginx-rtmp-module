@@ -29,6 +29,19 @@ typedef struct {
     uint32_t                            duration;
 } ngx_rtmp_fragmented_mp4_frag_t;
 
+typedef struct {
+    ngx_uint_t                          id;
+    ngx_uint_t                          opened;
+    ngx_uint_t                          mdat_size;
+    ngx_uint_t                          sample_count;
+    ngx_uint_t                          sample_mask;
+    ngx_fd_t                            fd;
+    char                                type;
+    uint32_t                            earliest_pres_time;
+    uint32_t                            latest_pres_time;
+    ngx_rtmp_mp4_sample_t               samples[NGX_RTMP_FRAGMENTED_MP4_MAX_SAMPLES];
+} ngx_rtmp_fragmented_mp4_track_t;
+
 typedef struct{
     ngx_str_t                                   playlist;
     ngx_str_t                                   playlist_bak;
@@ -38,6 +51,8 @@ typedef struct{
     ngx_rtmp_fragmented_mp4_frag_t               *frags; /* circular 2 * winfrags + 1 */
     ngx_uint_t                                  id; //id of context
     ngx_str_t                                   name; //application name
+    ngx_rtmp_fragmented_mp4_track_t               audio;
+    ngx_rtmp_fragmented_mp4_track_t               video;
 } ngx_rtmp_fragmented_mp4_ctx_t;
 
 static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
