@@ -432,8 +432,11 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
         return NGX_ERROR;
     }
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: context id: %u", ctx->id);
     if (ctx->id == 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: init segment");
         //if this is the first streame, we need to create init segment file
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
     }
