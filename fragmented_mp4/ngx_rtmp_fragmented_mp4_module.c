@@ -170,6 +170,7 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_video(ngx_rtmp_session_t *s, ngx_rtmp_h
  * Audio message processor 
  **/
 static ngx_int_t ngx_rtmp_fragmented_mp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in){
+    u_char                     htype;
     ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
     ngx_rtmp_codec_ctx_t      *codec_ctx;
     ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
