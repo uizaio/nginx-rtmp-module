@@ -468,90 +468,90 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                       "fmp4: close init file");
     }
     //now we need to create a playlist
-    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: Create bak playlist %s", ctx->playlist_bak.data);
-    fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
-                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);    
-    if (fd == NGX_INVALID_FILE) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: open failed: '%V'", &ctx->playlist_bak);
-        return NGX_ERROR;
-    }
-    max_frag = fmacf->fraglen / 1000;
+    // ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
+    //                   "fmp4: Create bak playlist %s", ctx->playlist_bak.data);
+    // fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
+    //                    NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);    
+    // if (fd == NGX_INVALID_FILE) {
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                   "fmp4: open failed: '%V'", &ctx->playlist_bak);
+    //     return NGX_ERROR;
+    // }
+    // max_frag = fmacf->fraglen / 1000;
 
-    for (i = 0; i < ctx->nfrags; i++) {
-        f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
-        if (f->duration > max_frag) {
-            max_frag = (ngx_uint_t) (f->duration + .5);
-        }
-    }
-    p = buffer;
-    end = p + sizeof(buffer);
-    p = ngx_slprintf(p, end,
-                     "#EXTM3U\n"
-                     "#EXT-X-VERSION:7\n"
-                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"
-                     "#EXT-X-TARGETDURATION:%ui\n",
-                     ctx->frag, max_frag);
-    //FIXME: VOD, LIVE or EVENT?
-    p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: VOD\n");
-    p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
-    n = ngx_write_fd(fd, buffer, p - buffer);
-    if (n < 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: " ngx_write_fd_n " failed: '%V'",
-                      &ctx->playlist_bak);
-        ngx_close_file(fd);
-        return NGX_ERROR;
-    }
-    sep = fmacf->nested ? (0 ? "/" : "") : "-";
-    key_sep = fmacf->nested ? (0 ? "/" : "") : "-";
-    name_part.len = 0;
-    if (!fmacf->nested /*|| fmacf->base_url.len*/) {
-        name_part = ctx->name;
-    }
-    key_name_part.len = 0;
-    if (!fmacf->nested /*|| fmacf->key_url.len*/) {
-        key_name_part = ctx->name;
-    }
-    prev_key_id = 0;
-    for (i = 0; i < ctx->nfrags; i++) {
-        f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
-        p = buffer;
-        end = p + sizeof(buffer);
-        prev_key_id = f->key_id;
-        p = ngx_slprintf(p, end,
-                         "#EXTINF:%.3f,\n"
-                         "%V%V%s%uL.m4s\n",
-                         f->duration, "", &name_part, sep, f->id);
-        n = ngx_write_fd(fd, buffer, p - buffer);
-        if (n < 0) {
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: " ngx_write_fd_n " failed '%V'",
-                          &ctx->playlist_bak);
-            ngx_close_file(fd);
-            return NGX_ERROR;
-        }
-    }
-    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
-    n = ngx_write_fd(fd, buffer, p - buffer);
-    if (n < 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: " ngx_write_fd_n " failed: '%V'",
-                      &ctx->playlist_bak);
-        ngx_close_file(fd);
-        return NGX_ERROR;
-    }
-    ngx_close_file(fd);
-    //remove old file and create a new file from bak
-    if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
-        == NGX_FILE_ERROR)
-    {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "hls: rename failed: '%V'->'%V'",
-                      &ctx->playlist_bak, &ctx->playlist);
-        return NGX_ERROR;
-    }
+    // for (i = 0; i < ctx->nfrags; i++) {
+    //     f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+    //     if (f->duration > max_frag) {
+    //         max_frag = (ngx_uint_t) (f->duration + .5);
+    //     }
+    // }
+    // p = buffer;
+    // end = p + sizeof(buffer);
+    // p = ngx_slprintf(p, end,
+    //                  "#EXTM3U\n"
+    //                  "#EXT-X-VERSION:7\n"
+    //                  "#EXT-X-MEDIA-SEQUENCE:%uL\n"
+    //                  "#EXT-X-TARGETDURATION:%ui\n",
+    //                  ctx->frag, max_frag);
+    // //FIXME: VOD, LIVE or EVENT?
+    // p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: VOD\n");
+    // p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
+    // n = ngx_write_fd(fd, buffer, p - buffer);
+    // if (n < 0) {
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                   "fmp4: " ngx_write_fd_n " failed: '%V'",
+    //                   &ctx->playlist_bak);
+    //     ngx_close_file(fd);
+    //     return NGX_ERROR;
+    // }
+    // sep = fmacf->nested ? (0 ? "/" : "") : "-";
+    // key_sep = fmacf->nested ? (0 ? "/" : "") : "-";
+    // name_part.len = 0;
+    // if (!fmacf->nested /*|| fmacf->base_url.len*/) {
+    //     name_part = ctx->name;
+    // }
+    // key_name_part.len = 0;
+    // if (!fmacf->nested /*|| fmacf->key_url.len*/) {
+    //     key_name_part = ctx->name;
+    // }
+    // prev_key_id = 0;
+    // for (i = 0; i < ctx->nfrags; i++) {
+    //     f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+    //     p = buffer;
+    //     end = p + sizeof(buffer);
+    //     prev_key_id = f->key_id;
+    //     p = ngx_slprintf(p, end,
+    //                      "#EXTINF:%.3f,\n"
+    //                      "%V%V%s%uL.m4s\n",
+    //                      f->duration, "", &name_part, sep, f->id);
+    //     n = ngx_write_fd(fd, buffer, p - buffer);
+    //     if (n < 0) {
+    //         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                       "fmp4: " ngx_write_fd_n " failed '%V'",
+    //                       &ctx->playlist_bak);
+    //         ngx_close_file(fd);
+    //         return NGX_ERROR;
+    //     }
+    // }
+    // p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
+    // n = ngx_write_fd(fd, buffer, p - buffer);
+    // if (n < 0) {
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                   "fmp4: " ngx_write_fd_n " failed: '%V'",
+    //                   &ctx->playlist_bak);
+    //     ngx_close_file(fd);
+    //     return NGX_ERROR;
+    // }
+    // ngx_close_file(fd);
+    // //remove old file and create a new file from bak
+    // if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
+    //     == NGX_FILE_ERROR)
+    // {
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                   "hls: rename failed: '%V'->'%V'",
+    //                   &ctx->playlist_bak, &ctx->playlist);
+    //     return NGX_ERROR;
+    // }
 
     // if (ctx->var) {
     //     return ngx_rtmp_hls_write_variant_playlist(s);
@@ -577,8 +577,6 @@ ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmente
         return;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: Close error");
     done:
         t->opened = 0;
 }
