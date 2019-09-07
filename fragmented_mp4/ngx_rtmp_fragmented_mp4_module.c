@@ -496,8 +496,8 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
         return NGX_OK;
     }
 
-    ngx_rtmp_dash_close_fragment(s, &ctx->video);
-    ngx_rtmp_dash_close_fragment(s, &ctx->audio);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
     //need to write data to file *.m4s
     //jump to next fragment
     //and update/create playlist
