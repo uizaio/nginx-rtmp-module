@@ -19,9 +19,12 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf);
 static ngx_int_t ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_fragmented_mp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_dash_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
-static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp);
-static ngx_rtmp_fragmented_mp4_frag_t * ngx_rtmp_fragmented_mp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n);
+static ngx_int_t ngx_rtmp_fragmented_mp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, 
+    ngx_rtmp_fragmented_mp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
+static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, 
+    ngx_int_t boundary, uint32_t timestamp);
+static ngx_rtmp_fragmented_mp4_frag_t * ngx_rtmp_fragmented_mp4_get_frag(ngx_rtmp_session_t *s,
+     ngx_int_t n);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t, ngx_uint_t id, char type);
 
 
@@ -29,6 +32,7 @@ typedef struct{
     ngx_flag_t                          fragmented_mp4;
     ngx_uint_t                          winfrags;
     ngx_str_t                           path;
+    ngx_msec_t                          fraglen;//len of fragment
     ngx_flag_t                          nested;
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
@@ -467,8 +471,6 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "fmp4: close fragments %d", ctx->opened);
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }    
