@@ -25,14 +25,14 @@ typedef struct{
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
 typedef struct{
-    ngx_str_t                           playlist;
-    ngx_str_t                           playlist_bak;
-    time_t                              start_time;
-    ngx_str_t                           stream; //save stream of context
-    unsigned                            opened:1;
-    ngx_rtmp_dash_frag_t               *frags; /* circular 2 * winfrags + 1 */
-    ngx_uint_t                          id; //id of context
-    ngx_str_t                           name; //application name
+    ngx_str_t                                   playlist;
+    ngx_str_t                                   playlist_bak;
+    time_t                                      start_time;
+    ngx_str_t                                   stream; //save stream of context
+    unsigned                                    opened:1;
+    ngx_rtmp_fragmented_mp4_frag_t               *frags; /* circular 2 * winfrags + 1 */
+    ngx_uint_t                                  id; //id of context
+    ngx_str_t                                   name; //application name
 } ngx_rtmp_fragmented_mp4_ctx_t;
 
 typedef struct {
@@ -327,7 +327,7 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     }
     p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
     ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
-    ctx->stream.data[ctx->stream.len - 1] = (dacf->nested ? '/' : '-');
+    ctx->stream.data[ctx->stream.len - 1] = (mfacf->nested ? '/' : '-');
     if (dacf->nested) {
         p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);//remove \0 character of c string
     } else {
