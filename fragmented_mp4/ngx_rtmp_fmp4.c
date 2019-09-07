@@ -435,7 +435,7 @@ ngx_rtmp_fmp4_write_hdlr(ngx_buf_t *b, ngx_rtmp_fmp4_track_type_t ttype)
     ngx_rtmp_fmp4_field_32(b, 0);
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    if (ttype == NGX_RTMP_fmp4_VIDEO_TRACK) {
+    if (ttype == NGX_RTMP_FMP4_VIDEO_TRACK) {
         /* video handler string, NULL-terminated */
         ngx_rtmp_fmp4_data(b, "Uiza Video Handler", sizeof("Uiza Video Handler"));
     } else {
