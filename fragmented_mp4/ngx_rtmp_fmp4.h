@@ -21,19 +21,19 @@ typedef struct {
     uint32_t        delay;
     uint32_t        timestamp;
     unsigned        key:1;
-} ngx_rtmp_mp4_sample_t;
+} ngx_rtmp_fmp4_sample_t;
 
 
 typedef enum {
     NGX_RTMP_FMP4_FILETYPE_INIT,
     NGX_RTMP_FMP4_FILETYPE_SEG
-} ngx_rtmp_mp4_file_type_t;
+} ngx_rtmp_fmp4_file_type_t;
 
 
 typedef enum {
     NGX_RTMP_FMP4_VIDEO_TRACK,
     NGX_RTMP_FMP4_AUDIO_TRACK
-} ngx_rtmp_mp4_track_type_t;
+} ngx_rtmp_fmp4_track_type_t;
 
 
 ngx_int_t ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b);
