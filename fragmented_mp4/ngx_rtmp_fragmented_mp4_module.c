@@ -179,7 +179,10 @@ ngx_rtmp_fragmented_mp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begi
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
 {
+    ngx_fd_t               fd;
+    ngx_int_t              rc;
     ngx_rtmp_fragmented_mp4_ctx_t   *ctx;
+    ngx_buf_t              b;
     ngx_rtmp_codec_ctx_t  *codec_ctx;
     static u_char          buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
     
