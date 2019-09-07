@@ -651,6 +651,8 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
                       "fmp4: create init file: %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR, NGX_FILE_TRUNCATE,
                        NGX_FILE_DEFAULT_ACCESS);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: open init file: %s", ctx->stream.data);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: error creating fragmented mp4 init file");
@@ -659,10 +661,17 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
     b.start = buffer;
     b.end = b.start + sizeof(buffer);
     b.pos = b.last = b.start;
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: 1");
     ngx_rtmp_fmp4_write_ftyp(&b);
-    ngx_rtmp_fmp4_write_moov(s, &b);    
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: 2");
+    ngx_rtmp_fmp4_write_moov(s, &b)
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: 3");;    
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: 4");
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: writing audio init failed");
