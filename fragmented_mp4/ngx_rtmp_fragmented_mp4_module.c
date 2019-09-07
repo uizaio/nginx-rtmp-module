@@ -398,11 +398,13 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
         return NGX_ERROR;
     }
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "init.mp4") = 0;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: create init file: %s", ctx.stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR, NGX_FILE_TRUNCATE,
                        NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "dash: error creating fragmented mp4 init file");
+                      "fmp4: error creating fragmented mp4 init file");
         return NGX_ERROR;
     }
     b.start = buffer;
