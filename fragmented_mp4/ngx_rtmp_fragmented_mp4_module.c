@@ -463,8 +463,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: init segment");
         //if this is the first streame, we need to create init segment file
-        ngx_rtmp_fragmented_mp4_write_init_segments(s);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+        // ngx_rtmp_fragmented_mp4_write_init_segments(s);
+        ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: close init file");
     }
     //now we need to create a playlist
@@ -666,9 +666,10 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: writing audio init failed");
+                      "fmp4: writing init failed");
     }
     ngx_close_file(fd);    
+
     return NGX_OK;
 }
 
