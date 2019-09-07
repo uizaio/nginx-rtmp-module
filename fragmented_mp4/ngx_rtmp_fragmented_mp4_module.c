@@ -21,7 +21,8 @@ typedef struct{
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
 typedef struct{
-    ngx_str_t  playlist;
+    ngx_str_t                           playlist;
+    ngx_str_t                           stream;
 } ngx_rtmp_fragmented_mp4_ctx_t;
 
 static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
@@ -178,7 +179,7 @@ ngx_rtmp_fragmented_mp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begi
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
 {
-    ngx_rtmp_dash_ctx_t   *ctx;
+    ngx_rtmp_fragmented_mp4_ctx_t   *ctx;
     ngx_rtmp_codec_ctx_t  *codec_ctx;
     static u_char          buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
     
