@@ -315,11 +315,15 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (ctx->name.data == NULL) {
         return NGX_ERROR;
     }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: create playlist: '%s'", v->name);
     *ngx_cpymem(ctx->name.data, v->name, ctx->name.len) = 0;
     len = fmacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
     if (fmacf->nested) {
         len += sizeof("/index") - 1;
     }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: create playlist: '%s'", ctx->name.data);
     ctx->playlist.data = ngx_palloc(s->connection->pool, len);
     p = ngx_cpymem(ctx->playlist.data, fmacf->path.data, fmacf->path.len);
     if (p[-1] != '/') {
