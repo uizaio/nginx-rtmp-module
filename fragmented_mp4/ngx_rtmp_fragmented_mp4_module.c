@@ -11,21 +11,32 @@ static ngx_rtmp_stream_begin_pt         next_stream_begin;
 static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 #define NGX_RTMP_FRAGMENTED_MP4_BUFSIZE           (1024*1024)
+#define NGX_RTMP_FRAGMENTED_MP4_DIR_ACCESS        0744
 
 static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf);
 
 typedef struct{
-    ngx_flag_t fragmented_mp4;
+    ngx_flag_t                          fragmented_mp4;
+    ngx_uint_t                          winfrags;
+    ngx_str_t                           path;
+    ngx_flag_t                          nested;
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
 typedef struct{
     ngx_str_t                           playlist;
+    ngx_str_t                           playlist_bak;
     ngx_str_t                           stream; //save stream of context
     unsigned                            opened:1;
     ngx_uint_t                          id; //id of context
+    ngx_str_t                           name; //application name
 } ngx_rtmp_fragmented_mp4_ctx_t;
+
+typedef struct {
+    uint32_t                            timestamp;
+    uint32_t                            duration;
+} ngx_rtmp_fragmented_mp4_frag_t;
 
 static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
     {
@@ -36,6 +47,18 @@ static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
         offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, fragmented_mp4),
         NULL
     },
+    { ngx_string("fmp4_path"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, path),
+      NULL },
+      { ngx_string("fmp4_nested"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_flag_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, nested),
+      NULL },
     ngx_null_command
 };
 
@@ -133,6 +156,102 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_h
     }
 }
 
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_ensure_directory(ngx_rtmp_session_t *s)
+{
+    size_t                     len;
+    ngx_file_info_t            fi;
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *mfacf;
+
+    static u_char              path[NGX_MAX_PATH + 1];
+
+    mfacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+
+    *ngx_snprintf(path, sizeof(path) - 1, "%V", &mfacf->path) = 0;
+
+    if (ngx_file_info(path, &fi) == NGX_FILE_ERROR) {
+
+        if (ngx_errno != NGX_ENOENT) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_file_info_n " failed on '%V'",
+                          &mfacf->path);
+            return NGX_ERROR;
+        }
+
+        /* ENOENT */
+
+        if (ngx_create_dir(path, NGX_RTMP_FRAGMENTED_MP4_DIR_ACCESS) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_create_dir_n " failed on '%V'",
+                          &mfacf->path);
+            return NGX_ERROR;
+        }
+
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                       "fmp4: directory '%V' created", &mfacf->path);
+
+    } else {
+
+        if (!ngx_is_dir(&fi)) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: '%V' exists and is not a directory",
+                          &mfacf->path);
+            return  NGX_ERROR;
+        }
+
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                       "fmp4: directory '%V' exists", &mfacf->path);
+    }
+
+    if (!mfacf->nested) {
+        return NGX_OK;
+    }
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+
+    len = mfacf->path.len;
+    if (mfacf->path.data[len - 1] == '/') {
+        len--;
+    }
+
+    *ngx_snprintf(path, sizeof(path) - 1, "%*s/%V", len, mfacf->path.data,
+                  &ctx->name) = 0;
+
+    if (ngx_file_info(path, &fi) != NGX_FILE_ERROR) {
+
+        if (ngx_is_dir(&fi)) {
+            ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                           "fmp4: directory '%s' exists", path);
+            return NGX_OK;
+        }
+
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "dash: '%s' exists and is not a directory", path);
+
+        return  NGX_ERROR;
+    }
+
+    if (ngx_errno != NGX_ENOENT) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_file_info_n " failed on '%s'", path);
+        return NGX_ERROR;
+    }
+
+    /* NGX_ENOENT */
+
+    if (ngx_create_dir(path, NGX_RTMP_FRAGMENTED_MP4_DIR_ACCESS) == NGX_FILE_ERROR) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_create_dir_n " failed on '%s'", path);
+        return NGX_ERROR;
+    }
+
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: directory '%s' created", path);
+
+    return NGX_OK;
+}
+
 /**
  * Get app configs
  * */
@@ -147,7 +266,86 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
+    u_char                    *p;
+    size_t                     len;
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_fragmented_mp4_frag_t      *f;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    if (fmacf == NULL || !fmacf->fragmented_mp4 /**|| fmacf->path.len == 0**/) {
+        goto next;
+    }
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    if (ctx == NULL) {
+        ctx = ngx_pcalloc(s->connection->pool, sizeof(ngx_rtmp_fragmented_mp4_ctx_t));
+        if (ctx == NULL) {
+            goto next;
+        }
+        ngx_rtmp_set_ctx(s, ctx, ngx_rtmp_fragmented_mp4_module);
 
+    }else{
+        if (ctx->opened) {
+            goto next;
+        }
+
+        f = ctx->frags;
+        ngx_memzero(ctx, sizeof(ngx_rtmp_dash_ctx_t));
+        ctx->frags = f;
+    }    
+    if (ctx->frags == NULL) {
+        ctx->frags = ngx_pcalloc(s->connection->pool,
+                                 sizeof(ngx_rtmp_fragmented_mp4_frag_t) *
+                                 (fmacf->winfrags * 2 + 1));
+        if (ctx->frags == NULL) {
+            return NGX_ERROR;
+        }
+    }
+    //when recv publish command, we reset id context to 0?
+    ctx->id = 0;
+    if (ngx_strstr(v->name, "..")) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: bad stream name: '%s'", v->name);
+        return NGX_ERROR;
+    }
+    ctx->name.len = ngx_strlen(v->name);
+    ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
+
+    if (ctx->name.data == NULL) {
+        return NGX_ERROR;
+    }
+    *ngx_cpymem(ctx->name.data, v->name, ctx->name.len) = 0;
+    len = fmacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
+    if (fmacf->nested) {
+        len += sizeof("/index") - 1;
+    }
+    ctx->playlist.data = ngx_palloc(s->connection->pool, len);
+    p = ngx_cpymem(ctx->playlist.data, fmacf->path.data, fmacf->path.len);
+    if (p[-1] != '/') {
+        *p++ = '/';
+    }
+    p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
+    ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
+    ctx->stream.data[ctx->stream.len - 1] = (dacf->nested ? '/' : '-');
+    if (dacf->nested) {
+        p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);//remove \0 character of c string
+    } else {
+        p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
+    }
+    ctx->playlist.len = p - ctx->playlist.data;
+    ctx->playlist_bak.len = p - ctx->playlist_bak.data;
+
+    *p = 0;
+
+    ngx_log_debug3(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "dash: playlist='%V' playlist_bak='%V' stream_pattern='%V'",
+                   &ctx->playlist, &ctx->playlist_bak, &ctx->stream);
+
+    ctx->start_time = ngx_time();
+
+    if (ngx_rtmp_fragmented_mp4_ensure_directory(s) != NGX_OK) {
+        return NGX_ERROR;
+    }
+    *p = 0;
     next:
         return next_publish(s, v);
 }
