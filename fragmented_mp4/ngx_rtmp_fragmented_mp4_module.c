@@ -21,10 +21,10 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf);
 static ngx_int_t ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fragmented_mp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, 
     ngx_rtmp_fragmented_mp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
-static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, 
-    ngx_int_t boundary, uint32_t timestamp);
 static ngx_rtmp_fragmented_mp4_frag_t * ngx_rtmp_fragmented_mp4_get_frag(ngx_rtmp_session_t *s,
      ngx_int_t n);
+static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, 
+    ngx_int_t boundary, uint32_t timestamp);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t, ngx_uint_t id, char type);
 
 
