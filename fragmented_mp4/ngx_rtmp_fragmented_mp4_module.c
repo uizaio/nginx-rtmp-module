@@ -230,7 +230,7 @@ ngx_rtmp_fragmented_mp4_ensure_directory(ngx_rtmp_session_t *s)
         }
 
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "dash: '%s' exists and is not a directory", path);
+                      "fmp4: '%s' exists and is not a directory", path);
 
         return  NGX_ERROR;
     }
@@ -275,7 +275,7 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_rtmp_fragmented_mp4_frag_t      *f;
     ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
-    if (fmacf == NULL || !fmacf->fragmented_mp4 /**|| fmacf->path.len == 0**/) {
+    if (fmacf == NULL || !fmacf->fragmented_mp4 || fmacf->path.len == 0) {
         goto next;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
