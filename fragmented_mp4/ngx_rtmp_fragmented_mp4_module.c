@@ -268,90 +268,90 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
-    // u_char                    *p;
-    // size_t                     len;
-    // ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
-    // ngx_rtmp_fragmented_mp4_frag_t      *f;
-    // ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
-    // fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
-    // if (fmacf == NULL || !fmacf->fragmented_mp4 /**|| fmacf->path.len == 0**/) {
-    //     goto next;
-    // }
-    // ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-    // if (ctx == NULL) {
-    //     ctx = ngx_pcalloc(s->connection->pool, sizeof(ngx_rtmp_fragmented_mp4_ctx_t));
-    //     if (ctx == NULL) {
-    //         goto next;
-    //     }
-    //     ngx_rtmp_set_ctx(s, ctx, ngx_rtmp_fragmented_mp4_module);
+    u_char                    *p;
+    size_t                     len;
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_fragmented_mp4_frag_t      *f;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    if (fmacf == NULL || !fmacf->fragmented_mp4 /**|| fmacf->path.len == 0**/) {
+        goto next;
+    }
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    if (ctx == NULL) {
+        ctx = ngx_pcalloc(s->connection->pool, sizeof(ngx_rtmp_fragmented_mp4_ctx_t));
+        if (ctx == NULL) {
+            goto next;
+        }
+        ngx_rtmp_set_ctx(s, ctx, ngx_rtmp_fragmented_mp4_module);
 
-    // }else{
-    //     if (ctx->opened) {
-    //         goto next;
-    //     }
+    }else{
+        if (ctx->opened) {
+            goto next;
+        }
 
-    //     f = ctx->frags;
-    //     ngx_memzero(ctx, sizeof(ngx_rtmp_fragmented_mp4_ctx_t));
-    //     ctx->frags = f;
-    // }    
-    // if (ctx->frags == NULL) {
-    //     ctx->frags = ngx_pcalloc(s->connection->pool,
-    //                              sizeof(ngx_rtmp_fragmented_mp4_frag_t) *
-    //                              (fmacf->winfrags * 2 + 1));
-    //     if (ctx->frags == NULL) {
-    //         return NGX_ERROR;
-    //     }
-    // }
-    // //when recv publish command, we reset id context to 0?
-    // ctx->id = 0;
-    // if (ngx_strstr(v->name, "..")) {
-    //     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-    //                   "fmp4: bad stream name: '%s'", v->name);
-    //     return NGX_ERROR;
-    // }
-    // fprintf(stderr,"fmp4: streamname: %s", v->name);
+        f = ctx->frags;
+        ngx_memzero(ctx, sizeof(ngx_rtmp_fragmented_mp4_ctx_t));
+        ctx->frags = f;
+    }    
+    if (ctx->frags == NULL) {
+        ctx->frags = ngx_pcalloc(s->connection->pool,
+                                 sizeof(ngx_rtmp_fragmented_mp4_frag_t) *
+                                 (fmacf->winfrags * 2 + 1));
+        if (ctx->frags == NULL) {
+            return NGX_ERROR;
+        }
+    }
+    //when recv publish command, we reset id context to 0?
+    ctx->id = 0;
+    if (ngx_strstr(v->name, "..")) {
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "fmp4: bad stream name: '%s'", v->name);
+        return NGX_ERROR;
+    }
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: streamname: %s", v->name);
                       
-    // ctx->name.len = ngx_strlen(v->name);
-    // ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
-    // fprintf(stderr,"fmp4: streamname: '%s'", ctx->name.data);
-    // if (ctx->name.data == NULL) {
-    //     return NGX_ERROR;
-    // }
-    // fprintf(stderr,"fmp4: create playlist: '%s'", v->name);
-    // *ngx_cpymem(ctx->name.data, v->name, ctx->name.len) = 0;
-    // len = fmacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
-    // if (fmacf->nested) {
-    //     len += sizeof("/index") - 1;
-    // }
-    // fprintf(stderr,"fmp4: create playlist: '%s'", ctx->name.data);
-    // ctx->playlist.data = ngx_palloc(s->connection->pool, len);
-    // p = ngx_cpymem(ctx->playlist.data, fmacf->path.data, fmacf->path.len);
-    // if (p[-1] != '/') {
-    //     *p++ = '/';
-    // }
-    // p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
-    // ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
-    // ctx->stream.data[ctx->stream.len - 1] = (fmacf->nested ? '/' : '-');
-    // if (fmacf->nested) {
-    //     p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);//remove \0 character of c string
-    // } else {
-    //     p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
-    // }
-    // ctx->playlist.len = p - ctx->playlist.data;
-    // ctx->playlist_bak.len = p - ctx->playlist_bak.data;
+    ctx->name.len = ngx_strlen(v->name);
+    ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: streamname: '%s'", ctx->name.data);
+    if (ctx->name.data == NULL) {
+        return NGX_ERROR;
+    }
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: create playlist: '%s'", v->name);
+    *ngx_cpymem(ctx->name.data, v->name, ctx->name.len) = 0;
+    len = fmacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
+    if (fmacf->nested) {
+        len += sizeof("/index") - 1;
+    }
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: create playlist: '%s'", ctx->name.data);
+    ctx->playlist.data = ngx_palloc(s->connection->pool, len);
+    p = ngx_cpymem(ctx->playlist.data, fmacf->path.data, fmacf->path.len);
+    if (p[-1] != '/') {
+        *p++ = '/';
+    }
+    p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
+    ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
+    ctx->stream.data[ctx->stream.len - 1] = (fmacf->nested ? '/' : '-');
+    if (fmacf->nested) {
+        p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);//remove \0 character of c string
+    } else {
+        p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
+    }
+    ctx->playlist.len = p - ctx->playlist.data;
+    ctx->playlist_bak.len = p - ctx->playlist_bak.data;
 
-    // *p = 0;
+    *p = 0;
 
-    // ngx_log_debug3(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-    //                "dash: playlist='%V' playlist_bak='%V' stream_pattern='%V'",
-    //                &ctx->playlist, &ctx->playlist_bak, &ctx->stream);
+    ngx_log_debug3(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "dash: playlist='%V' playlist_bak='%V' stream_pattern='%V'",
+                   &ctx->playlist, &ctx->playlist_bak, &ctx->stream);
 
-    // ctx->start_time = ngx_time();//when user start publishing data
+    ctx->start_time = ngx_time();//when user start publishing data
 
-    // if (ngx_rtmp_fragmented_mp4_ensure_directory(s) != NGX_OK) {
-    //     return NGX_ERROR;
-    // }
-    // *p = 0;
+    if (ngx_rtmp_fragmented_mp4_ensure_directory(s) != NGX_OK) {
+        return NGX_ERROR;
+    }
+    *p = 0;
     next:
         return next_publish(s, v);
 }
