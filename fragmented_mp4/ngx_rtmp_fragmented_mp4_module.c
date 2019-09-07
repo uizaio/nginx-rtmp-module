@@ -12,6 +12,7 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 #define NGX_RTMP_FRAGMENTED_MP4_BUFSIZE           (1024*1024)
 #define NGX_RTMP_FRAGMENTED_MP4_DIR_ACCESS        0744
+#define NGX_RTMP_FRAGMENTED_MP4_MAX_SAMPLES       1024
 
 static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
