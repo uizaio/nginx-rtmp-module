@@ -665,9 +665,10 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "dash: writing audio init failed");
+                      "fmp4: writing audio init failed");
     }
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: finish creating init file: %s", ctx->stream.data);
     ngx_close_file(fd);
 
     return NGX_OK;
