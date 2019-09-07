@@ -468,8 +468,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                       "fmp4: close init file");
     }
     //now we need to create a playlist
-    // ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-    //                   "fmp4: Create bak playlist %s", ctx->playlist_bak.data);
+    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
+                      "fmp4: Create bak playlist %s", ctx->playlist_bak.data);
     // fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
     //                    NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);    
     // if (fd == NGX_INVALID_FILE) {
