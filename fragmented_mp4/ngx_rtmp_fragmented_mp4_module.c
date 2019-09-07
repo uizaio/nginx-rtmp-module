@@ -44,6 +44,7 @@ static ngx_rtmp_fragmented_mp4_frag_t * ngx_rtmp_fragmented_mp4_get_frag(ngx_rtm
 static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, 
     ngx_int_t boundary, uint32_t timestamp);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t, ngx_uint_t id, char type);
+static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragments(ngx_rtmp_session_t *s);
 
 
 typedef struct{
@@ -772,6 +773,26 @@ ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION;
     }
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_open_fragments(ngx_rtmp_session_t *s)
+{
+    ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+
+    if (ctx->opened) {
+        return NGX_OK;
+    }
+
+    ngx_rtmp_fragmented_mp4_open_fragment(s, &ctx->video, ctx->id, 'v');
+
+    ngx_rtmp_fragmented_mp4_open_fragment(s, &ctx->audio, ctx->id, 'a');
+
+    ctx->opened = 1;
 
     return NGX_OK;
 }
