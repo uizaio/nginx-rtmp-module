@@ -468,6 +468,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     //now we need to create a playlist
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
+                      "fmp4: Create bak playlist %s", ctx->playlist_bak.data);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: open failed: '%V'", &ctx->playlist_bak);
