@@ -466,10 +466,10 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
     }
     //now we need to create a playlist
-    fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
-                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: Create bak playlist %s", ctx->playlist_bak.data);
+    fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
+                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);    
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: open failed: '%V'", &ctx->playlist_bak);
@@ -661,22 +661,13 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
     b.start = buffer;
     b.end = b.start + sizeof(buffer);
     b.pos = b.last = b.start;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: 1");
     ngx_rtmp_fmp4_write_ftyp(&b);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: 2");
-    ngx_rtmp_fmp4_write_moov(s, &b);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "fmp4: 3");   
+    ngx_rtmp_fmp4_write_moov(s, &b);   
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: 4");
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: writing audio init failed");
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: finish creating init file: %s", ctx->stream.data);
     ngx_close_file(fd);
 
     return NGX_OK;
