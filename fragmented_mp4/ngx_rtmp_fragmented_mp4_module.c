@@ -24,6 +24,11 @@ typedef struct{
     ngx_flag_t                          nested;
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
+typedef struct {
+    uint32_t                            timestamp;
+    uint32_t                            duration;
+} ngx_rtmp_fragmented_mp4_frag_t;
+
 typedef struct{
     ngx_str_t                                   playlist;
     ngx_str_t                                   playlist_bak;
@@ -34,11 +39,6 @@ typedef struct{
     ngx_uint_t                                  id; //id of context
     ngx_str_t                                   name; //application name
 } ngx_rtmp_fragmented_mp4_ctx_t;
-
-typedef struct {
-    uint32_t                            timestamp;
-    uint32_t                            duration;
-} ngx_rtmp_fragmented_mp4_frag_t;
 
 static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
     {
@@ -327,8 +327,8 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     }
     p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
     ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
-    ctx->stream.data[ctx->stream.len - 1] = (mfacf->nested ? '/' : '-');
-    if (dacf->nested) {
+    ctx->stream.data[ctx->stream.len - 1] = (fmacf->nested ? '/' : '-');
+    if (fmacf->nested) {
         p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);//remove \0 character of c string
     } else {
         p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
