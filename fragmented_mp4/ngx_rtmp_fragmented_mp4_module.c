@@ -45,6 +45,7 @@ static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s,
     ngx_int_t boundary, uint32_t timestamp);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t, ngx_uint_t id, char type);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragments(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fragmented_mp4_rename_file(u_char *src, u_char *dst)
 
 
 typedef struct{
@@ -94,6 +95,12 @@ static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, nested),
       NULL },
+      { ngx_string("fmp4_fragment"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_msec_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, fraglen),
+      NULL },
     ngx_null_command
 };
 
@@ -128,6 +135,7 @@ ngx_module_t  ngx_rtmp_fragmented_mp4_module = {
 
 /**
  * Allocate memory for location specific configuration
+ * Every configs must be set here before using
  * */
 static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf){
     ngx_rtmp_fragmented_mp4_app_conf_t *conf;
@@ -137,6 +145,7 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf){
     }
     conf->fragmented_mp4 = NGX_CONF_UNSET;
     conf->nested = NGX_CONF_UNSET;
+    conf->fraglen = NGX_CONF_UNSET_MSEC;
     return conf;
 }
 
@@ -312,6 +321,8 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
     ngx_rtmp_fragmented_mp4_app_conf_t *conf = child;
 
     ngx_conf_merge_value(conf->fragmented_mp4, prev->fragmented_mp4, 0);
+    //fraglen default is 5000ms
+    ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
     return NGX_CONF_OK;
 }
 
@@ -425,10 +436,18 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
 {
-    static u_char              buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
-    ngx_rtmp_fragmented_mp4_ctx_t *ctx;
+    static u_char                       buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
     ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
-    ngx_rtmp_codec_ctx_t      *codec_ctx;
+    ngx_rtmp_codec_ctx_t                *codec_ctx;
+    ngx_fd_t                            fd;
+    u_char                              *p, *end;
+    ngx_uint_t                          i, max_frag;
+    ssize_t                             n;
+    const char                          *sep, *key_sep;
+    ngx_str_t                           name_part, key_name_part;
+    uint64_t                            prev_key_id;
+    ngx_rtmp_hls_frag_t                 *f;
     
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
@@ -436,15 +455,103 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: id: %d", ctx->id);
     if (ctx->id == 0) {
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+        ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: init segment");
         //if this is the first streame, we need to create init segment file
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
     }
     //now we need to create a playlist
+    fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
+                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    if (fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: open failed: '%V'", &ctx->playlist_bak);
+        return NGX_ERROR;
+    }
+    max_frag = hacf->fraglen / 1000;
+
+    for (i = 0; i < ctx->nfrags; i++) {
+        f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+        if (f->duration > max_frag) {
+            max_frag = (ngx_uint_t) (f->duration + .5);
+        }
+    }
+    p = buffer;
+    end = p + sizeof(buffer);
+    p = ngx_slprintf(p, end,
+                     "#EXTM3U\n"
+                     "#EXT-X-VERSION:7\n"
+                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"
+                     "#EXT-X-TARGETDURATION:%ui\n",
+                     ctx->frag, max_frag);
+    //FIXME: VOD, LIVE or EVENT?
+    p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: VOD\n");
+    p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
+    n = ngx_write_fd(fd, buffer, p - buffer);
+    if (n < 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_write_fd_n " failed: '%V'",
+                      &ctx->playlist_bak);
+        ngx_close_file(fd);
+        return NGX_ERROR;
+    }
+    sep = fmacf->nested ? (false ? "/" : "") : "-";
+    key_sep = fmacf->nested ? (false ? "/" : "") : "-";
+    name_part.len = 0;
+    if (!fmacf->nested /*|| fmacf->base_url.len*/) {
+        name_part = ctx->name;
+    }
+    key_name_part.len = 0;
+    if (!fmacf->nested /*|| fmacf->key_url.len*/) {
+        key_name_part = ctx->name;
+    }
+    prev_key_id = 0;
+    for (i = 0; i < ctx->nfrags; i++) {
+        f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+        p = buffer;
+        end = p + sizeof(buffer);
+        prev_key_id = f->key_id;
+        p = ngx_slprintf(p, end,
+                         "#EXTINF:%.3f,\n"
+                         "%V%V%s%uL.m4s\n",
+                         f->duration, "", &name_part, sep, f->id);
+        n = ngx_write_fd(fd, buffer, p - buffer);
+        if (n < 0) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_write_fd_n " failed '%V'",
+                          &ctx->playlist_bak);
+            ngx_close_file(fd);
+            return NGX_ERROR;
+        }
+    }
+    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
+    n = ngx_write_fd(fd, buffer, p - buffer);
+    if (n < 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_write_fd_n " failed: '%V'",
+                      &ctx->playlist_bak);
+        ngx_close_file(fd);
+        return NGX_ERROR;
+    }
+    ngx_close_file(fd);
+    //remove old file and create a new file from bak
+    if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
+        == NGX_FILE_ERROR)
+    {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "hls: rename failed: '%V'->'%V'",
+                      &ctx->playlist_bak, &ctx->playlist);
+        return NGX_ERROR;
+    }
+
+    // if (ctx->var) {
+    //     return ngx_rtmp_hls_write_variant_playlist(s);
+    // }
+
+    return NGX_OK;
 }
 
 static void
@@ -658,6 +765,9 @@ ngx_rtmp_fragmented_mp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     return NGX_OK;
 }
 
+/**
+ * @param uint32_t timestamp timestamp in the header
+ **/
 static void
 ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary,
     uint32_t timestamp)
@@ -677,6 +787,7 @@ ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t bounda
     if (d >= 0) {
 
         f->duration = timestamp - f->timestamp;
+        //check if fraglen is hit
         hit = (f->duration >= fmacf->fraglen);
 
         /* keep fragment lengths within 2x factor for dash.js  */
@@ -710,7 +821,7 @@ ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t bounda
     if (!ctx->opened) {
         boundary = 1;
     }
-
+    //we need to create new fragment file if fraglen is hit
     if (boundary) {
         ngx_rtmp_fragmented_mp4_close_fragments(s);
         ngx_rtmp_fragmented_mp4_open_fragments(s);
@@ -796,4 +907,16 @@ ngx_rtmp_fragmented_mp4_open_fragments(ngx_rtmp_session_t *s)
     ctx->opened = 1;
 
     return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_rename_file(u_char *src, u_char *dst)
+{
+    /* rename file with overwrite */
+
+#if (NGX_WIN32)
+    return MoveFileEx((LPCTSTR) src, (LPCTSTR) dst, MOVEFILE_REPLACE_EXISTING);
+#else
+    return ngx_rename_file(src, dst);
+#endif
 }
