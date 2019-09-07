@@ -393,6 +393,31 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
 }
 
 static ngx_int_t
+ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
+{
+    static u_char              buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
+    ngx_rtmp_fragmented_mp4_ctx_t *ctx;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+    ngx_rtmp_codec_ctx_t      *codec_ctx;
+    
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+    if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
+        return NGX_ERROR;
+    }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: context id: %u", ctx->id);
+    if (ctx->id == 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: init segment");
+        //if this is the first streame, we need to create init segment file
+        ngx_rtmp_fragmented_mp4_write_init_segments(s);
+    }
+    //now we need to create a playlist
+}
+
+static ngx_int_t
 ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
 {
     ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
@@ -485,30 +510,6 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
     return NGX_OK;
 }
 
-static ngx_int_t
-ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
-{
-    static u_char              buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
-    ngx_rtmp_fragmented_mp4_ctx_t *ctx;
-    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
-    ngx_rtmp_codec_ctx_t      *codec_ctx;
-    
-    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
-    if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
-        return NGX_ERROR;
-    }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: context id: %u", ctx->id);
-    if (ctx->id == 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: init segment");
-        //if this is the first streame, we need to create init segment file
-        ngx_rtmp_fragmented_mp4_write_init_segments(s);
-    }
-    //now we need to create a playlist
-}
 
 static void
 ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t)
