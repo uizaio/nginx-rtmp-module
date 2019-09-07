@@ -48,6 +48,8 @@ typedef struct{
     time_t                                      start_time;
     ngx_str_t                                   stream; //save stream of context
     unsigned                                    opened:1;
+    ngx_uint_t                                  nfrags;
+    ngx_uint_t                                  frag;
     ngx_rtmp_fragmented_mp4_frag_t               *frags; /* circular 2 * winfrags + 1 */
     ngx_uint_t                                  id; //id of context
     ngx_str_t                                   name; //application name
@@ -465,7 +467,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
 }
 
 static void
-ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t)
+ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t)
 {
     u_char                    *pos, *pos1;
     size_t                     left;
