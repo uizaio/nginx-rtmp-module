@@ -463,7 +463,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: init segment");
         //if this is the first streame, we need to create init segment file
-        // ngx_rtmp_fragmented_mp4_write_init_segments(s);
+        ngx_rtmp_fragmented_mp4_write_init_segments(s);
         ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: close init file");
     }
@@ -577,6 +577,8 @@ ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmente
         return;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: Close error");
     done:
         t->opened = 0;
 }
