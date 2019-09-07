@@ -238,8 +238,6 @@ ngx_rtmp_dash_write_playlist(ngx_rtmp_session_t *s)
     if (dacf == NULL || ctx == NULL || codec_ctx == NULL) {
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "dash: ducla %d", ctx->id);
     if (ctx->id == 0) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "dash: init segments");
