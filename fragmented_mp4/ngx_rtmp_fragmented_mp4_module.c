@@ -22,7 +22,9 @@ typedef struct{
 
 typedef struct{
     ngx_str_t                           playlist;
-    ngx_str_t                           stream;
+    ngx_str_t                           stream; //save stream of context
+    unsigned                            opened:1;
+    ngx_uint_t                          id; //id of context
 } ngx_rtmp_fragmented_mp4_ctx_t;
 
 static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
