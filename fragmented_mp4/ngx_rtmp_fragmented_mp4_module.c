@@ -216,6 +216,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         //if this is the first streame, we need to create init segment file
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
     }
+    //now we need to create a playlist
 }
 
 static ngx_int_t
