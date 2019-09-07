@@ -30,7 +30,9 @@ typedef struct {
 
 typedef struct {
     uint32_t                            timestamp;
-    uint32_t                            duration;
+    uint64_t                            id;
+    uint64_t                            key_id;
+    double                              duration;
 } ngx_rtmp_fragmented_mp4_frag_t;
 
 static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
@@ -447,7 +449,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     const char                          *sep, *key_sep;
     ngx_str_t                           name_part, key_name_part;
     uint64_t                            prev_key_id;
-    ngx_rtmp_hls_frag_t                 *f;
+    ngx_rtmp_fragmented_mp4_frag_t                 *f;
     
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
@@ -471,7 +473,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                       "fmp4: open failed: '%V'", &ctx->playlist_bak);
         return NGX_ERROR;
     }
-    max_frag = hacf->fraglen / 1000;
+    max_frag = fmacf->fraglen / 1000;
 
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
@@ -498,8 +500,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_close_file(fd);
         return NGX_ERROR;
     }
-    sep = fmacf->nested ? (false ? "/" : "") : "-";
-    key_sep = fmacf->nested ? (false ? "/" : "") : "-";
+    sep = fmacf->nested ? (0 ? "/" : "") : "-";
+    key_sep = fmacf->nested ? (0 ? "/" : "") : "-";
     name_part.len = 0;
     if (!fmacf->nested /*|| fmacf->base_url.len*/) {
         name_part = ctx->name;
