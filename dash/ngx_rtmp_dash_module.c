@@ -243,7 +243,8 @@ ngx_rtmp_dash_write_playlist(ngx_rtmp_session_t *s)
                       "dash: init segments");
         ngx_rtmp_dash_write_init_segments(s);
     }
-
+    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
+                      "dash: Create bak playlist %s", ctx->playlist_bak.data);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
 
