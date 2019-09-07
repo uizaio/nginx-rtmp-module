@@ -1065,19 +1065,19 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 
     for (i = 0; i < sample_count; i++, samples++) {
 
-        if (sample_mask & NGX_RTMP_fmp4_SAMPLE_DURATION) {
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             ngx_rtmp_fmp4_field_32(b, samples->duration);
         }
 
-        if (sample_mask & NGX_RTMP_fmp4_SAMPLE_SIZE) {
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
             ngx_rtmp_fmp4_field_32(b, samples->size);
         }
 
-        if (sample_mask & NGX_RTMP_fmp4_SAMPLE_KEY) {
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
             ngx_rtmp_fmp4_field_32(b, samples->key ? 0x00000000 : 0x00010000);
         }
 
-        if (sample_mask & NGX_RTMP_fmp4_SAMPLE_DELAY) {
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
             ngx_rtmp_fmp4_field_32(b, samples->delay);
         }
     }
