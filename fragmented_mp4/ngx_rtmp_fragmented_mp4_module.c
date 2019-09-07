@@ -593,10 +593,10 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
         return NGX_OK;
     }    
 
-    // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
-    // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
 
-    // ngx_rtmp_fragmented_mp4_next_frag(s);
+    ngx_rtmp_fragmented_mp4_next_frag(s);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: Write playlist");
     ngx_rtmp_fragmented_mp4_write_playlist(s);
