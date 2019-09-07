@@ -2,12 +2,15 @@
 #include <ngx_rtmp.h>
 #include <ngx_rtmp_cmd_module.h>
 #include <ngx_rtmp_codec_module.h>
+#include "ngx_rtmp_fmp4.h"
 
 
 static ngx_rtmp_publish_pt              next_publish;
 static ngx_rtmp_close_stream_pt         next_close_stream;
 static ngx_rtmp_stream_begin_pt         next_stream_begin;
 static ngx_rtmp_stream_eof_pt           next_stream_eof;
+
+#define NGX_RTMP_FRAGMENTED_MP4_BUFSIZE           (1024*1024)
 
 static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
@@ -157,12 +160,91 @@ ngx_rtmp_fragmented_mp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begi
     return next_stream_begin(s, v);
 }
 
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
+{
+    ngx_rtmp_dash_ctx_t   *ctx;
+    ngx_rtmp_codec_ctx_t  *codec_ctx;
+    static u_char          buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
+    
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+    if (ctx == NULL || codec_ctx == NULL) {
+        return NGX_ERROR;
+    }
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "init.mp4") = 0;
+    fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR, NGX_FILE_TRUNCATE,
+                       NGX_FILE_DEFAULT_ACCESS);
+    if (fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "dash: error creating fragmented mp4 init file");
+        return NGX_ERROR;
+    }
+    b.start = buffer;
+    b.end = b.start + sizeof(buffer);
+    b.pos = b.last = b.start;
+
+    ngx_rtmp_fmp4_write_ftyp(&b);
+    ngx_rtmp_fmp4_write_moov(s, &b);    
+    rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
+    if (rc == NGX_ERROR) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "dash: writing audio init failed");
+    }
+
+    ngx_close_file(fd);
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
+{
+    static u_char              buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
+    ngx_rtmp_fragmented_mp4_ctx_t *ctx;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+    ngx_rtmp_codec_ctx_t      *codec_ctx;
+    
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+    if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
+        return NGX_ERROR;
+    }
+
+    if (ctx->id == 0) {
+        //if this is the first streame, we need to create init segment file
+        ngx_rtmp_fragmented_mp4_write_init_segments(s);
+    }
+}
+
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
+{
+    ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    if (ctx == NULL || !ctx->opened) {
+        return NGX_OK;
+    }
+
+    //need to write data to file *.m4s
+    //jump to next fragment
+    //and update/create playlist
+    ngx_rtmp_fragmented_mp4_write_playlist(s);
+    ctx->id++;
+    ctx->opened = 0;
+
+    return NGX_OK;
+}
+
 /**
  * End of stream
  **/
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {
+    ngx_rtmp_fragmented_mp4_close_fragments(s);
     return next_stream_eof(s, v);
 }
 
