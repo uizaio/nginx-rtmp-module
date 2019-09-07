@@ -375,6 +375,22 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
         return next_publish(s, v);
 }
 
+static void
+ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
+{
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+
+    if (ctx->nfrags == fmacf->winfrags) {
+        ctx->frag++;
+    } else {
+        ctx->nfrags++;
+    }
+}
+
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
 {
@@ -514,21 +530,6 @@ ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmente
         t->opened = 0;
 }
 
-static void
-ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
-{
-    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
-    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
-
-    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-
-    if (ctx->nfrags == fmacf->winfrags) {
-        ctx->frag++;
-    } else {
-        ctx->nfrags++;
-    }
-}
 
 
 
