@@ -389,7 +389,7 @@ ngx_rtmp_fragmented_mp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_strea
     if (fmcf == NULL || !fmcf->fragmented_mp4 || ctx == NULL) {
         goto next;
     }
-
+    ngx_rtmp_fragmented_mp4_close_fragments(s);
     next:
         return next_close_stream(s, v);
 }
@@ -520,6 +520,8 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     //jump to next fragment
     //and update/create playlist
     ngx_rtmp_fragmented_mp4_next_frag(s);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: write playlist");
     ngx_rtmp_fragmented_mp4_write_playlist(s);
     ctx->id++;
     ctx->opened = 0;
