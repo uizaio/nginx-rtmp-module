@@ -55,7 +55,7 @@ static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, path),
       NULL },
-      { ngx_string("fragmented_mp4_nested"),
+      { ngx_string("fmp4_nested"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
@@ -103,6 +103,7 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf){
         return NULL;
     }
     conf->fragmented_mp4 = NGX_CONF_UNSET;
+    conf->nested = NGX_CONF_UNSET;
     return conf;
 }
 
