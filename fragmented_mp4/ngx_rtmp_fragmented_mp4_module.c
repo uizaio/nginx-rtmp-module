@@ -309,23 +309,23 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
                       "fmp4: bad stream name: '%s'", v->name);
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: streamname: %s", v->name);
     ctx->name.len = ngx_strlen(v->name);
     ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: streamname: '%s'", ctx->name.data);
     if (ctx->name.data == NULL) {
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: create playlist: '%s'", v->name);
     *ngx_cpymem(ctx->name.data, v->name, ctx->name.len) = 0;
     len = fmacf->path.len + 1 + ctx->name.len + sizeof(".m3u8");
     if (fmacf->nested) {
         len += sizeof("/index") - 1;
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: create playlist: '%s'", ctx->name.data);
     ctx->playlist.data = ngx_palloc(s->connection->pool, len);
     p = ngx_cpymem(ctx->playlist.data, fmacf->path.data, fmacf->path.len);
