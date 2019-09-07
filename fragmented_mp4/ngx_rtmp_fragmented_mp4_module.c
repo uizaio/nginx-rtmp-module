@@ -651,8 +651,6 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
                       "fmp4: create init file: %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR, NGX_FILE_TRUNCATE,
                        NGX_FILE_DEFAULT_ACCESS);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: open init file: %s", ctx->stream.data);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: error creating fragmented mp4 init file");
@@ -669,7 +667,8 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
                       "fmp4: writing audio init failed");
     }
     ngx_close_file(fd);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: close init file: %s", ctx->stream.data);
     return NGX_OK;
 }
 
