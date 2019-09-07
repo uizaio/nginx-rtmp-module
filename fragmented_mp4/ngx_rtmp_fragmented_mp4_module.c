@@ -13,11 +13,17 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 #define NGX_RTMP_FRAGMENTED_MP4_BUFSIZE           (1024*1024)
 #define NGX_RTMP_FRAGMENTED_MP4_DIR_ACCESS        0744
 #define NGX_RTMP_FRAGMENTED_MP4_MAX_SAMPLES       1024
+#define NGX_RTMP_FRAGMENTED_MP4_MAX_MDAT          (10*1024*1024)
 
 static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf);
 static ngx_int_t ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fragmented_mp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_dash_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
+static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp);
+static ngx_rtmp_fragmented_mp4_frag_t * ngx_rtmp_fragmented_mp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n);
+static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t, ngx_uint_t id, char type);
+
 
 typedef struct{
     ngx_flag_t                          fragmented_mp4;
@@ -50,6 +56,8 @@ typedef struct{
     time_t                                      start_time;
     ngx_str_t                                   stream; //save stream of context
     unsigned                                    opened:1;
+    unsigned                                    has_video:1;
+    unsigned                                    has_audio:1;
     ngx_uint_t                                  nfrags;
     ngx_uint_t                                  frag;
     ngx_rtmp_fragmented_mp4_frag_t               *frags; /* circular 2 * winfrags + 1 */
@@ -172,10 +180,25 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_h
     /* Only AAC is supported */
 
     if (codec_ctx->audio_codec_id != NGX_RTMP_AUDIO_AAC ||
-        codec_ctx->aac_header == NULL)
-    {
+        codec_ctx->aac_header == NULL){
         return NGX_OK;
     }
+    if (in->buf->last - in->buf->pos < 2) {
+        return NGX_ERROR;
+    }
+    /* skip AAC config */
+
+    htype = in->buf->pos[1];
+    if (htype != 1) {
+        return NGX_OK;
+    }
+
+    ctx->has_audio = 1;
+
+    /* skip RTMP & AAC headers */
+
+    in->buf->pos += 2;
+    return ngx_rtmp_fragmented_mp4_append(s, in, &ctx->audio, 0, h->timestamp, 0);
 }
 
 static ngx_int_t
@@ -444,12 +467,11 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: close fragments %d", ctx->opened);
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
-    }
-
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "fmp4: close fragments");
+    }    
 
     // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
     // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
@@ -567,6 +589,185 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf){
 
     next_stream_eof = ngx_rtmp_stream_eof;
     ngx_rtmp_stream_eof = ngx_rtmp_fragmented_mp4_stream_eof;
+
+    return NGX_OK;
+}
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
+    ngx_rtmp_fragmented_mp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay)
+{
+    u_char                 *p;
+    size_t                  size, bsize;
+    ngx_rtmp_fmp4_sample_t  *smpl;
+
+    static u_char           buffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE];
+
+    p = buffer;
+    size = 0;
+
+    for (; in && size < sizeof(buffer); in = in->next) {
+
+        bsize = (size_t) (in->buf->last - in->buf->pos);
+        if (size + bsize > sizeof(buffer)) {
+            bsize = (size_t) (sizeof(buffer) - size);
+        }
+
+        p = ngx_cpymem(p, in->buf->pos, bsize);
+        size += bsize;
+    }
+
+    ngx_rtmp_fragmented_mp4_update_fragments(s, key, timestamp);
+
+    if (t->sample_count == 0) {
+        t->earliest_pres_time = timestamp;
+    }
+
+    t->latest_pres_time = timestamp;
+
+    if (t->sample_count < NGX_RTMP_FRAGMENTED_MP4_MAX_SAMPLES) {
+
+        if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_write_fd_n " failed");
+            return NGX_ERROR;
+        }
+
+        smpl = &t->samples[t->sample_count];
+
+        smpl->delay = delay;
+        smpl->size = (uint32_t) size;
+        smpl->duration = 0;
+        smpl->timestamp = timestamp;
+        smpl->key = (key ? 1 : 0);
+
+        if (t->sample_count > 0) {
+            smpl = &t->samples[t->sample_count - 1];
+            smpl->duration = timestamp - smpl->timestamp;
+        }
+
+        t->sample_count++;
+        t->mdat_size += (ngx_uint_t) size;
+    }
+
+    return NGX_OK;
+}
+
+static void
+ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary,
+    uint32_t timestamp)
+{
+    int32_t                    d;
+    ngx_int_t                  hit;
+    ngx_rtmp_fragmented_mp4_ctx_t      *ctx;
+    ngx_rtmp_fragmented_mp4_frag_t      *f;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
+
+    d = (int32_t) (timestamp - f->timestamp);
+
+    if (d >= 0) {
+
+        f->duration = timestamp - f->timestamp;
+        hit = (f->duration >= fmacf->fraglen);
+
+        /* keep fragment lengths within 2x factor for dash.js  */
+        if (f->duration >= fmacf->fraglen * 2) {
+            boundary = 1;
+        }
+
+    } else {
+
+        /* sometimes clients generate slightly unordered frames */
+
+        hit = (-d > 1000);
+    }
+
+    if (ctx->has_video && !hit) {
+        boundary = 0;
+    }
+
+    if (!ctx->has_video && ctx->has_audio) {
+        boundary = hit;
+    }
+
+    if (ctx->audio.mdat_size >= NGX_RTMP_FRAGMENTED_MP4_MAX_MDAT) {
+        boundary = 1;
+    }
+
+    if (ctx->video.mdat_size >= NGX_RTMP_FRAGMENTED_MP4_MAX_MDAT) {
+        boundary = 1;
+    }
+
+    if (!ctx->opened) {
+        boundary = 1;
+    }
+
+    if (boundary) {
+        ngx_rtmp_fragmented_mp4_close_fragments(s);
+        ngx_rtmp_fragmented_mp4_open_fragments(s);
+
+        f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
+        f->timestamp = timestamp;
+    }
+}
+static ngx_rtmp_fragmented_mp4_frag_t *
+ngx_rtmp_fragmented_mp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n)
+{
+    ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
+
+    fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+
+    return &ctx->frags[(ctx->frag + n) % (fmacf->winfrags * 2 + 1)];
+}
+
+static ngx_int_t
+ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t,
+    ngx_uint_t id, char type)
+{
+    ngx_rtmp_fragmented_mp4_ctx_t   *ctx;
+
+    if (t->opened) {
+        return NGX_OK;
+    }
+
+    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: open fragment id=%ui, type='%c'", id, type);
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
+
+    t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
+                          NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+
+    if (t->fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: error creating fragment file");
+        return NGX_ERROR;
+    }
+
+    t->id = id;
+    t->type = type;
+    t->sample_count = 0;
+    t->earliest_pres_time = 0;
+    t->latest_pres_time = 0;
+    t->mdat_size = 0;
+    t->opened = 1;
+
+    if (type == 'v') {
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION|
+                         NGX_RTMP_FMP4_SAMPLE_DELAY|
+                         NGX_RTMP_FMP4_SAMPLE_KEY;
+    } else {
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION;
+    }
 
     return NGX_OK;
 }
