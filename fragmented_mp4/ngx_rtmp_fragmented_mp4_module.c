@@ -55,7 +55,7 @@ static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, path),
       NULL },
-      { ngx_string("fmp4_nested"),
+      { ngx_string("fragmented_mp4_nested"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
@@ -309,7 +309,6 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
                       "fmp4: bad stream name: '%s'", v->name);
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: streamname: %s", v->name);
                       
     ctx->name.len = ngx_strlen(v->name);
     ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
@@ -326,23 +325,18 @@ ngx_rtmp_fragmented_mp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (p[-1] != '/') {
         *p++ = '/';
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: playlist: '%s'", ctx->playlist.data);
     p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
     ctx->stream.len = p - ctx->playlist.data + 1;
     ctx->stream.data = ngx_palloc(s->connection->pool,
                                   ctx->stream.len + NGX_INT32_LEN +
                                   sizeof(".m4x"));
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: 0");
     ngx_memcpy(ctx->stream.data, ctx->playlist.data, ctx->stream.len - 1);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: 1");
     ctx->stream.data[ctx->stream.len - 1] = (fmacf->nested ? '/' : '-');
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: 2");
     if (fmacf->nested) {
         p = ngx_cpymem(p, "/index.m3u8", sizeof("/index.m3u8") - 1);//remove \0 character of c string
     } else {
         p = ngx_cpymem(p, ".m3u8", sizeof(".m3u8") - 1);
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,"fmp4: playlist: '%s'", ctx->stream.data);
     ctx->playlist.len = p - ctx->playlist.data;
     ctx->playlist_bak.len = p - ctx->playlist_bak.data;
 
