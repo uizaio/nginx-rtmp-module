@@ -507,7 +507,7 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
 {
-    ngx_rtmp_dash_ctx_t  *ctx;
+    ngx_rtmp_fragmented_mp4_ctx_t  *ctx;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
     if (ctx == NULL || !ctx->opened) {
