@@ -356,7 +356,7 @@ ngx_rtmp_fmp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b,
     ngx_rtmp_fmp4_field_32(b, 0);
 
     /* reserved */
-    ngx_rtmp_fmp4_field_16(b, ttype == NGX_RTMP_fmp4_VIDEO_TRACK ?  0 : 0x0100);
+    ngx_rtmp_fmp4_field_16(b, ttype == NGX_RTMP_FMP4_VIDEO_TRACK ?  0 : 0x0100);
 
     /* reserved */
     ngx_rtmp_fmp4_field_16(b, 0);
