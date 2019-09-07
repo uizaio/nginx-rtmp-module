@@ -45,7 +45,7 @@ static void ngx_rtmp_fragmented_mp4_update_fragments(ngx_rtmp_session_t *s,
     ngx_int_t boundary, uint32_t timestamp);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t, ngx_uint_t id, char type);
 static ngx_int_t ngx_rtmp_fragmented_mp4_open_fragments(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_fragmented_mp4_rename_file(u_char *src, u_char *dst)
+static ngx_int_t ngx_rtmp_fragmented_mp4_rename_file(u_char *src, u_char *dst);
 
 
 typedef struct{
