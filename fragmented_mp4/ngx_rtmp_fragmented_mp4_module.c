@@ -666,9 +666,8 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
     ngx_rtmp_fmp4_write_ftyp(&b);
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: 2");
-    ngx_rtmp_fmp4_write_moov(s, &b)
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: 3");   
+    ngx_rtmp_fmp4_write_moov(s, &b);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "fmp4: 3");   
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: 4");
