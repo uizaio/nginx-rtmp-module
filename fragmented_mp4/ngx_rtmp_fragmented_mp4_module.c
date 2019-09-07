@@ -436,10 +436,10 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: context id: %u", ctx->id);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "fmp4: id: %d", ctx->id);
     if (ctx->id == 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: init segment");
         //if this is the first streame, we need to create init segment file
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
@@ -482,13 +482,14 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
 
     // ngx_rtmp_fragmented_mp4_next_frag(s);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "fmp4: Write playlist");
     ngx_rtmp_fragmented_mp4_write_playlist(s);
 
     ctx->id++;
     ctx->opened = 0;
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "fmp4: close fragment: %d", ctx->id);
     return NGX_OK;
 }
 
