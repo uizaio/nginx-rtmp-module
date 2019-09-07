@@ -18,6 +18,7 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_rtmp_fragmented_mp4_postconfiguration(ngx_conf_t *cf);
 static ngx_int_t ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s);
+static void ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t)
 
 typedef struct{
     ngx_flag_t                          fragmented_mp4;
