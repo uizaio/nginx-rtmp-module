@@ -363,8 +363,7 @@ static ngx_int_t
 ngx_rtmp_fragmented_mp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
 {
     ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
-    ngx_rtmp_fragmented_mp4_app_conf_t  *fmcf;
-    ngx_log_error(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,"fmp4 - ducla");
+    ngx_rtmp_fragmented_mp4_app_conf_t  *fmcf;    
     fmcf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
