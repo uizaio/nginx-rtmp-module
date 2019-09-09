@@ -678,8 +678,8 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
         return NGX_OK;
     }    
     //we must mix video and sound to a file
-    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
-    // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
+    // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
 
     ngx_rtmp_fragmented_mp4_next_frag(s);
     ngx_rtmp_fragmented_mp4_write_playlist(s);
