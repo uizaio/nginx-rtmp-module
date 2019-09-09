@@ -164,6 +164,7 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_video(ngx_rtmp_session_t *s, ngx_rtmp_h
     ngx_rtmp_codec_ctx_t      *codec_ctx;
     uint8_t                    ftype, htype;
     uint32_t                   delay;
+    u_char                    *p;
 
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
