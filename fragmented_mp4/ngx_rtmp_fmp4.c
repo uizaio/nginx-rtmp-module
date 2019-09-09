@@ -1127,7 +1127,7 @@ ngx_rtmp_fmp4_write_mfhd(ngx_buf_t *b, uint32_t index)
 
 ngx_int_t
 ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
-    uint32_t earliest_pres_time, uint32_t latest_pres_time)
+    uint32_t earliest_pres_time, uint32_t latest_pres_time, int track_id)
 {
     u_char    *pos;
     uint32_t   duration;
@@ -1140,7 +1140,7 @@ ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
     ngx_rtmp_fmp4_field_32(b, 0);
 
     /* reference id, alway start from 1 */
-    ngx_rtmp_fmp4_field_32(b, 1);
+    ngx_rtmp_fmp4_field_32(b, track_id);
 
     /* timescale */
     ngx_rtmp_fmp4_field_32(b, 1000);
