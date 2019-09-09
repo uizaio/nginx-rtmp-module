@@ -714,9 +714,9 @@ ngx_rtmp_fragmented_mp4_track_t *at)
         if (fd != NGX_INVALID_FILE) {
             ngx_close_file(fd);
         }
-
-        ngx_close_file(t->fd);
-
+        //close raw files
+        ngx_close_file(vt->fd);
+        ngx_close_file(at->fd);
         vt->fd = NGX_INVALID_FILE;
         at->fd = NGX_INVALID_FILE;
         vt->opened = 0;
