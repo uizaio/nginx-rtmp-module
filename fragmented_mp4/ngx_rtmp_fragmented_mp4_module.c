@@ -703,7 +703,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
             break;
         }
 
-        n = ngx_write_fd(fd, vbuffer, (size_t) n);
+        n = ngx_write_fd(fd, abuffer, (size_t) n);
         if (n == NGX_ERROR) {
             break;
         }
