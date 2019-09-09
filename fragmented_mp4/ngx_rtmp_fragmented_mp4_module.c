@@ -568,6 +568,17 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     return NGX_OK;
 }
 
+/**
+ * We need to merge sound and video data to a file.
+ * How this file is formated?
+ * styp
+ * sidx --> video data
+ * sidx --> sound data
+ * moof
+ * mdat
+ * 
+ * @param st sound
+ **/
 static void
 ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented_mp4_track_t *t)
 {
@@ -585,7 +596,74 @@ ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmente
         return;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
+    b.start = buffer;
+    b.end = buffer + sizeof(buffer);
+    b.pos = b.last = b.start;
+    ngx_rtmp_fmp4_write_styp(&b);
+    pos = b.last;
+    b.last += 44; /* leave room for sidx */
+    /** create moof box */
+    ngx_rtmp_fmp4_write_moof(&b, t->earliest_pres_time, t->sample_count,
+                            t->samples, t->sample_mask, t->id);
+    pos1 = b.last;
+    b.last = pos;
+    ngx_rtmp_fmp4_write_sidx(&b, t->mdat_size + 8 + (pos1 - (pos + 44)),
+                            t->earliest_pres_time, t->latest_pres_time);
+    b.last = pos1;
+    ngx_rtmp_fmp4_write_mdat(&b, t->mdat_size + 8);
+    f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
+    //we only support m4s file format
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s",
+                 f->timestamp) = 0;
+    fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
+                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    if (fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: error creating fmp4 temp video file");
+        goto done;
+    }
+
+    if (ngx_write_fd(fd, b.pos, (size_t) (b.last - b.pos)) == NGX_ERROR) {
+        goto done;
+    }
+
+    left = (size_t) t->mdat_size;
+    #if (NGX_WIN32)
+        if (SetFilePointer(t->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                        "dash: SetFilePointer error");
+            goto done;
+        }
+    #else
+        if (lseek(t->fd, 0, SEEK_SET) == -1) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                        "dash: lseek error");
+            goto done;
+        }
+    #endif
+    //write sound/video data to file
+    while (left > 0) {
+
+        n = ngx_read_fd(t->fd, buffer, ngx_min(sizeof(buffer), left));
+        if (n == NGX_ERROR) {
+            break;
+        }
+
+        n = ngx_write_fd(fd, buffer, (size_t) n);
+        if (n == NGX_ERROR) {
+            break;
+        }
+
+        left -= n;
+    }
     done:
+        if (fd != NGX_INVALID_FILE) {
+            ngx_close_file(fd);
+        }
+
+        ngx_close_file(t->fd);
+
+        t->fd = NGX_INVALID_FILE;
         t->opened = 0;
 }
 
@@ -598,9 +676,9 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }    
-
+    //we must mix video and sound to a file
     ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
-    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
+    // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
 
     ngx_rtmp_fragmented_mp4_next_frag(s);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,

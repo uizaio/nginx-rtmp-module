@@ -1308,3 +1308,5 @@ of the file.
                  -> string text = ASCII text dump
 
      -> 4 bytes compatibility utda end = long value set to zero
+
+http://xhelmboyx.tripod.com/formats/mp4-layout.txt
