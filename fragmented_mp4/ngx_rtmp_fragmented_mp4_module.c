@@ -153,6 +153,7 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf){
 
 /**
  *  Video message processor
+ *  we write data to a temp file raw.m4v.
  *  @param s
  * @param h
  * @param in ngx_chain_t is a strucutre that contains a chain of memory buffer
@@ -161,6 +162,8 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_video(ngx_rtmp_session_t *s, ngx_rtmp_h
     ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
     ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
     ngx_rtmp_codec_ctx_t      *codec_ctx;
+    uint8_t                    ftype, htype;
+    uint32_t                   delay;
 
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
@@ -176,6 +179,25 @@ static ngx_int_t ngx_rtmp_fragmented_mp4_video(ngx_rtmp_session_t *s, ngx_rtmp_h
         return NGX_OK;
     }
 
+    if (in->buf->last - in->buf->pos < 5) {
+        return NGX_ERROR;
+    }
+    ftype = (in->buf->pos[0] & 0xf0) >> 4;
+    htype = in->buf->pos[1];
+    if (htype != 1) {
+        return NGX_OK;
+    }
+    p = (u_char *) &delay;
+
+    p[0] = in->buf->pos[4];
+    p[1] = in->buf->pos[3];
+    p[2] = in->buf->pos[2];
+    p[3] = 0;
+    ctx->has_video = 1;//stream has video signal
+    in->buf->pos += 5;
+
+    return ngx_rtmp_fragmented_mp4_append(s, in, &ctx->video, ftype == 1, h->timestamp,
+                                delay);
 }
 
 /**
