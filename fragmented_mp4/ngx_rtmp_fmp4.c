@@ -241,15 +241,14 @@ ngx_rtmp_fmp4_write_styp(ngx_buf_t *b)
     pos = ngx_rtmp_fmp4_start_box(b, "styp");
 
     /* major brand */
-    ngx_rtmp_fmp4_box(b, "iso6");
+    ngx_rtmp_fmp4_box(b, "msdh");
 
     /* minor version */
-    ngx_rtmp_fmp4_field_32(b, 1);
+    ngx_rtmp_fmp4_field_32(b, 0);
 
     /* compatible brands */
-    ngx_rtmp_fmp4_box(b, "isom");
-    ngx_rtmp_fmp4_box(b, "iso6");
-    ngx_rtmp_fmp4_box(b, "dash");
+    ngx_rtmp_fmp4_box(b, "msdh");
+    ngx_rtmp_fmp4_box(b, "msix");
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -1015,7 +1014,7 @@ ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time)
 
     /* version == 1 aka 64 bit integer */
     ngx_rtmp_fmp4_field_32(b, 0x00000000);
-    ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
+    // ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -1114,10 +1113,10 @@ ngx_rtmp_fmp4_write_mfhd(ngx_buf_t *b, uint32_t index)
 
     pos = ngx_rtmp_fmp4_start_box(b, "mfhd");
 
-    /* don't know what this is */
+    /* write box version, default is 0 */
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    /* fragment index. */
+    /* fragment index/sequence number. */
     ngx_rtmp_fmp4_field_32(b, index);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
@@ -1137,10 +1136,10 @@ ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
 
     pos = ngx_rtmp_fmp4_start_box(b, "sidx");
 
-    /* version */
+    /* version , if 1, we use 64 bit size*/
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    /* reference id */
+    /* reference id, alway start from 1 */
     ngx_rtmp_fmp4_field_32(b, 1);
 
     /* timescale */

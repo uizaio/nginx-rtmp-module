@@ -599,7 +599,7 @@ ngx_rtmp_dash_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t)
         goto done;
     }
 #endif
-
+    //write sound/video data to file
     while (left > 0) {
 
         n = ngx_read_fd(t->fd, buffer, ngx_min(sizeof(buffer), left));
