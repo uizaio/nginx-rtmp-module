@@ -943,7 +943,8 @@ ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented
                    "fmp4: open fragment id=%ui, type='%c'", id, type);
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                   "fmp4: open fragment id=%ui, type='%c'", id, type);
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
 
     t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
