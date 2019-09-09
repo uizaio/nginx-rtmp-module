@@ -987,7 +987,7 @@ ngx_rtmp_fmp4_write_moov(ngx_rtmp_session_t *s, ngx_buf_t *b)
 
 
 static ngx_int_t
-ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b)
+ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, int track_id)
 {
     u_char  *pos;
 
@@ -997,7 +997,7 @@ ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b)
     ngx_rtmp_fmp4_field_32(b, 0x00020000);
 
     /* track id */
-    ngx_rtmp_fmp4_field_32(b, 1);
+    ngx_rtmp_fmp4_field_32(b, track_id);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -1090,13 +1090,13 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 static ngx_int_t
 ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
     uint32_t sample_count, ngx_rtmp_fmp4_sample_t *samples,
-    ngx_uint_t sample_mask, u_char *moof_pos)
+    ngx_uint_t sample_mask, int track_id , u_char *moof_pos)
 {
     u_char  *pos;
 
     pos = ngx_rtmp_fmp4_start_box(b, "traf");
 
-    ngx_rtmp_fmp4_write_tfhd(b);
+    ngx_rtmp_fmp4_write_tfhd(b, track_id);
     ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);
     ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos);
 
@@ -1176,17 +1176,22 @@ ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
 
 
 ngx_int_t
-ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t earliest_pres_time,
-    uint32_t sample_count, ngx_rtmp_fmp4_sample_t *samples,
-    ngx_uint_t sample_mask, uint32_t index)
+ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t v_earliest_pres_time,
+    uint32_t v_sample_count, ngx_rtmp_fmp4_sample_t *v_samples,
+    ngx_uint_t v_sample_mask, uint32_t index,
+    uint32_t a_earliest_pres_time,
+    uint32_t a_sample_count, ngx_rtmp_fmp4_sample_t *a_samples,
+    ngx_uint_t a_sample_mask)
 {
     u_char  *pos;
 
     pos = ngx_rtmp_fmp4_start_box(b, "moof");
 
     ngx_rtmp_fmp4_write_mfhd(b, index);
-    ngx_rtmp_fmp4_write_traf(b, earliest_pres_time, sample_count, samples,
-                            sample_mask, pos);
+    ngx_rtmp_fmp4_write_traf(b, v_earliest_pres_time, v_sample_count, v_samples,
+                            v_sample_mask, 1, pos);
+    ngx_rtmp_fmp4_write_traf(b, a_earliest_pres_time, a_sample_count, a_samples,
+                            a_sample_mask, 2, pos);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
