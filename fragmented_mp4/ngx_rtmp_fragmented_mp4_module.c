@@ -636,10 +636,10 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     b.last = pos;
     //sidx for video
     ngx_rtmp_fmp4_write_sidx(&b, vt->mdat_size + 8 + (pos1 - (pos + 44)),
-                            vt->earliest_pres_time, vt->latest_pres_time);
+                            vt->earliest_pres_time, vt->latest_pres_time, 1);
     //sidx for audio
     ngx_rtmp_fmp4_write_sidx(&b, at->mdat_size + 8 + (pos1 - (pos + 88)),
-                            at->earliest_pres_time, at->latest_pres_time);
+                            at->earliest_pres_time, at->latest_pres_time, 2);
     b.last = pos1;
     ngx_rtmp_fmp4_write_mdat(&b, vt->mdat_size + 8);
     f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
