@@ -631,19 +631,20 @@ ngx_rtmp_fragmented_mp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmente
     #if (NGX_WIN32)
         if (SetFilePointer(t->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "dash: SetFilePointer error");
+                        "fmp4: SetFilePointer error");
             goto done;
         }
     #else
         if (lseek(t->fd, 0, SEEK_SET) == -1) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                        "dash: lseek error");
+                        "fmp4: lseek error");
             goto done;
         }
     #endif
     //write sound/video data to file
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                        "fmp4: video data: %lu", left);
     while (left > 0) {
-
         n = ngx_read_fd(t->fd, buffer, ngx_min(sizeof(buffer), left));
         if (n == NGX_ERROR) {
             break;
@@ -681,14 +682,10 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
 
     ngx_rtmp_fragmented_mp4_next_frag(s);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "fmp4: Write playlist");
     ngx_rtmp_fragmented_mp4_write_playlist(s);
 
     ctx->id++;
     ctx->opened = 0;
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "fmp4: close fragment: %d", ctx->id);
     return NGX_OK;
 }
 
