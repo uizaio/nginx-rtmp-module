@@ -554,8 +554,6 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
 
     for (i = 0; i < ctx->nfrags; i++) {
         t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: t->id %d %d %f.2 %d", t->id, t->key_id, t->duration, t->timestamp);
         p = buffer;
         end = p + sizeof(buffer);
         // prev_key_id = t->key_id;
@@ -574,6 +572,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
             return NGX_ERROR;
         }
     }
+    p = buffer;
+    end = p + sizeof(buffer);
     p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
     n = ngx_write_fd(fd, buffer, p - buffer);
     if (n < 0) {
