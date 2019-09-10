@@ -190,7 +190,8 @@ ngx_rtmp_dash_next_frag(ngx_rtmp_session_t *s)
 
     dacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_dash_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "dash: nfrags %d winfrags %d", ctx->nfrags, dacf->winfrags);      
     if (ctx->nfrags == dacf->winfrags) {
         ctx->frag++;
     } else {
