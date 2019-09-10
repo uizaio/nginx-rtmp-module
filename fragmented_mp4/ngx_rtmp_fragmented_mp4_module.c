@@ -537,8 +537,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                      "#EXT-X-MEDIA-SEQUENCE:%uL\n"
                      "#EXT-X-TARGETDURATION:%ui\n",
                      ctx->frag, max_frag);
-    //FIXME: VOD, LIVE or EVENT?
-    p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: VOD\n");
+    //EVENT: the playlist can only be appended to, VOD: the playlist must not change
+    p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
     n = ngx_write_fd(fd, buffer, p - buffer);
     if (n < 0) {
@@ -568,10 +568,11 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
             return NGX_ERROR;
         }
     }
-    p = buffer;
-    end = p + sizeof(buffer);
-    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
-    n = ngx_write_fd(fd, buffer, p - buffer);
+    //FIXME: how to send this part when stream stop?
+    // p = buffer;
+    // end = p + sizeof(buffer);
+    // p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
+    // n = ngx_write_fd(fd, buffer, p - buffer);
     if (n < 0) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: " ngx_write_fd_n " failed: '%V'",
@@ -615,6 +616,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     ngx_buf_t                  b;
     ngx_rtmp_fragmented_mp4_ctx_t       *ctx;
     ngx_rtmp_fragmented_mp4_frag_t      *f;
+    ngx_uint_t                  reference_size;
 
     static u_char              vbuffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE]; //video buffer
     static u_char              abuffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE]; //audio buffer
@@ -628,7 +630,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     b.pos = b.last = b.start;
     ngx_rtmp_fmp4_write_styp(&b);
     pos = b.last;
-    b.last += 88; /* leave room for sidx */
+    b.last += 88; /* leave room for sidx */    
     /** create moof box */
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, vt->id,
@@ -636,11 +638,13 @@ ngx_rtmp_fragmented_mp4_track_t *at)
                             at->samples, at->sample_mask);
     pos1 = b.last;
     b.last = pos;
+    //refrence_size = size of moof + size of mdat
+    reference_size = vt->mdat_size + at->mdat_size;
     //sidx for video
-    ngx_rtmp_fmp4_write_sidx(&b, vt->mdat_size + 8 + (pos1 - (pos + 44)),
+    ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 44)),
                             vt->earliest_pres_time, vt->latest_pres_time, 1);
     //sidx for audio
-    ngx_rtmp_fmp4_write_sidx(&b, at->mdat_size + 8 + (pos1 - (pos + 88)),
+    ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
                             at->earliest_pres_time, at->latest_pres_time, 2);
     b.last = pos1;
     ngx_rtmp_fmp4_write_mdat(&b, vt->mdat_size + 8);
@@ -728,7 +732,7 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     //we must mix video and sound to a file
     // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video);
     // ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio);
-    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio, &ctx->video);
+    ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->video, &ctx->audio);
 
     ngx_rtmp_fragmented_mp4_next_frag(s);
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
