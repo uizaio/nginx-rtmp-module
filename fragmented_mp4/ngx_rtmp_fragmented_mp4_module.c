@@ -475,7 +475,7 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module); 
     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "hls: nfrags %d winfrags %d frag %d", ctx->nfrags, fmacf->winfrags, ctx->frag);      
+                          "fmp4: nfrags %d winfrags %d frag %d", ctx->nfrags, fmacf->winfrags, ctx->frag);      
     if (ctx->nfrags == fmacf->winfrags) {
         ctx->frag++;//increase number of frags in a winfrags
     } else {
@@ -550,13 +550,12 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_close_file(fd);
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: ducla %d", ctx->nfrags);
+    
 
     for (i = 0; i < ctx->nfrags; i++) {
         t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: %uL", t->id);
+                          "fmp4: t->id %d %d %f.2 %d", t->id, t->key_id, t->duration, t->timestamp);
         p = buffer;
         end = p + sizeof(buffer);
         // prev_key_id = t->key_id;
