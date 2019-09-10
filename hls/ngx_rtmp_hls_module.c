@@ -956,9 +956,7 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
         return NGX_ERROR;
     }
 
-    ctx->opened = 1;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "hls: nfrags %d", ctx->nfrags);
+    ctx->opened = 1;    
     f = ngx_rtmp_hls_get_frag(s, ctx->nfrags);
 
     ngx_memzero(f, sizeof(*f));
