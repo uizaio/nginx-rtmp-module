@@ -689,11 +689,11 @@ ngx_rtmp_fragmented_mp4_track_t *at)
 
     //     vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
     //     if (vn == NGX_ERROR) {
-            break;
-        }
+    //         break;
+    //     }
 
-        vleft -= vn;
-    }
+    //     vleft -= vn;
+    // }
     while (aleft > 0) {
         an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
         if (an == NGX_ERROR) {
