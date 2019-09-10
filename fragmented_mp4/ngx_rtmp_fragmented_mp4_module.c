@@ -690,19 +690,19 @@ ngx_rtmp_fragmented_mp4_track_t *at)
 
         vleft -= n;
     }
-    // while (aleft > 0) {
-    //     n = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
-    //     if (n == NGX_ERROR) {
-    //         break;
-    //     }
+    while (aleft > 0) {
+        n = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
+        if (n == NGX_ERROR) {
+            break;
+        }
 
-    //     n = ngx_write_fd(fd, abuffer, (size_t) n);
-    //     if (n == NGX_ERROR) {
-    //         break;
-    //     }
+        n = ngx_write_fd(fd, abuffer, (size_t) n);
+        if (n == NGX_ERROR) {
+            break;
+        }
 
-    //     aleft -= n;
-    // }
+        aleft -= n;
+    }
     done:
         if (fd != NGX_INVALID_FILE) {
             ngx_close_file(fd);
