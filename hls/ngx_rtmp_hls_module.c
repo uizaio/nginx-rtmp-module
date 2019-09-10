@@ -1471,7 +1471,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
         ngx_rtmp_hls_restore_stream(s);
     }
     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "hls: nfrags %d", ctx->nfrags;)
+                          "hls: nfrags %d", ctx->nfrags);
 next:
     return next_publish(s, v);
 }
