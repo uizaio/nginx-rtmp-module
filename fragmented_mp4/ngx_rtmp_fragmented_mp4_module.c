@@ -508,9 +508,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
     if (fmacf == NULL || ctx == NULL || codec_ctx == NULL) {
         return NGX_ERROR;
-    }
-    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: id: %d", ctx->id);    
+    }   
     if (ctx->id == 0) {
         //if this is the first streame, we need to create init segment file
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
@@ -561,8 +559,6 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                          "#EXTINF:%.3f,\n"
                          "%uL.m4s\n",
                          t->duration, t->id);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: %s", p);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
