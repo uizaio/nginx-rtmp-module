@@ -498,9 +498,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     u_char                              *p, *end;
     ngx_uint_t                          i, max_frag;
     ssize_t                             n;
-    // const char                          *sep, *key_sep;
-    // ngx_str_t                           name_part, key_name_part;
-    // uint64_t                            prev_key_id;
+    ngx_uint_t                          first_media;
     ngx_rtmp_fragmented_mp4_frag_t                 *t;
     
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
@@ -528,15 +526,18 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         if (t->duration > max_frag) {
             max_frag = (ngx_uint_t) (t->duration + .5);
         }
+        if(i == 0){
+            first_media = t->id
+        }
     }
     p = buffer;
     end = p + sizeof(buffer);
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
                      "#EXT-X-VERSION:7\n"
-                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"
+                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"//the first media segment in the list
                      "#EXT-X-TARGETDURATION:%ui\n",
-                     ctx->frag, max_frag);
+                     first_media, max_frag);
     //EVENT: the playlist can only be appended to, VOD: the playlist must not change
     p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
@@ -569,17 +570,17 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         }
     }
     //FIXME: how to send this part when stream stop?
-    p = buffer;
-    end = p + sizeof(buffer);
-    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
-    n = ngx_write_fd(fd, buffer, p - buffer);
-    if (n < 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: " ngx_write_fd_n " failed: '%V'",
-                      &ctx->playlist_bak);
-        ngx_close_file(fd);
-        return NGX_ERROR;
-    }
+    // p = buffer;
+    // end = p + sizeof(buffer);
+    // p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
+    // n = ngx_write_fd(fd, buffer, p - buffer);
+    // if (n < 0) {
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                   "fmp4: " ngx_write_fd_n " failed: '%V'",
+    //                   &ctx->playlist_bak);
+    //     ngx_close_file(fd);
+    //     return NGX_ERROR;
+    // }
     ngx_close_file(fd);
     //remove old file and create a new file from bak
     if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
