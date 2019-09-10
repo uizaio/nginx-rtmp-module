@@ -621,7 +621,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     static u_char              vbuffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE]; //video buffer
     static u_char              abuffer[NGX_RTMP_FRAGMENTED_MP4_BUFSIZE]; //audio buffer
 
-    if (!vt->opened) {
+    if (!vt->opened || !at->opened) {
         return;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
@@ -681,19 +681,19 @@ ngx_rtmp_fragmented_mp4_track_t *at)
         }
     #endif
     //write sound/video data to file
-    // while (vleft > 0) {
-    //     vn = ngx_read_fd(vt->fd, vbuffer, ngx_min(sizeof(vbuffer), vleft));
-    //     if (vn == NGX_ERROR) {
-    //         break;
-    //     }
+    while (vleft > 0) {
+        vn = ngx_read_fd(vt->fd, vbuffer, ngx_min(sizeof(vbuffer), vleft));
+        if (vn == NGX_ERROR) {
+            break;
+        }
 
-    //     vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
-    //     if (vn == NGX_ERROR) {
-    //         break;
-    //     }
+        vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
+        if (vn == NGX_ERROR) {
+            break;
+        }
 
-    //     vleft -= vn;
-    // }
+        vleft -= vn;
+    }
     while (aleft > 0) {
         an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
         if (an == NGX_ERROR) {
