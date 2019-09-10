@@ -547,28 +547,17 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_close_file(fd);
         return NGX_ERROR;
     }
-    // sep = fmacf->nested ? (0 ? "/" : "") : "-";
-    // key_sep = fmacf->nested ? (0 ? "/" : "") : "-";
-    // name_part.len = 0;
-    // if (!fmacf->nested /*|| fmacf->base_url.len*/) {
-    //     name_part = ctx->name;
-    // }
-    // key_name_part.len = 0;
-    // if (!fmacf->nested /*|| fmacf->key_url.len*/) {
-    //     key_name_part = ctx->name;
-    // }
-    // prev_key_id = 0;
     for (i = 0; i < ctx->nfrags; i++) {
         t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: %uL", t->id);
         p = buffer;
         end = p + sizeof(buffer);
         // prev_key_id = t->key_id;
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: id %u", ctx->id);
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%uL.m4s\n",
-                         t->duration, ctx->id);
+                         t->duration, t->id);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
