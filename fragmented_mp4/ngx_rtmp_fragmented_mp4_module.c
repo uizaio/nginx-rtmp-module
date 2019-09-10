@@ -563,10 +563,12 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         p = buffer;
         end = p + sizeof(buffer);
         prev_key_id = f->key_id;
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: id %u", t->id);
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%V%s%uL.m4s\n",
-                         f->duration, &name_part, sep, f->id);
+                         f->duration, &name_part, sep, t->id);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
