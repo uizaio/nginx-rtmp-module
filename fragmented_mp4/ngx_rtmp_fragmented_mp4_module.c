@@ -358,7 +358,8 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
     //fraglen default is 5000ms
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
     //playlen default is 30000ms
-    ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);    
+    ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);  
+    //playlistlen = 30s, fraglen = 5s --> winfrags = 6 --> nfrags = 6 (number of frag for each playlist)  
     if (conf->fraglen) {
         conf->winfrags = conf->playlen / conf->fraglen;
     }
@@ -549,6 +550,9 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_close_file(fd);
         return NGX_ERROR;
     }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: ducla %d", ctx->nfrags);
+
     for (i = 0; i < ctx->nfrags; i++) {
         t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
