@@ -56,6 +56,7 @@ typedef struct{
     ngx_str_t                           path;
     ngx_msec_t                          fraglen;//len of fragment
     ngx_flag_t                          nested;
+    ngx_msec_t                          playlen;//playlist lengt
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
 
@@ -102,6 +103,12 @@ static ngx_command_t ngx_rtmp_fragmented_mp4_commands[] = {
       ngx_conf_set_msec_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, fraglen),
+      NULL },
+      { ngx_string("fmp4_playlist_length"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_msec_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_fragmented_mp4_app_conf_t, playlen),
       NULL },
     ngx_null_command
 };
@@ -348,6 +355,12 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
     ngx_conf_merge_value(conf->fragmented_mp4, prev->fragmented_mp4, 0);
     //fraglen default is 5000ms
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
+    //playlen default is 30000ms
+    ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);
+    if (conf->fraglen) {
+        conf->winfrags = conf->playlen / conf->fraglen;
+    }
+    ngx_conf_merge_str_value(conf->path, prev->path, "");
     return NGX_CONF_OK;
 }
 
@@ -460,9 +473,9 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
 
     if (ctx->nfrags == fmacf->winfrags) {
-        ctx->frag++;
+        ctx->frag++;//increase number of frags in a winfrags
     } else {
-        ctx->nfrags++;
+        ctx->nfrags++;//increase number of winfrags
     }
 }
 
