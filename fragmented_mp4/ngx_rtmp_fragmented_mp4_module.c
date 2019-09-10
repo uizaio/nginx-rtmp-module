@@ -495,9 +495,9 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     u_char                              *p, *end;
     ngx_uint_t                          i, max_frag;
     ssize_t                             n;
-    const char                          *sep, *key_sep;
-    ngx_str_t                           name_part, key_name_part;
-    uint64_t                            prev_key_id;
+    // const char                          *sep, *key_sep;
+    // ngx_str_t                           name_part, key_name_part;
+    // uint64_t                            prev_key_id;
     ngx_rtmp_fragmented_mp4_frag_t                 *t;
     
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
@@ -547,17 +547,17 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         ngx_close_file(fd);
         return NGX_ERROR;
     }
-    sep = fmacf->nested ? (0 ? "/" : "") : "-";
-    key_sep = fmacf->nested ? (0 ? "/" : "") : "-";
-    name_part.len = 0;
-    if (!fmacf->nested /*|| fmacf->base_url.len*/) {
-        name_part = ctx->name;
-    }
-    key_name_part.len = 0;
-    if (!fmacf->nested /*|| fmacf->key_url.len*/) {
-        key_name_part = ctx->name;
-    }
-    prev_key_id = 0;
+    // sep = fmacf->nested ? (0 ? "/" : "") : "-";
+    // key_sep = fmacf->nested ? (0 ? "/" : "") : "-";
+    // name_part.len = 0;
+    // if (!fmacf->nested /*|| fmacf->base_url.len*/) {
+    //     name_part = ctx->name;
+    // }
+    // key_name_part.len = 0;
+    // if (!fmacf->nested /*|| fmacf->key_url.len*/) {
+    //     key_name_part = ctx->name;
+    // }
+    // prev_key_id = 0;
     for (i = 0; i < ctx->nfrags; i++) {
         t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
         p = buffer;
@@ -567,8 +567,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                           "fmp4: id %u", t->id);
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
-                         "%V%s%uL.m4s\n",
-                         t->duration, &name_part, sep, t->id);
+                         "%uL.m4s\n",
+                         t->duration, t->id);
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: id 1");
         n = ngx_write_fd(fd, buffer, p - buffer);
