@@ -544,6 +544,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         key_name_part = ctx->name;
     }
     prev_key_id = 0;    
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: frags: %d", ctx->nfrags);
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
         p = buffer;
@@ -575,16 +577,14 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     }
     ngx_close_file(fd);
     //remove old file and create a new file from bak
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: move bak playlist to playlist %s --> %s", ctx->playlist_bak.data, ctx->playlist.data);
-    // if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
-    //     == NGX_FILE_ERROR)
-    // {
-    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-    //                   "fmp4: rename failed: '%V'->'%V'",
-    //                   &ctx->playlist_bak, &ctx->playlist);
-    //     return NGX_ERROR;
-    // }
+    if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
+        == NGX_FILE_ERROR)
+    {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: rename failed: '%V'->'%V'",
+                      &ctx->playlist_bak, &ctx->playlist);
+        return NGX_ERROR;
+    }
 
     return NGX_OK;
 }
