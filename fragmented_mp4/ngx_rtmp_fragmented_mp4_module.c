@@ -657,7 +657,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: error creating fmp4 temp video file");
+                      "fmp4: error creating fmp4 temp file");
         goto done;
     }
 
@@ -684,19 +684,28 @@ ngx_rtmp_fragmented_mp4_track_t *at)
         }
     #endif
     //write sound/video data to file
-    // while (vleft > 0) {
-    //     vn = ngx_read_fd(vt->fd, vbuffer, ngx_min(sizeof(vbuffer), vleft));
-    //     if (vn == NGX_ERROR) {
-    //         break;
-    //     }
+    //FIXME: end of file character
+    while (vleft > 0) {
+        vn = ngx_read_fd(vt->fd, vbuffer, ngx_min(sizeof(vbuffer), vleft));
+        if (vn == NGX_ERROR) {
+            break;
+        }
 
-    //     vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
-    //     if (vn == NGX_ERROR) {
-    //         break;
-    //     }
+        vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
+        if (vn == NGX_ERROR) {
+            break;
+        }
 
-    //     vleft -= vn;
-    // }
+        vleft -= vn;
+    }    
+    ngx_close_file(fd);    
+    fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
+                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    if (fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: error creating fmp4 temp file");
+        goto done;
+    }
     while (aleft > 0) {
         an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
         if (an == NGX_ERROR) {
