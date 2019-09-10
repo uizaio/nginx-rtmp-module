@@ -667,6 +667,8 @@ ngx_rtmp_fragmented_mp4_track_t *at)
 
     vleft = (size_t) vt->mdat_size;
     aleft = (size_t) at->mdat_size;
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: vleft %lu aleft %lu", vleft, aleft);
     #if (NGX_WIN32)
         if (SetFilePointer(vt->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER || 
             SetFilePointer(at->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
