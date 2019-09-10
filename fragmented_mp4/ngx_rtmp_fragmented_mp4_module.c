@@ -1013,11 +1013,10 @@ ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: error creating fragment file");
         return NGX_ERROR;
-    }
+    }    
+    t->id = id;
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: t->id %d", t->id);
-        return NGX_ERROR;
-    t->id = id;
     t->type = type;
     t->sample_count = 0;
     t->earliest_pres_time = 0;
