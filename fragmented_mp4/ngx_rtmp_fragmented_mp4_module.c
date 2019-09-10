@@ -744,6 +744,8 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     ngx_rtmp_fragmented_mp4_write_playlist(s);
 
     ctx->id++;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: close fragment ctx->id %d", ctx->id);
     ctx->opened = 0;
     return NGX_OK;
 }
