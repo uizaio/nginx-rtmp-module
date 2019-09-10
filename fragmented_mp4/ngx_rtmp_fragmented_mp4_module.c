@@ -996,6 +996,7 @@ ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented
     ngx_uint_t id, char type)
 {
     ngx_rtmp_fragmented_mp4_ctx_t   *ctx;
+    ngx_rtmp_fragmented_mp4_frag_t *f;
 
     if (t->opened) {
         return NGX_OK;
@@ -1036,7 +1037,9 @@ ngx_rtmp_fragmented_mp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fragmented
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION;
     }
-
+    f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
+    ngx_memzero(f, sizeof(*f));
+    f->id = id;
     return NGX_OK;
 }
 
