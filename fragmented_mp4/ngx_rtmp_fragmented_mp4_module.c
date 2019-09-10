@@ -56,7 +56,7 @@ typedef struct{
     ngx_str_t                           path;
     ngx_msec_t                          fraglen;//len of fragment
     ngx_flag_t                          nested;
-    ngx_msec_t                          playlen;//playlist lengt
+    ngx_msec_t                          playlen;//playlist length
 }ngx_rtmp_fragmented_mp4_app_conf_t;
 
 
@@ -151,10 +151,12 @@ static void * ngx_rtmp_fragmented_mp4_create_app_conf(ngx_conf_t *cf){
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_fragmented_mp4_app_conf_t));
     if (conf == NULL) {
         return NULL;
-    }
+    }    
     conf->fragmented_mp4 = NGX_CONF_UNSET;
     conf->nested = NGX_CONF_UNSET;
     conf->fraglen = NGX_CONF_UNSET_MSEC;
+    //if not set, it'll be 0
+    conf->playlen = NGX_CONF_UNSET_MSEC;
     return conf;
 }
 
