@@ -527,7 +527,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
             max_frag = (ngx_uint_t) (t->duration + .5);
         }
         if(i == 0){
-            first_media = t->id
+            first_media = t->id;
         }
     }
     p = buffer;
