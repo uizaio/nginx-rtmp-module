@@ -647,7 +647,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
     //we only support m4s file format
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s",
-                 f->timestamp) = 0;
+                 f->id) = 0;
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
