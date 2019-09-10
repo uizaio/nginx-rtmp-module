@@ -408,8 +408,7 @@ ngx_rtmp_dash_write_playlist(ngx_rtmp_session_t *s)
                          codec_ctx->sample_rate,
                          (ngx_uint_t) (codec_ctx->audio_data_rate * 1000),
                          name, sep,
-                         name, sep);
-
+                         name, sep);        
         for (i = 0; i < ctx->nfrags; i++) {
             f = ngx_rtmp_dash_get_frag(s, i);
             p = ngx_slprintf(p, last, NGX_RTMP_DASH_MANIFEST_TIME,
