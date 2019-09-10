@@ -641,7 +641,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     //refrence_size = size of moof + size of mdat
     reference_size = vt->mdat_size + at->mdat_size;
     //sidx for video
-    ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 44)),
+    ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
                             vt->earliest_pres_time, vt->latest_pres_time, 1);
     //sidx for audio
     ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
