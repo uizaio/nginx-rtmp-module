@@ -575,6 +575,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     }
     ngx_close_file(fd);
     //remove old file and create a new file from bak
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: move bak playlist to playlist");
     if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
         == NGX_FILE_ERROR)
     {
@@ -738,6 +740,8 @@ ngx_rtmp_fragmented_mp4_close_fragments(ngx_rtmp_session_t *s)
     ngx_rtmp_fragmented_mp4_close_fragment(s, &ctx->audio, &ctx->video);
 
     ngx_rtmp_fragmented_mp4_next_frag(s);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: write playlist");
     ngx_rtmp_fragmented_mp4_write_playlist(s);
 
     ctx->id++;
@@ -788,8 +792,6 @@ ngx_rtmp_fragmented_mp4_write_init_segments(ngx_rtmp_session_t *s)
         return NGX_ERROR;
     }
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "init.mp4") = 0;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: create init file: %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR, NGX_FILE_TRUNCATE,
                        NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
