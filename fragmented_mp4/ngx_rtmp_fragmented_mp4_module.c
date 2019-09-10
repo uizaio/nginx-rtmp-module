@@ -684,19 +684,19 @@ ngx_rtmp_fragmented_mp4_track_t *at)
         }
     #endif
     //write sound/video data to file
-    while (vleft > 0) {
-        vn = ngx_read_fd(vt->fd, vbuffer, ngx_min(sizeof(vbuffer), vleft));
-        if (vn == NGX_ERROR) {
-            break;
-        }
+    // while (vleft > 0) {
+    //     vn = ngx_read_fd(vt->fd, vbuffer, ngx_min(sizeof(vbuffer), vleft));
+    //     if (vn == NGX_ERROR) {
+    //         break;
+    //     }
 
-        vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
-        if (vn == NGX_ERROR) {
-            break;
-        }
+    //     vn = ngx_write_fd(fd, vbuffer, (size_t) vn);
+    //     if (vn == NGX_ERROR) {
+    //         break;
+    //     }
 
-        vleft -= vn;
-    }
+    //     vleft -= vn;
+    // }
     while (aleft > 0) {
         an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
         if (an == NGX_ERROR) {
