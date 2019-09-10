@@ -471,7 +471,8 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
 
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-
+    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
+                      "fmp4: nfrags %d winfrags %d", ctx->nfrags, fmacf->winfrags);    
     if (ctx->nfrags == fmacf->winfrags) {
         ctx->frag++;//increase number of frags in a winfrags
     } else {
