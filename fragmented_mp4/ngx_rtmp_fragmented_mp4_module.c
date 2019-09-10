@@ -357,6 +357,8 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
     //playlen default is 30000ms
     ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "fmp4: fraglen %d", conf->fraglen);
     if (conf->fraglen) {
         conf->winfrags = conf->playlen / conf->fraglen;
     }
