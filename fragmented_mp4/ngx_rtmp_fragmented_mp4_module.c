@@ -356,9 +356,7 @@ static char * ngx_rtmp_fragmented_mp4_merge_app_conf(ngx_conf_t *cf, void *paren
     //fraglen default is 5000ms
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
     //playlen default is 30000ms
-    ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "fmp4: fraglen %d", conf->fraglen);
+    ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);    
     if (conf->fraglen) {
         conf->winfrags = conf->playlen / conf->fraglen;
     }
@@ -474,7 +472,7 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
     ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: nfrags %d winfrags %d", ctx->nfrags, fmacf->winfrags);    
+                      "fmp4: nfrags %d winfrags %d fraglen %d", ctx->nfrags, fmacf->winfrags, fmacf->fraglen);    
     if (ctx->nfrags == fmacf->winfrags) {
         ctx->frag++;//increase number of frags in a winfrags
     } else {
