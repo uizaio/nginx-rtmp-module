@@ -466,6 +466,10 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
     }
 }
 
+/**
+ * playlist will be update after creating new m4s file.
+ * how to update: create a playlist.bak and overwrite it to old file
+ **/ 
 static ngx_int_t
 ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
 {
@@ -491,16 +495,10 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
                       "fmp4: id: %d", ctx->id);    
     if (ctx->id == 0) {
-        ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: init segment");
         //if this is the first streame, we need to create init segment file
         ngx_rtmp_fragmented_mp4_write_init_segments(s);
-        ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: close init file");
     }
     //now we need to create a playlist   
-    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: Create bak playlist %s", ctx->playlist_bak.data); 
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);    
     if (fd == NGX_INVALID_FILE) {
@@ -545,7 +543,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     if (!fmacf->nested /*|| fmacf->key_url.len*/) {
         key_name_part = ctx->name;
     }
-    prev_key_id = 0;
+    prev_key_id = 0;    
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
         p = buffer;
@@ -556,6 +554,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                          "%V%V%s%uL.m4s\n",
                          f->duration, "", &name_part, sep, f->id);
         n = ngx_write_fd(fd, buffer, p - buffer);
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "fmp4: write frag: %d", ctx->nfrags);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: " ngx_write_fd_n " failed '%V'",
