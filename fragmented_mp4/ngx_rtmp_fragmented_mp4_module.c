@@ -663,25 +663,16 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     vleft = (size_t) vt->mdat_size;
     aleft = (size_t) at->mdat_size;
     #if (NGX_WIN32)
-        if (SetFilePointer(vt->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
+        if (SetFilePointer(vt->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER || 
+            SetFilePointer(at->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "fmp4: SetFilePointer for video error");
-            goto done;
-        }
-        if (SetFilePointer(at->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "fmp4: SetFilePointer audio error");
+                        "fmp4: SetFilePointer error");
             goto done;
         }
     #else
-        if (lseek(vt->fd, 0, SEEK_SET) == -1) {
+        if (lseek(vt->fd, 0, SEEK_SET) == -1 || lseek(at->fd, 0, SEEK_SET) == -1) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                        "fmp4: lseek video error");
-            goto done;
-        }
-        if (lseek(at->fd, 0, SEEK_SET) == -1) {
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                        "fmp4: lseek audio error");
+                        "fmp4: lseek error");
             goto done;
         }
     #endif
@@ -699,19 +690,19 @@ ngx_rtmp_fragmented_mp4_track_t *at)
 
         vleft -= n;
     }
-    while (aleft > 0) {
-        n = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
-        if (n == NGX_ERROR) {
-            break;
-        }
+    // while (aleft > 0) {
+    //     n = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
+    //     if (n == NGX_ERROR) {
+    //         break;
+    //     }
 
-        n = ngx_write_fd(fd, abuffer, (size_t) n);
-        if (n == NGX_ERROR) {
-            break;
-        }
+    //     n = ngx_write_fd(fd, abuffer, (size_t) n);
+    //     if (n == NGX_ERROR) {
+    //         break;
+    //     }
 
-        aleft -= n;
-    }
+    //     aleft -= n;
+    // }
     done:
         if (fd != NGX_INVALID_FILE) {
             ngx_close_file(fd);
