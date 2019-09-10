@@ -498,7 +498,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     const char                          *sep, *key_sep;
     ngx_str_t                           name_part, key_name_part;
     uint64_t                            prev_key_id;
-    ngx_rtmp_fragmented_mp4_frag_t                 *f;
+    ngx_rtmp_fragmented_mp4_frag_t                 *t;
     
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
@@ -523,9 +523,9 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     max_frag = fmacf->fraglen / 1000;
 
     for (i = 0; i < ctx->nfrags; i++) {
-        f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
-        if (f->duration > max_frag) {
-            max_frag = (ngx_uint_t) (f->duration + .5);
+        t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+        if (t->duration > max_frag) {
+            max_frag = (ngx_uint_t) (t->duration + .5);
         }
     }
     p = buffer;
@@ -559,7 +559,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     }
     prev_key_id = 0;
     for (i = 0; i < ctx->nfrags; i++) {
-        f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+        t = ngx_rtmp_fragmented_mp4_get_frag(s, i);
         p = buffer;
         end = p + sizeof(buffer);
         prev_key_id = f->key_id;
@@ -568,7 +568,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%V%s%uL.m4s\n",
-                         f->duration, &name_part, sep, t->id);
+                         t->duration, &name_part, sep, t->id);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
