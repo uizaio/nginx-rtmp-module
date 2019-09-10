@@ -957,7 +957,8 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
     }
 
     ctx->opened = 1;
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "hls: nfrags %d", ctx->nfrags);
     f = ngx_rtmp_hls_get_frag(s, ctx->nfrags);
 
     ngx_memzero(f, sizeof(*f));
@@ -1469,9 +1470,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     if (hacf->continuous && !hacf->hide_stream_key) {        
         ngx_rtmp_hls_restore_stream(s);
-    }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "hls: nfrags %d", ctx->nfrags);
+    }    
 next:
     return next_publish(s, v);
 }
