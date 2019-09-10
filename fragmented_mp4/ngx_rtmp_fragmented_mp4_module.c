@@ -472,9 +472,7 @@ ngx_rtmp_fragmented_mp4_next_frag(ngx_rtmp_session_t *s)
     ngx_rtmp_fragmented_mp4_app_conf_t  *fmacf;
 
     fmacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fragmented_mp4_module);
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);
-    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
-                      "fmp4: nfrags %d winfrags %d fraglen %d playlen %d", ctx->nfrags, fmacf->winfrags, fmacf->fraglen, fmacf->playlen);    
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fragmented_mp4_module);       
     if (ctx->nfrags == fmacf->winfrags) {
         ctx->frag++;//increase number of frags in a winfrags
     } else {
@@ -564,6 +562,8 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                           "fmp4: frags: %d", ctx->nfrags);
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: get frags: %d", i);
         p = buffer;
         end = p + sizeof(buffer);
         prev_key_id = f->key_id;
