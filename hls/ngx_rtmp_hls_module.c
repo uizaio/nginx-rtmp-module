@@ -464,7 +464,8 @@ ngx_rtmp_hls_write_playlist(ngx_rtmp_session_t *s)
 
     p = buffer;
     end = p + sizeof(buffer);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "hls: nfrags %d", ctx->frag);
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
                      "#EXT-X-VERSION:3\n"

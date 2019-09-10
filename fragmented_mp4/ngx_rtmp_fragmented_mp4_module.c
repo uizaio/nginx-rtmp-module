@@ -557,27 +557,17 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     if (!fmacf->nested /*|| fmacf->key_url.len*/) {
         key_name_part = ctx->name;
     }
-    prev_key_id = 0;    
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: frags: %d", ctx->nfrags);
+    prev_key_id = 0;
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fragmented_mp4_get_frag(s, i);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: get frags: %d", i);
         p = buffer;
         end = p + sizeof(buffer);
         prev_key_id = f->key_id;
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: 1");
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%V%s%uL.m4s\n",
                          f->duration, &name_part, sep, f->id);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: 2");
         n = ngx_write_fd(fd, buffer, p - buffer);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: 3");
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: " ngx_write_fd_n " failed '%V'",
