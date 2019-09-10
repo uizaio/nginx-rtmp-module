@@ -569,10 +569,10 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         }
     }
     //FIXME: how to send this part when stream stop?
-    // p = buffer;
-    // end = p + sizeof(buffer);
-    // p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
-    // n = ngx_write_fd(fd, buffer, p - buffer);
+    p = buffer;
+    end = p + sizeof(buffer);
+    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
+    n = ngx_write_fd(fd, buffer, p - buffer);
     if (n < 0) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: " ngx_write_fd_n " failed: '%V'",
