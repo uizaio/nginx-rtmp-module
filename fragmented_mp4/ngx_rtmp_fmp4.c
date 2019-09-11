@@ -1079,13 +1079,13 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 
     // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-sstr/6d796f37-b4f0-475f-becd-13f1c86c2d1f
     // current_offset + 20byte for the flags, sample_cout, offset and sample + (size of nitems) + 8byte mdat
-    if(pre_size == 0){
-        //for video track
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 56 + (next_sample_count * next_nitems * 4) + 8;
-    }else{
+    // if(pre_size == 0){
+    //     //for video track
+    //     offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 56 + (next_sample_count * next_nitems * 4) + 8;
+    // }else{
         //for audio track
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
-    }    
+    // }    
 
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
@@ -1221,8 +1221,8 @@ ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t v_earliest_pres_time,
     
     ngx_rtmp_fmp4_write_traf(b, v_earliest_pres_time, v_sample_count, v_samples,
                             v_sample_mask, 1, pos, a_sample_count, a_sample_mask, 0);
-    ngx_rtmp_fmp4_write_traf(b, a_earliest_pres_time, a_sample_count, a_samples,
-                            a_sample_mask, 2, pos, 0, 0, pre_size);
+    // ngx_rtmp_fmp4_write_traf(b, a_earliest_pres_time, a_sample_count, a_samples,
+    //                         a_sample_mask, 2, pos, 0, 0, pre_size);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 

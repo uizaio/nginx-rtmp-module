@@ -646,10 +646,10 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
                             vt->earliest_pres_time, vt->latest_pres_time, 1);
     //sidx for audio
-    ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
-                            at->earliest_pres_time, at->latest_pres_time, 2);
+    // ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
+    //                         at->earliest_pres_time, at->latest_pres_time, 2);
     b.last = pos1;
-    ngx_rtmp_fmp4_write_mdat(&b, reference_size + 8);
+    ngx_rtmp_fmp4_write_mdat(&b, vt->mdat_size);
     f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
     //we only support m4s file format
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s",
@@ -699,19 +699,19 @@ ngx_rtmp_fragmented_mp4_track_t *at)
 
         vleft -= vn;
     }
-    while (aleft > 0) {
-        an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
-        if (an == NGX_ERROR) {
-            break;
-        }
+    // while (aleft > 0) {
+    //     an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
+    //     if (an == NGX_ERROR) {
+    //         break;
+    //     }
 
-        an = ngx_write_fd(fd, abuffer, (size_t) an);
-        if (an == NGX_ERROR) {
-            break;
-        }
+    //     an = ngx_write_fd(fd, abuffer, (size_t) an);
+    //     if (an == NGX_ERROR) {
+    //         break;
+    //     }
 
-        aleft -= an;
-    }
+    //     aleft -= an;
+    // }
     done:
         if (fd != NGX_INVALID_FILE) {
             ngx_close_file(fd);
