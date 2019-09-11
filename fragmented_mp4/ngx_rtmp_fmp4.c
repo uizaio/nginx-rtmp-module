@@ -1081,8 +1081,9 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     // current_offset + 20byte for the flags, sample_cout, offset and sample + (size of nitems) + 8byte mdat
     if(pre_size == 0){
         //for video track
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 20 + (next_sample_count * next_nitems * 4) + 8;
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 56 + (next_sample_count * next_nitems * 4) + 8;
     }else{
+        //for audio track
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
     }    
 
@@ -1131,7 +1132,7 @@ ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
-    return NGX_OK;
+    return NGX_OK;x
 }
 
 
