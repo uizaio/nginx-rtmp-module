@@ -539,6 +539,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
                      "#EXT-X-TARGETDURATION:%ui\n",
                      first_media, max_frag);
     //EVENT: the playlist can only be appended to, VOD: the playlist must not change
+    p = ngx_slprintf(p, end, "#EXT-X-DISCONTINUITY\n");
     p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
     n = ngx_write_fd(fd, buffer, p - buffer);
