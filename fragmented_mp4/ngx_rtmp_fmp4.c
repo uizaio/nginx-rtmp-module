@@ -1167,7 +1167,7 @@ ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
     pos = ngx_rtmp_fmp4_start_box(b, "sidx");
 
     /* version , if 1, we use 64 bit size*/
-    ngx_rtmp_fmp4_field_32(b, 0);
+    ngx_rtmp_fmp4_field_32(b, 1);
 
     /* reference id, alway start from 1 */
     ngx_rtmp_fmp4_field_32(b, track_id);
