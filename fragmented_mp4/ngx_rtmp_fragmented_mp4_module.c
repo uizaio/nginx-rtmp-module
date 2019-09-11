@@ -534,7 +534,7 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
     end = p + sizeof(buffer);
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
-                     "#EXT-X-VERSION:7\n"
+                     "#EXT-X-VERSION:3\n"
                      "#EXT-X-MEDIA-SEQUENCE:%uL\n"//the first media segment in the list
                      "#EXT-X-TARGETDURATION:%ui\n",
                      first_media, max_frag);
