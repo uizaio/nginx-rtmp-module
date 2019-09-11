@@ -570,17 +570,17 @@ ngx_rtmp_fragmented_mp4_write_playlist(ngx_rtmp_session_t *s)
         }
     }
     //FIXME: how to send this part when stream stop?
-    p = buffer;
-    end = p + sizeof(buffer);
-    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
-    n = ngx_write_fd(fd, buffer, p - buffer);
-    if (n < 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: " ngx_write_fd_n " failed: '%V'",
-                      &ctx->playlist_bak);
-        ngx_close_file(fd);
-        return NGX_ERROR;
-    }
+    // p = buffer;
+    // end = p + sizeof(buffer);
+    // p = ngx_slprintf(p, end, "#EXT-X-ENDLIST");
+    // n = ngx_write_fd(fd, buffer, p - buffer);
+    // if (n < 0) {
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                   "fmp4: " ngx_write_fd_n " failed: '%V'",
+    //                   &ctx->playlist_bak);
+    //     ngx_close_file(fd);
+    //     return NGX_ERROR;
+    // }
     ngx_close_file(fd);
     //remove old file and create a new file from bak
     if (ngx_rtmp_fragmented_mp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
@@ -636,7 +636,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, vt->id,
                             at->earliest_pres_time, at->sample_count,
-                            at->samples, at->sample_mask);
+                            at->samples, at->sample_mask, vt->mdat_size);
     pos1 = b.last;
     b.last = pos;
     //refrence_size = size of moof + size of mdat

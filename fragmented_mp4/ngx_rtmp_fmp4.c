@@ -1024,10 +1024,12 @@ ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time)
 
 static ngx_int_t
 ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
-    ngx_rtmp_fmp4_sample_t *samples, ngx_uint_t sample_mask, u_char *moof_pos)
+    ngx_rtmp_fmp4_sample_t *samples, ngx_uint_t sample_mask, u_char *moof_pos, 
+    uint32_t next_sample_count, ngx_uint_t next_sample_mask, ngx_uint_t pre_size)
 {
     u_char    *pos;
     uint32_t   i, offset, nitems, flags;
+    uint32_t    next_nitems;
 
     pos = ngx_rtmp_fmp4_start_box(b, "trun");
 
@@ -1055,8 +1057,34 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         nitems++;
         flags |= 0x000800;
     }
+    //////
+    if(pre_size == 0){
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+            next_nitems++;
+        }
 
-    offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8;
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
+            next_nitems++;
+        }
+
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+            next_nitems++;
+        }
+
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+            next_nitems++;        
+        }
+    }
+    
+
+    // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-sstr/6d796f37-b4f0-475f-becd-13f1c86c2d1f
+    // current_offset + 20byte for the flags, sample_cout, offset and sample + (size of nitems) + 8byte mdat
+    if(pre_size == 0){
+        //for video track
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 20 + (next_sample_count * next_nitems * 4) + 8;
+    }else{
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
+    }    
 
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
@@ -1090,15 +1118,16 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 static ngx_int_t
 ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
     uint32_t sample_count, ngx_rtmp_fmp4_sample_t *samples,
-    ngx_uint_t sample_mask, int track_id , u_char *moof_pos)
+    ngx_uint_t sample_mask, int track_id , u_char *moof_pos,
+    uint32_t next_sample_count, ngx_uint_t next_sample_mask, ngx_uint_t pre_size)
 {
     u_char  *pos;
 
     pos = ngx_rtmp_fmp4_start_box(b, "traf");
 
     ngx_rtmp_fmp4_write_tfhd(b, track_id);
-    ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);
-    ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos);
+    ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);    
+    ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos, next_sample_count, next_sample_mask, pre_size);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -1160,7 +1189,7 @@ ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
     /* 1st bit is reference type, the rest is reference size */
     ngx_rtmp_fmp4_field_32(b, reference_size);
 
-    /* subsegment duration */
+    /* subsegment duration: in second */
     ngx_rtmp_fmp4_field_32(b, duration);
 
     /* first bit is startsWithSAP (=1), next 3 bits are SAP type (=001) */
@@ -1181,17 +1210,18 @@ ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t v_earliest_pres_time,
     ngx_uint_t v_sample_mask, uint32_t index,
     uint32_t a_earliest_pres_time,
     uint32_t a_sample_count, ngx_rtmp_fmp4_sample_t *a_samples,
-    ngx_uint_t a_sample_mask)
+    ngx_uint_t a_sample_mask, ngx_uint_t pre_size)
 {
     u_char  *pos;
 
     pos = ngx_rtmp_fmp4_start_box(b, "moof");
 
     ngx_rtmp_fmp4_write_mfhd(b, index);
+    
     ngx_rtmp_fmp4_write_traf(b, v_earliest_pres_time, v_sample_count, v_samples,
-                            v_sample_mask, 1, pos);
+                            v_sample_mask, 1, pos, a_sample_count, a_sample_mask, 0);
     ngx_rtmp_fmp4_write_traf(b, a_earliest_pres_time, a_sample_count, a_samples,
-                            a_sample_mask, 2, pos);
+                            a_sample_mask, 2, pos, 0, 0, pre_size);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
