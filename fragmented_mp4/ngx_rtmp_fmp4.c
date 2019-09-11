@@ -1014,7 +1014,7 @@ ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time)
 
     /* version == 1 aka 64 bit integer */
     ngx_rtmp_fmp4_field_32(b, 0x00000000);
-    // ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
+    ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
