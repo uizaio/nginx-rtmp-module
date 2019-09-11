@@ -697,14 +697,6 @@ ngx_rtmp_fragmented_mp4_track_t *at)
         }
 
         vleft -= vn;
-    }    
-    ngx_close_file(fd);    
-    fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
-                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
-    if (fd == NGX_INVALID_FILE) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: error creating fmp4 temp file");
-        goto done;
     }
     while (aleft > 0) {
         an = ngx_read_fd(at->fd, abuffer, ngx_min(sizeof(abuffer), aleft));
