@@ -1132,7 +1132,7 @@ ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
-    return NGX_OK;x
+    return NGX_OK;
 }
 
 
