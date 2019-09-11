@@ -648,7 +648,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     ngx_rtmp_fmp4_write_sidx(&b, reference_size + 8 + (pos1 - (pos + 88)),
                             at->earliest_pres_time, at->latest_pres_time, 2);
     b.last = pos1;
-    ngx_rtmp_fmp4_write_mdat(&b, vt->mdat_size + 8);
+    ngx_rtmp_fmp4_write_mdat(&b, reference_size + 8);
     f = ngx_rtmp_fragmented_mp4_get_frag(s, ctx->nfrags);
     //we only support m4s file format
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s",
