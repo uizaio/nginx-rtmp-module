@@ -964,6 +964,7 @@ ngx_rtmp_fmp4_write_mvex(ngx_buf_t *b)
     ngx_rtmp_fmp4_field_32(b, 0);
 
     //for audio track
+    ngx_rtmp_fmp4_field_32(b, 0x20);
     ngx_rtmp_fmp4_box(b, "trex");
 
     /* version & flags */
