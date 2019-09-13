@@ -1116,10 +1116,12 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     }     
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
-    ngx_rtmp_fmp4_field_32(b, offset);
-    int size = 0;
-    for (i = 0; i < sample_count; i++, samples++) {
-        size += samples->size;
+    ngx_rtmp_fmp4_field_32(b, offset);    
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "sample count: %d", sample_count);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "=======================");
+    for (i = 0; i < sample_count; i++, samples++) {        
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             ngx_rtmp_fmp4_field_32(b, samples->duration);
         }
@@ -1135,9 +1137,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
             ngx_rtmp_fmp4_field_32(b, samples->delay);
         }
-    }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "mdat: %d", size);
+    }    
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
