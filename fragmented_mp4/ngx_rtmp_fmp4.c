@@ -1130,8 +1130,8 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
             ngx_rtmp_fmp4_field_32(b, samples->delay);
         }
     }
-    fprintf(stderr, "mdat: %d", size);
-
+    ngx_log_error(NGX_LOG_ERR, NULL, 0,
+                      "mdat: %d", size);
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
