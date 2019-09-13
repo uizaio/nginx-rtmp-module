@@ -51,7 +51,7 @@ RTMP_DEPS="                                                 \
                 $ngx_addon_dir/hls/ngx_rtmp_mpegts.h        \
                 $ngx_addon_dir/hls/ngx_rtmp_hls_module.h    \
                 $ngx_addon_dir/dash/ngx_rtmp_mp4.h          \
-                $ngx_addon_dir/fragmented_mp4/ngx_rtmp_fmp4.h \
+                $ngx_addon_dir/fmp4/ngx_rtmp_fmp4.h \
                 "
 
 
