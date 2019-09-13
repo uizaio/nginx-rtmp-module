@@ -637,7 +637,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, vt->id,
                             at->earliest_pres_time, at->sample_count,
-                            at->samples, at->sample_mask, vt->mdat_size);
+                            at->samples, at->sample_mask, vt->mdat_size, s);
     pos1 = b.last;
     b.last = pos;
     //refrence_size = size of moof + size of mdat

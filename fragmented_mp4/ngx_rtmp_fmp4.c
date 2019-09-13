@@ -1047,7 +1047,7 @@ ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time)
 static ngx_int_t
 ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     ngx_rtmp_fmp4_sample_t *samples, ngx_uint_t sample_mask, u_char *moof_pos, 
-    uint32_t next_sample_count, ngx_uint_t next_sample_mask, ngx_uint_t pre_size)
+    uint32_t next_sample_count, ngx_uint_t next_sample_mask, ngx_uint_t pre_size, ngx_rtmp_session_t *s)
 {
     u_char    *pos;
     uint32_t   i, offset, nitems, flags;
@@ -1130,7 +1130,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
             ngx_rtmp_fmp4_field_32(b, samples->delay);
         }
     }
-    ngx_log_error(NGX_LOG_ERR, NULL, 0,
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "mdat: %d", size);
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -1142,7 +1142,7 @@ static ngx_int_t
 ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
     uint32_t sample_count, ngx_rtmp_fmp4_sample_t *samples,
     ngx_uint_t sample_mask, int track_id , u_char *moof_pos,
-    uint32_t next_sample_count, ngx_uint_t next_sample_mask, ngx_uint_t pre_size)
+    uint32_t next_sample_count, ngx_uint_t next_sample_mask, ngx_uint_t pre_size, ngx_rtmp_session_t *s)
 {
     u_char  *pos;
 
@@ -1150,7 +1150,7 @@ ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
 
     ngx_rtmp_fmp4_write_tfhd(b, track_id);
     ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);    
-    ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos, next_sample_count, next_sample_mask, pre_size);
+    ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos, next_sample_count, next_sample_mask, pre_size, s);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -1233,7 +1233,7 @@ ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t v_earliest_pres_time,
     ngx_uint_t v_sample_mask, uint32_t index,
     uint32_t a_earliest_pres_time,
     uint32_t a_sample_count, ngx_rtmp_fmp4_sample_t *a_samples,
-    ngx_uint_t a_sample_mask, ngx_uint_t pre_size)
+    ngx_uint_t a_sample_mask, ngx_uint_t pre_size, ngx_rtmp_session_t *s)
 {
     u_char  *pos;
 
@@ -1242,9 +1242,9 @@ ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t v_earliest_pres_time,
     ngx_rtmp_fmp4_write_mfhd(b, index);
     
     ngx_rtmp_fmp4_write_traf(b, v_earliest_pres_time, v_sample_count, v_samples,
-                            v_sample_mask, 1, pos, a_sample_count, a_sample_mask, 0);
+                            v_sample_mask, 1, pos, a_sample_count, a_sample_mask, 0, s);
     ngx_rtmp_fmp4_write_traf(b, a_earliest_pres_time, a_sample_count, a_samples,
-                            a_sample_mask, 2, pos, 0, 0, pre_size);
+                            a_sample_mask, 2, pos, 0, 0, pre_size, s);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
