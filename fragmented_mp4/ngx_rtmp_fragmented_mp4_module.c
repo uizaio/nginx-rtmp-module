@@ -37,7 +37,7 @@ typedef struct{
 
 
 typedef struct {
-    ngx_rtmp_hls_frag_t                *frags; /* circular 2 * winfrags + 1 */
+    ngx_rtmp_fmp4_frag_t                *frags; /* circular 2 * winfrags + 1 */
     ngx_str_t                           name;//name of stream
     ngx_str_t                           playlist;//link of playlist
     ngx_str_t                           playlist_bak;//playlist bak file name
@@ -100,8 +100,8 @@ static ngx_rtmp_module_t ngx_rtmp_fmp4_module_ctx = {
 
 ngx_module_t  ngx_rtmp_fmp4_module = {
     NGX_MODULE_V1,
-    &ngx_rtmp_fragmented_mp4_module_ctx,          /* module context */
-    ngx_rtmp_fragmented_mp4_commands,             /* module directives */
+    &ngx_rtmp_fmp4_module_ctx,          /* module context */
+    ngx_rtmp_fmp4_commands,             /* module directives */
     NGX_RTMP_MODULE,                    /* module type */
     NULL,                               /* init master */
     NULL,                               /* init module */
@@ -118,8 +118,8 @@ ngx_module_t  ngx_rtmp_fmp4_module = {
  * Every configs must be set here before using
  * */
 static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
-    ngx_rtmp_fragmented_mp4_app_conf_t *conf;
-    conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_fragmented_mp4_app_conf_t));
+    ngx_rtmp_fmp4_app_conf_t *conf;
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_fmp4_app_conf_t));
     if (conf == NULL) {
         return NULL;
     }    
