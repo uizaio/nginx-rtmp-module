@@ -1101,9 +1101,15 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 
     // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-sstr/6d796f37-b4f0-475f-becd-13f1c86c2d1f
     // current_offset + 20byte for the flags, sample_cout, offset and sample + (size of nitems) + 8byte mdat
+    // 8 byte ('traf')
+    //tfhd: 16byte
+    //tfdt: 16byte
+    //trun: 8byte ('trun), 4 byte box version, 4 byte flag, 4 byte offset, 4byte sample
+    //trun: each item 4byte
+    //8byte ('mdat')
     if(pre_size == 0){
         //for video track
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 56 + (next_sample_count * next_nitems * 4) + 8;
+        offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 72;
     }else{
         //for audio track
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
