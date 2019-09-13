@@ -40,6 +40,7 @@ typedef struct{
 
 
 typedef struct {
+    unsigned                            opened:1;//is context opened?
     ngx_rtmp_fmp4_frag_t                *frags; /* circular 2 * winfrags + 1 */
     ngx_uint_t                          nfrags; //number of fragment
     uint64_t                            frag; //current fragment, ex 2.m4s
@@ -258,13 +259,13 @@ ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s){
     // ngx_rtmp_mpegts_close_file(&ctx->file);
     ctx->opened = 0; //close context
     ngx_rtmp_fmp4_next_frag(s);
-    ngx_rtmp_hls_write_playlist(s);
+    ngx_rtmp_fmp4_write_playlist(s);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                       "fmp4: close fragment");
     return NGX_OK;
 }
 
-static void ngx_rtmp_fmp4_write_init(){
+static void ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_app_conf_t        *acf;
     ngx_rtmp_fmp4_ctx_t             *ctx;
     ngx_fd_t                        fd;
