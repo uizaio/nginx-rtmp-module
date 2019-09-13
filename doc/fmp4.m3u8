@@ -5,9 +5,9 @@
 #EXT-X-PLAYLIST-TYPE:VOD
 #EXT-X-MAP:URI="init.mp4"
 #EXTINF:6.000000,
-fileSequence0.m4s
+2.m4s
 #EXTINF:6.000000,
-fileSequence1.m4s
+3.m4s
 #EXTINF:3.000000,
-fileSequence2.m4s
+4.m4s
 #EXT-X-ENDLIST

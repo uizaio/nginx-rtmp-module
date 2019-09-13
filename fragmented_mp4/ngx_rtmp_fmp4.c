@@ -963,7 +963,7 @@ ngx_rtmp_fmp4_write_mvex(ngx_buf_t *b)
     /* default sample flags, key on */
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    //for audio track
+    //for audio track    
     ngx_rtmp_fmp4_field_32(b, 0x20);
     ngx_rtmp_fmp4_box(b, "trex");
 
@@ -1107,14 +1107,13 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     }else{
         //for audio track
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
-    }    
-
+    }     
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
     ngx_rtmp_fmp4_field_32(b, offset);
-
+    int size = 0;
     for (i = 0; i < sample_count; i++, samples++) {
-
+        size += samples->size;
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             ngx_rtmp_fmp4_field_32(b, samples->duration);
         }
@@ -1131,6 +1130,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
             ngx_rtmp_fmp4_field_32(b, samples->delay);
         }
     }
+    fprintf(stderr, "mdat: %d", size);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
