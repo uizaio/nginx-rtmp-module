@@ -21,7 +21,7 @@ RTMP_CORE_MODULES="                                         \
                 ngx_rtmp_limit_module                       \
                 ngx_rtmp_hls_module                         \
                 ngx_rtmp_dash_module                        \
-                ngx_rtmp_fragmented_mp4_module               \
+                ngx_rtmp_fmp4_module               \
                 "
 
 
