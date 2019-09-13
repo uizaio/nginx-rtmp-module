@@ -1109,7 +1109,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     //8byte ('mdat')
     if(pre_size == 0){
         //for video track
-        offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 72;
+        offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 88;
     }else{
         //for audio track
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
