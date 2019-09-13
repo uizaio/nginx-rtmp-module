@@ -274,6 +274,7 @@ static void ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    
 
 }
 
@@ -305,7 +306,7 @@ ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v){
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
 
-    if (acf == NULL || !acf->fragmented_pmp4 || ctx == NULL) {
+    if (acf == NULL || !acf->fragmented_mp4 || ctx == NULL) {
         goto next;
     }
     ngx_rtmp_fmp4_close_fragment(s);
@@ -315,11 +316,15 @@ ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v){
 
 static ngx_int_t
 ngx_rtmp_fmp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v)
-{}
+{
+    return next_stream_begin(s, v);
+}
 
 static ngx_int_t
 ngx_rtmp_fmp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
-{}
+{
+    return next_stream_eof(s, v);
+}
 
 /**
  * Get app configs
