@@ -44,7 +44,7 @@ ngx_int_t ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t v_earliest_pres_time,
     ngx_uint_t v_sample_mask, uint32_t index,
     uint32_t a_earliest_pres_time,
     uint32_t a_sample_count, ngx_rtmp_fmp4_sample_t *a_samples,
-    ngx_uint_t a_sample_mask, ngx_uint_t pre_size);
+    ngx_uint_t a_sample_mask, ngx_uint_t pre_size, ngx_rtmp_session_t *s);
 ngx_int_t ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b,
     ngx_uint_t reference_size, uint32_t earliest_pres_time,
     uint32_t latest_pres_time, int track_id);
