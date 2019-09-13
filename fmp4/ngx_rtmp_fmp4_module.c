@@ -41,6 +41,8 @@ typedef struct{
 
 typedef struct {
     ngx_rtmp_fmp4_frag_t                *frags; /* circular 2 * winfrags + 1 */
+    ngx_uint_t                          nfrags; //number of fragment
+    uint64_t                            frag; //current fragment, ex 2.m4s
     ngx_str_t                           name;//name of stream
     ngx_str_t                           playlist;//link of playlist
     ngx_str_t                           playlist_bak;//playlist bak file name
@@ -281,7 +283,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
 
 static void
 ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s){
-    ngx_rtmp_hls_ctx_t         *ctx;
+    ngx_rtmp_fmp4_ctx_t         *ctx;
     ngx_rtmp_fmp4_app_conf_t    *acf;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
@@ -298,9 +300,9 @@ ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v){
     ngx_rtmp_fmp4_app_conf_t        *acf;
     ngx_rtmp_fmp4_ctx_t             *ctx;
 
-    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp_module);
+    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
 
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
 
     if (acf == NULL || !acf->fragmented_pmp4 || ctx == NULL) {
         goto next;
