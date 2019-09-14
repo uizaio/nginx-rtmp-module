@@ -83,7 +83,7 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
     pos = ngx_rtmp_fmp4_start_box(b, "ftyp");
     //major brand
     ngx_rtmp_fmp4_box(b, "iso5");
-    ngx_rtmp_fmp4_box(b, "512");
+    ngx_rtmp_mp4_field_32(b, "512");
     //compatible brands:
     ngx_rtmp_fmp4_box(b, "iso6");
     ngx_rtmp_fmp4_box(b, "mp41");
