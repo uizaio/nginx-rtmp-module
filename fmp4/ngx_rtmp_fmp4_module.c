@@ -79,6 +79,7 @@ static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ng
 static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type);
 static ngx_int_t ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s);
 static void ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp);
+static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
@@ -372,7 +373,9 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }    
-    // ngx_rtmp_mpegts_close_file(&ctx->file);    
+    //close temp file
+    ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
+    ngx_rtmp_fmp4_close_fragment(s, &ctx->audio);   
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
     ctx->opened = 0; //close context
@@ -434,6 +437,8 @@ ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                   "fmp4: nfrags %d frag %d", ctx->nfrags, ctx->frag);
     if (ctx->nfrags == acf->winfrags) {
         ctx->frag++;
     } else {
@@ -627,6 +632,11 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 
 static void
 ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp){
+    int32_t                    d;
+    ngx_rtmp_fmp4_frag_t      *f;
+
+    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment
+
     ngx_rtmp_fmp4_close_fragments(s);
     ngx_rtmp_fmp4_open_fragments(s);
 
@@ -666,6 +676,7 @@ ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s){
     return NGX_OK;
 }
 
+//open temp file to write data
 static ngx_int_t
 ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     ngx_uint_t id, char type){
@@ -707,6 +718,17 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
                          NGX_RTMP_FMP4_SAMPLE_DURATION;
     }
     return NGX_OK;
+}
+
+//close temp file and prepare for new data
+static void
+ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t){
+    done:
+        //close temp file
+        ngx_close_file(t->fd);
+
+        t->fd = NGX_INVALID_FILE;
+        t->opened = 0;
 }
 
 /**
