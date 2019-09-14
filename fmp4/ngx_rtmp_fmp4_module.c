@@ -360,11 +360,11 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                       "fmp4: close fragment 1");
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: close fragment 2");
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: close fragment 2");
     // ngx_rtmp_mpegts_close_file(&ctx->file);    
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
