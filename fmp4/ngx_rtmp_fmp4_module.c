@@ -647,7 +647,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
 
     d = (int32_t) (timestamp - f->timestamp);  
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: timestamp %d", d); 
     if (d >= 0) {
         f->duration = timestamp - f->timestamp;
@@ -673,6 +673,8 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     if (!ctx->opened) {
         boundary = 1;
     }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: boundary %d", boundary); 
     if (boundary) {
         //close audio and video frag (m4s file)
         ngx_rtmp_fmp4_close_fragments(s);
