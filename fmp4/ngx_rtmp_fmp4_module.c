@@ -571,28 +571,6 @@ ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
 static ngx_int_t
 ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay){
-    u_char                 *p;
-    static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    size_t                  size, bsize;
-
-    p = buffer;
-    size = 0;
-    //copy data to buffer
-    for (; in && size < sizeof(buffer); in = in->next) {
-
-        bsize = (size_t) (in->buf->last - in->buf->pos);
-        if (size + bsize > sizeof(buffer)) {
-            bsize = (size_t) (sizeof(buffer) - size);
-        }
-
-        p = ngx_cpymem(p, in->buf->pos, bsize);
-        size += bsize;
-    }
-    if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                        "fmp4: " ngx_write_fd_n " failed");
-        return NGX_ERROR;
-    }
 
     return NGX_OK;
 
