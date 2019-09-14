@@ -18,8 +18,8 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 
 typedef struct {
-    uint32_t                            timestamp;
-    uint32_t                            duration;
+    uint32_t                            timestamp;//time that m4s is created
+    uint32_t                            duration;//duration of a m4s
 } ngx_rtmp_fmp4_frag_t;
 
 typedef struct {
@@ -380,7 +380,7 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
     ngx_rtmp_fmp4_close_fragment(s, &ctx->audio); 
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: create new m4s file");
+                          "==========fmp4: create new m4s file=========");
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
     ctx->opened = 0; //close context
@@ -647,9 +647,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
 
-    d = (int32_t) (timestamp - f->timestamp);  
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: timestamp %d-%d", timestamp, f->timestamp); 
+    d = (int32_t) (timestamp - f->timestamp);
     if (d >= 0) {
         f->duration = timestamp - f->timestamp;
         hit = (f->duration >= acf->fraglen);
