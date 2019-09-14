@@ -36,6 +36,19 @@ static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
 typedef struct {
 } ngx_rtmp_fmp4_frag_t;
 
+typedef struct {
+    ngx_uint_t                          id;
+    ngx_uint_t                          opened;
+    ngx_uint_t                          mdat_size;
+    ngx_uint_t                          sample_count;
+    ngx_uint_t                          sample_mask;
+    ngx_fd_t                            fd;
+    char                                type;
+    uint32_t                            earliest_pres_time;
+    uint32_t                            latest_pres_time;
+    ngx_rtmp_mp4_sample_t               samples[NGX_RTMP_FMP4_MAX_SAMPLES];
+} ngx_rtmp_fmp4_track_t;
+
 typedef struct{
     ngx_flag_t                          fragmented_mp4;
     ngx_uint_t                          winfrags;
@@ -50,15 +63,19 @@ typedef struct{
 typedef struct {
     unsigned                            opened:1;//is context opened?
     ngx_rtmp_fmp4_frag_t                *frags; /* circular 2 * winfrags + 1 */
-    ngx_uint_t                          nfrags; //number of fragment
+    ngx_uint_t                          nfrags; //number frag of a fragment
     uint64_t                            frag; //current fragment, ex 2.m4s
     ngx_str_t                           name;//name of stream
     ngx_str_t                           playlist;//link of playlist
     ngx_str_t                           playlist_bak;//playlist bak file name
     ngx_str_t                           initMp4;
     ngx_str_t                           stream;//stream path, ex /path/to/1.m4s
-    ngx_uint_t                          id;//id of context
-} ngx_rtmp_fmp4_ctx_t;
+    ngx_uint_t                          id;//id of context    
+    unsigned                            has_video:1;//if this context has video
+    unsigned                            has_audio:1;//if this context has audio
+    ngx_rtmp_fmp4_track_t               audio;
+    ngx_rtmp_fmp4_track_t               video;
+} ngx_rtmp_fmp4_ctx_t;//current context
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
@@ -149,15 +166,94 @@ static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
 
 static ngx_int_t
 ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-    ngx_chain_t *in)
-{
-    
+    ngx_chain_t *in){
+    ngx_rtmp_fmp4_app_conf_t *acf;
+    ngx_rtmp_fmp4_ctx_t * ctx;
+    ngx_rtmp_codec_ctx_t      *codec_ctx;
+    uint8_t                    ftype, htype;
+    u_char                    *p;
+
+    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+
+    if (acf == NULL || !acf->fragmented_mp4 || ctx == NULL || codec_ctx == NULL ||
+        codec_ctx->avc_header == NULL || h->mlen < 5){
+        return NGX_OK;
+    }
+     /* Only H264 is supported */
+
+    if (codec_ctx->video_codec_id != NGX_RTMP_VIDEO_H264) {
+        return NGX_OK;
+    }
+
+    if (in->buf->last - in->buf->pos < 5) {
+        return NGX_ERROR;
+    }
+    ftype = (in->buf->pos[0] & 0xf0) >> 4;
+
+    /* skip AVC config */
+
+    htype = in->buf->pos[1];
+    if (htype != 1) {
+        return NGX_OK;
+    }
+    p = (u_char *) &delay;
+
+    p[0] = in->buf->pos[4];
+    p[1] = in->buf->pos[3];
+    p[2] = in->buf->pos[2];
+    p[3] = 0;
+    //context has video data
+    ctx->has_video = 1;
+    in->buf->pos += 5;
+    return ngx_rtmp_fmp4_append(s, in, &ctx->video, ftype == 1, h->timestamp,
+                                delay);
 }
 
 static ngx_int_t
 ngx_rtmp_fmp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-    ngx_chain_t *in)
-{}
+    ngx_chain_t *in){
+    u_char                     htype;
+    ngx_rtmp_fmp4_ctx_t       *ctx;
+    ngx_rtmp_codec_ctx_t      *codec_ctx;
+    ngx_rtmp_fmp4_app_conf_t  *acf;
+
+    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+
+    if (acf == NULL || !acf->dash || ctx == NULL ||
+        codec_ctx == NULL || h->mlen < 2){
+        return NGX_OK;
+    }
+    /* Only AAC is supported */
+
+    if (codec_ctx->audio_codec_id != NGX_RTMP_AUDIO_AAC ||
+        codec_ctx->aac_header == NULL)
+    {
+        return NGX_OK;
+    }
+
+    if (in->buf->last - in->buf->pos < 2) {
+        return NGX_ERROR;
+    }
+
+    /* skip AAC config */
+
+    htype = in->buf->pos[1];
+    if (htype != 1) {
+        return NGX_OK;
+    }
+
+    ctx->has_audio = 1;
+
+    /* skip RTMP & AAC headers */
+
+    in->buf->pos += 2;
+
+    return ngx_rtmp_fmp4_append(s, in, &ctx->audio, 0, h->timestamp, 0);
+}
 
 /**
  * When we start publishing stream
@@ -193,6 +289,7 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     }
     if (ctx->frags == NULL) {
+        //we locate a mem that can hold all frag info of a playlist + 1
         ctx->frags = ngx_pcalloc(s->connection->pool,
                                  sizeof(ngx_rtmp_fmp4_frag_t) *
                                  (acf->winfrags * 2 + 1));
@@ -466,6 +563,124 @@ ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
 
     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                    "fmp4: directory '%s' created", path);
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
+    ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay){
+    u_char                 *p;
+    ngx_rtmp_fmp4_sample_t  *smpl;
+    static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
+    size_t                  size, bsize;
+
+    p = buffer;
+    size = 0;
+    //copy data to buffer
+    for (; in && size < sizeof(buffer); in = in->next) {
+
+        bsize = (size_t) (in->buf->last - in->buf->pos);
+        if (size + bsize > sizeof(buffer)) {
+            bsize = (size_t) (sizeof(buffer) - size);
+        }
+
+        p = ngx_cpymem(p, in->buf->pos, bsize);
+        size += bsize;
+    }
+    if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                        "fmp4: " ngx_write_fd_n " failed");
+        return NGX_ERROR;
+    }
+
+    return NGX_OK;
+
+}
+
+static void
+ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp){
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                        "fmp4: update fragments");
+    ngx_rtmp_fmp4_close_fragments(s);
+}
+
+static ngx_rtmp_fmp4_frag_t *
+ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n){
+    ngx_rtmp_fmp4_ctx_t       *ctx;
+    ngx_rtmp_fmp4_app_conf_t  *acf;
+
+    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+
+    return &ctx->frags[(ctx->frag + n) % (acf->winfrags * 2 + 1)];
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s){
+    ngx_rtmp_fmp4_ctx_t  *ctx;
+
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: open fragments");
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+
+    if (ctx->opened) {
+        return NGX_OK;
+    }
+
+    //write video data
+    ngx_rtmp_fmp4_open_fragment(s, &ctx->video, ctx->id, 'v');
+    //write audio data
+    ngx_rtmp_fmp4_open_fragment(s, &ctx->audio, ctx->id, 'a');
+
+    ctx->opened = 1;
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
+    ngx_uint_t id, char type){
+    ngx_rtmp_fmp4_ctx_t   *ctx;
+
+    if (t->opened) {
+        return NGX_OK;
+    }
+
+    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: open fragment id=%ui, type='%c'", id, type);
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
+    //create a new file, if file exist, delete it before creating
+    t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
+                          NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+
+    if (t->fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: error creating fragment file");
+        return NGX_ERROR;
+    }
+
+    t->id = id;
+    t->type = type;
+    t->sample_count = 0;
+    t->earliest_pres_time = 0;
+    t->latest_pres_time = 0;
+    t->mdat_size = 0;
+    t->opened = 1;
+
+    if (type == 'v') {
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION|
+                         NGX_RTMP_FMP4_SAMPLE_DELAY|
+                         NGX_RTMP_FMP4_SAMPLE_KEY;
+    } else {
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION;
+    }
 
     return NGX_OK;
 }

@@ -9,6 +9,19 @@
 #include <ngx_rtmp.h>
 
 
+#define NGX_RTMP_FMP4_SAMPLE_SIZE        0x01
+#define NGX_RTMP_FMP4_SAMPLE_DURATION    0x02
+#define NGX_RTMP_FMP4_SAMPLE_DELAY       0x04
+#define NGX_RTMP_FMP4_SAMPLE_KEY         0x08
+
+typedef struct {
+    uint32_t        size;
+    uint32_t        duration;
+    uint32_t        delay;
+    uint32_t        timestamp;
+    unsigned        key:1;
+} ngx_rtmp_fmp4_sample_t;
+
 ngx_int_t
 ngx_rtmp_mp4_write_ftyp(ngx_buf_t *b);
 u_char *
