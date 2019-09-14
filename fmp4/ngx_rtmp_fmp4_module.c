@@ -402,6 +402,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     static u_char                   buffer[NGX_RTMP_FMP4_BUFSIZE];
     size_t                          vleft, aleft;
     ssize_t                         n;
+    u_char                          *pos, *pos1;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -425,6 +426,8 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, at->earliest_pres_time, at->sample_count,
                             at->samples, at->sample_mask, vt->id);
+    pos1 = b.last;
+    b.last = pos;
     //we write box for data video
     mdat_size = vt->mdat_size + at->mdat_size;
     ngx_rtmp_fmp4_write_sidx(&b, vt->earliest_pres_time, vt->latest_pres_time, mdat_size, 1);
