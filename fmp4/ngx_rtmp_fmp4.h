@@ -46,6 +46,8 @@ static u_char * ngx_rtmp_fmp4_start_box(ngx_buf_t *b, const char box[4]);
 static ngx_int_t ngx_rtmp_fmp4_update_box_size(ngx_buf_t *b, u_char *p);
 static ngx_int_t ngx_rtmp_fmp4_write_meta(ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_udta(ngx_buf_t *b);
+static ngx_int_t ngx_rtmp_fmp4_write_avcc(ngx_rtmp_session_t *s, ngx_buf_t *b);
+static ngx_int_t ngx_rtmp_fmp4_put_descr(ngx_buf_t *b, int tag, size_t size);
 
 
 #endif /* _NGX_RTMP_FMP4_H_INCLUDED_ */

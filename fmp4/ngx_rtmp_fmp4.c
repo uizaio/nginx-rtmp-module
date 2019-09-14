@@ -130,7 +130,7 @@ ngx_rtmp_fmp4_write_hdlr(ngx_buf_t *b, int isVideo){
     /* pre defined */
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    if (isVideo == 1) {
+    if (isVideo == 0) {
         ngx_rtmp_fmp4_box(b, "vide");
     } else {
         ngx_rtmp_fmp4_box(b, "soun");
@@ -141,7 +141,7 @@ ngx_rtmp_fmp4_write_hdlr(ngx_buf_t *b, int isVideo){
     ngx_rtmp_fmp4_field_32(b, 0);
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    if (isVideo == 1) {
+    if (isVideo == 0) {
         /* video handler string, NULL-terminated */
         ngx_rtmp_fmp4_data(b, "Uiza Video Hanlder", sizeof("Uiza Video Hanlder"));
     } else {
@@ -218,7 +218,7 @@ ngx_rtmp_fmp4_write_dref(ngx_buf_t *b)
     /* url size */
     ngx_rtmp_fmp4_field_32(b, 0xc);
 
-    ngx_rtmp_mp4_box(b, "url ");
+    ngx_rtmp_fmp4_box(b, "url ");
 
     /* version and flags */
     ngx_rtmp_fmp4_field_32(b, 0x00000001);
@@ -424,7 +424,7 @@ ngx_rtmp_fmp4_write_esds(ngx_rtmp_session_t *s, ngx_buf_t *b)
     /* SL Descriptor */
 
     ngx_rtmp_fmp4_put_descr(b, 0x06, 1);
-    ngx_rtmp_mp4_field_8(b, 0x02);
+    ngx_rtmp_fmp4_field_8(b, 0x02);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -446,7 +446,7 @@ ngx_rtmp_fmp4_write_stsd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo)
     /* entry count */
     ngx_rtmp_fmp4_field_32(b, 1);
 
-    if (isVideo == 1) {
+    if (isVideo == 0) {
         ngx_rtmp_fmp4_write_avc(s, b);
     } else {
         ngx_rtmp_fmp4_write_mp4a(s, b);
@@ -541,14 +541,14 @@ ngx_rtmp_fmp4_write_minf(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
 
     pos = ngx_rtmp_fmp4_start_box(b, "minf");
 
-    if (isVideo == 1) {
+    if (isVideo == 0) {
         ngx_rtmp_fmp4_write_vmhd(b);
     } else {
         ngx_rtmp_fmp4_write_smhd(b);
     }
 
     ngx_rtmp_fmp4_write_dinf(b);
-    ngx_rtmp_fmp4_write_stbl(s, b, ttype);
+    ngx_rtmp_fmp4_write_stbl(s, b, isVideo);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -564,6 +564,7 @@ ngx_rtmp_fmp4_write_mdia(ngx_buf_t *b,int isVideo){
     //write hdlr box
     ngx_rtmp_fmp4_write_hdlr(b, isVideo);
     //write minf box
+    ngx_rtmp_fmp4_write_minf(b, isVideo);
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
@@ -574,7 +575,7 @@ ngx_rtmp_fmp4_write_trak(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     pos = ngx_rtmp_fmp4_start_box(b, "trak");
     ngx_rtmp_fmp4_write_tkhd(s, b, isVideo);
     //write edts
-    ngx_rtmp_mp4_write_mdia(b, isVideo);
+    ngx_rtmp_fmp4_write_mdia(b, isVideo);
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
@@ -618,7 +619,7 @@ ngx_rtmp_fmp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
 
     ngx_rtmp_fmp4_write_matrix(b, 1, 0, 0, 1, 0, 0);
 
-    if (isVideo == 1) {
+    if (isVideo == 0) {
         ngx_rtmp_fmp4_field_32(b, (uint32_t) codec_ctx->width << 16);
         ngx_rtmp_fmp4_field_32(b, (uint32_t) codec_ctx->height << 16);
     } else {
@@ -636,8 +637,8 @@ ngx_rtmp_fmp4_write_moov(ngx_rtmp_session_t *s, ngx_buf_t *b){
     pos = ngx_rtmp_fmp4_start_box(b, "moov");
     ngx_rtmp_fmp4_write_mvhd(b);
     ngx_rtmp_fmp4_write_mvex(b);
-    ngx_rtmp_fmp4_write_trak(s, b, 1);//video
-    ngx_rtmp_fmp4_write_trak(s, b, 2);//audio
+    ngx_rtmp_fmp4_write_trak(s, b, 0);//video
+    ngx_rtmp_fmp4_write_trak(s, b, 1);//audio
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
@@ -799,6 +800,77 @@ ngx_rtmp_fmp4_write_udta(ngx_buf_t *b){
     pos = ngx_rtmp_mp4_start_box(b, "udta");
     ngx_rtmp_fmp4_write_meta(b);
     //write meta box
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_write_avcc(ngx_rtmp_session_t *s, ngx_buf_t *b){
+    u_char                *pos, *p;
+    ngx_chain_t           *in;
+    ngx_rtmp_codec_ctx_t  *codec_ctx;
+
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+
+    if (codec_ctx == NULL) {
+        return NGX_ERROR;
+    }
+
+    in = codec_ctx->avc_header;
+    if (in == NULL) {
+        return NGX_ERROR;
+    }
+
+    pos = ngx_rtmp_fmp4_start_box(b, "avcC");
+
+    /* assume config fits one chunk (highly probable) */
+
+    /*
+     * Skip:
+     * - flv fmt
+     * - H264 CONF/PICT (0x00)
+     * - 0
+     * - 0
+     * - 0
+     */
+
+    p = in->buf->pos + 5;
+
+    if (p < in->buf->last) {
+        ngx_rtmp_fmp4_data(b, p, (size_t) (in->buf->last - p));
+    } else {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "dash: invalid avcc received");
+    }
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_put_descr(ngx_buf_t *b, int tag, size_t size){
+    ngx_rtmp_fmp4_field_8(b, (uint8_t) tag);
+    ngx_rtmp_fmp4_field_8(b, size & 0x7F);
+
+    return NGX_OK;
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_write_stbl(ngx_rtmp_session_t *s, ngx_buf_t *b,
+    int isVideo)
+{
+    u_char  *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "stbl");
+
+    ngx_rtmp_fmp4_write_stsd(s, b, isVideo);
+    ngx_rtmp_fmp4_write_stts(b);
+    ngx_rtmp_fmp4_write_stsc(b);
+    ngx_rtmp_fmp4_write_stsz(b);
+    ngx_rtmp_fmp4_write_stco(b);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
