@@ -656,7 +656,9 @@ ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-
+    int test = (ctx->frag + n) % (acf->winfrags * 2 + 1);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: get frag: %d", test);
     return &ctx->frags[(ctx->frag + n) % (acf->winfrags * 2 + 1)];
 }
 
