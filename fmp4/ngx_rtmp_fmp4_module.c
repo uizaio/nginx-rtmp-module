@@ -648,7 +648,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     d = (int32_t) (timestamp - f->timestamp);   
     if (d >= 0) {
         f->duration = timestamp - f->timestamp;
-        hit = (f->duration >= dacf->fraglen);
+        hit = (f->duration >= acf->fraglen);
     }else{
         hit = (-d > 1000);
     }
