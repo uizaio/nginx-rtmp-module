@@ -651,11 +651,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: timestamp %d-%d", timestamp, f->timestamp); 
     if (d >= 0) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: boundary 11"); 
         f->duration = timestamp - f->timestamp;
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: boundary 12"); 
         hit = (f->duration >= acf->fraglen);
     }else{
         hit = (-d > 1000);
@@ -664,26 +660,18 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     if (ctx->has_video && !hit) {
         boundary = 0;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: boundary 2"); 
     if (!ctx->has_video && ctx->has_audio) {
         boundary = hit;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: boundary 3"); 
     if (ctx->audio.mdat_size >= NGX_RTMP_FMP4_MAX_MDAT) {
         boundary = 1;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: boundary 4"); 
     if (ctx->video.mdat_size >= NGX_RTMP_FMP4_MAX_MDAT) {
         boundary = 1;
     }
     if (!ctx->opened) {
         boundary = 1;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: boundary %d", boundary); 
     if (boundary) {
         //close audio and video frag (m4s file)
         ngx_rtmp_fmp4_close_fragments(s);
