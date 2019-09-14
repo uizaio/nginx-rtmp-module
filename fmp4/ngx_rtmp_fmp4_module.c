@@ -359,20 +359,13 @@ static ngx_int_t
 ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_ctx_t         *ctx;
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    if(ctx == NULL){
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: ctx null");
-    }else{
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: ctx not null");
-    }
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
-    }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: close fragment 2");
+    }    
     // ngx_rtmp_mpegts_close_file(&ctx->file);    
     ngx_rtmp_fmp4_next_frag(s);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: close fragment 1");
     ngx_rtmp_fmp4_write_playlist(s);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                       "fmp4: close fragment");
@@ -392,7 +385,7 @@ ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
+    fd = ngx_open_file(ctx->initMp4.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -403,12 +396,16 @@ ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
     b.start = buffer;
     b.end = buffer + sizeof(buffer);
     b.pos = b.last = b.start;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing init ftyp");
     ngx_rtmp_fmp4_write_ftyp(&b);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing init moov");
     ngx_rtmp_fmp4_write_moov(s, &b);
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "dash: writing video init failed");
+                      "fmp4: writing init failed");
     }
 
     ngx_close_file(fd);
@@ -422,6 +419,8 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: write init");
     if (ctx->id == 0) {
         ngx_rtmp_fmp4_write_init(s);
     }
