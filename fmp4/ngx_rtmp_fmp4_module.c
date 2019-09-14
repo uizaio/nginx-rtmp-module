@@ -31,6 +31,8 @@ static void ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
+static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type);
 
 
 typedef struct {
@@ -571,7 +573,6 @@ static ngx_int_t
 ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay){
     u_char                 *p;
-    ngx_rtmp_fmp4_sample_t  *smpl;
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
     size_t                  size, bsize;
 
