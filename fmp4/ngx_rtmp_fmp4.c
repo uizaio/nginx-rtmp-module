@@ -678,7 +678,7 @@ ngx_rtmp_fmp4_write_mvex(ngx_buf_t *b){
     /* default sample size, 1024 for AAC */
     ngx_rtmp_fmp4_field_32(b, 0);
     /* default sample flags, key on */
-    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_fmp4_field_32(b, 0);
 
 
 
@@ -713,11 +713,11 @@ ngx_rtmp_fmp4_start_box(ngx_buf_t *b, const char box[4]){
 
     p = b->last;
 
-    if (ngx_rtmp_mp4_field_32(b, 0) != NGX_OK) {
+    if (ngx_rtmp_fmp4_field_32(b, 0) != NGX_OK) {
         return NULL;
     }
 
-    if (ngx_rtmp_mp4_box(b, box) != NGX_OK) {
+    if (ngx_rtmp_fmp4_box(b, box) != NGX_OK) {
         return NULL;
     }
 
@@ -786,9 +786,10 @@ ngx_rtmp_fmp4_update_box_size(ngx_buf_t *b, u_char *p){
 static ngx_int_t
 ngx_rtmp_fmp4_write_meta(ngx_buf_t *b){
     u_char  *pos;
-    pos = ngx_rtmp_mp4_start_box(b, "meta");
-    ngx_rtmp_mp4_field_32(b, 0); /* version */
+    pos = ngx_rtmp_fmp4_start_box(b, "meta");
+    ngx_rtmp_fmp4_field_32(b, 0); /* version */
     //we use this to write some extend metadata, so keep reserved for future
+    ngx_rtmp_fmp4_write_udta(b);
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
