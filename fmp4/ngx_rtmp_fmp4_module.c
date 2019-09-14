@@ -21,16 +21,6 @@ typedef struct {
 } ngx_rtmp_fmp4_frag_t;
 
 typedef struct {
-    ngx_uint_t                          id;
-    ngx_uint_t                          opened;
-    ngx_uint_t                          mdat_size;
-    ngx_uint_t                          sample_count;
-    ngx_uint_t                          sample_mask;
-    ngx_fd_t                            fd;
-    char                                type;
-    uint32_t                            earliest_pres_time;
-    uint32_t                            latest_pres_time;
-    ngx_rtmp_mp4_sample_t               samples[NGX_RTMP_FMP4_MAX_SAMPLES];
 } ngx_rtmp_fmp4_track_t;
 
 typedef struct{
@@ -620,45 +610,6 @@ ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s){
 static ngx_int_t
 ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     ngx_uint_t id, char type){
-    ngx_rtmp_fmp4_ctx_t   *ctx;
-
-    if (t->opened) {
-        return NGX_OK;
-    }
-
-    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "fmp4: open fragment id=%ui, type='%c'", id, type);
-
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-
-    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
-    //create a new file, if file exist, delete it before creating
-    t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
-                          NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
-
-    if (t->fd == NGX_INVALID_FILE) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: error creating fragment file");
-        return NGX_ERROR;
-    }
-
-    t->id = id;
-    t->type = type;
-    t->sample_count = 0;
-    t->earliest_pres_time = 0;
-    t->latest_pres_time = 0;
-    t->mdat_size = 0;
-    t->opened = 1;
-
-    if (type == 'v') {
-        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
-                         NGX_RTMP_FMP4_SAMPLE_DURATION|
-                         NGX_RTMP_FMP4_SAMPLE_DELAY|
-                         NGX_RTMP_FMP4_SAMPLE_KEY;
-    } else {
-        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
-                         NGX_RTMP_FMP4_SAMPLE_DURATION;
-    }
 
     return NGX_OK;
 }
