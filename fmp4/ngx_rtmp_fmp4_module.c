@@ -5,6 +5,12 @@
 #include "ngx_rtmp_fmp4.h"
 
 
+#define NGX_RTMP_FMP4_BUFSIZE           (1024*1024)
+#define NGX_RTMP_FMP4_MAX_MDAT          (10*1024*1024)
+#define NGX_RTMP_FMP4_MAX_SAMPLES       1024
+#define NGX_RTMP_FMP4_DIR_ACCESS        0744
+
+
 static ngx_rtmp_publish_pt              next_publish;
 static ngx_rtmp_close_stream_pt         next_close_stream;
 static ngx_rtmp_stream_begin_pt         next_stream_begin;
@@ -24,6 +30,7 @@ static ngx_int_t ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s);
 static void ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
 
 
 typedef struct {
@@ -238,16 +245,23 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ctx->playlist_bak.len = p - ctx->playlist_bak.data;
     *p = 0;
     //we create init.mp4 file
-    ctx->initMp4.data = ngx_palloc(s->connection->pool, acf->path.len + sizeof("init.mp4") + 1);
+    ctx->initMp4.data = ngx_palloc(s->connection->pool, acf->path.len + ctx->name.len + sizeof("-init.mp4") + 1);    
     p = ngx_cpymem(ctx->initMp4.data, acf->path.data, acf->path.len);
     if (p[-1] != '/') {
         *p++ = '/';
+    }
+    p = ngx_cpymem(ctx->initMp4.data, ctx->name.data, ctx->name.len);
+    if(acf->nested){
+        *p++ = "/";
+    }else{
+        *p++ = "-";
     }
     p = ngx_cpymem(ctx->initMp4.data, "init.mp4", sizeof("init.mp4") - 1);
     ctx->initMp4.len = p - ctx->initMp4.data;
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                       "fmp4: Create: %s", ctx->initMp4.data);
     *p =0;
+    ngx_rtmp_fmp4_ensure_directory(s);
     next:
         return next_publish(s, v);
 }
@@ -359,6 +373,101 @@ static ngx_int_t
 ngx_rtmp_fmp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {
     return next_stream_eof(s, v);
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
+    size_t                     len;
+    ngx_file_info_t            fi;
+    ngx_rtmp_fmp4_ctx_t       *ctx;
+    ngx_rtmp_fmp4_app_conf_t  *acf;
+
+    static u_char              path[NGX_MAX_PATH + 1];
+
+    dacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+
+    *ngx_snprintf(path, sizeof(path) - 1, "%V", &acf->path) = 0;
+
+    if (ngx_file_info(path, &fi) == NGX_FILE_ERROR) {
+
+        if (ngx_errno != NGX_ENOENT) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_file_info_n " failed on '%V'",
+                          &acf->path);
+            return NGX_ERROR;
+        }
+
+        /* ENOENT */
+
+        if (ngx_create_dir(path, NGX_RTMP_FMP4_DIR_ACCESS) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_create_dir_n " failed on '%V'",
+                          &acf->path);
+            return NGX_ERROR;
+        }
+
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                       "fmp4: directory '%V' created", &acf->path);
+
+    } else {
+
+        if (!ngx_is_dir(&fi)) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: '%V' exists and is not a directory",
+                          &acf->path);
+            return  NGX_ERROR;
+        }
+
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                       "fmp4: directory '%V' exists", &acf->path);
+    }
+
+    if (!acf->nested) {
+        return NGX_OK;
+    }
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+
+    len = acf->path.len;
+    if (acf->path.data[len - 1] == '/') {
+        len--;
+    }
+
+    *ngx_snprintf(path, sizeof(path) - 1, "%*s/%V", len, acf->path.data,
+                  &ctx->name) = 0;
+
+    if (ngx_file_info(path, &fi) != NGX_FILE_ERROR) {
+
+        if (ngx_is_dir(&fi)) {
+            ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                           "fmp4: directory '%s' exists", path);
+            return NGX_OK;
+        }
+
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: '%s' exists and is not a directory", path);
+
+        return  NGX_ERROR;
+    }
+
+    if (ngx_errno != NGX_ENOENT) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_file_info_n " failed on '%s'", path);
+        return NGX_ERROR;
+    }
+
+    /* NGX_ENOENT */
+
+    if (ngx_create_dir(path, NGX_RTMP_FMP4_DIR_ACCESS) == NGX_FILE_ERROR) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_create_dir_n " failed on '%s'", path);
+        return NGX_ERROR;
+    }
+
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: directory '%s' created", path);
+
+    return NGX_OK;
 }
 
 /**
