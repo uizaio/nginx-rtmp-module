@@ -558,18 +558,18 @@ ngx_rtmp_fmp4_write_minf(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
 static ngx_int_t
 ngx_rtmp_fmp4_write_mdia(ngx_buf_t *b,int isVideo){
     u_char  *pos;
-    pos = ngx_rtmp_mp4_start_box(b, "mdia");
+    pos = ngx_rtmp_fmp4_start_box(b, "mdia");
     //write mdhd box
     ngx_rtmp_fmp4_write_mdhd(b);
     //write hdlr box
-    ngx_rtmp_fmp4_write_mdhd(b, isVideo);
+    ngx_rtmp_fmp4_write_hdlr(b, isVideo);
     //write minf box
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
 
 static ngx_int_t
-ngx_rtmp_mp4_write_trak(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
+ngx_rtmp_fmp4_write_trak(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "trak");
     ngx_rtmp_fmp4_write_tkhd(s, b, isVideo);
@@ -580,7 +580,7 @@ ngx_rtmp_mp4_write_trak(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
 }
 
 static ngx_int_t
-ngx_rtmp_mp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
+ngx_rtmp_fmp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     u_char  *pos;
 
     ngx_rtmp_codec_ctx_t  *codec_ctx;
@@ -598,7 +598,7 @@ ngx_rtmp_mp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     /* modification time */
     ngx_rtmp_fmp4_field_32(b, 0);
      /* track id */
-    ngx_rtmp_mp4_field_32(b, 1);
+    ngx_rtmp_fmp4_field_32(b, 1);
 
     /* reserved */
     ngx_rtmp_fmp4_field_32(b, 0);
@@ -635,9 +635,9 @@ ngx_rtmp_fmp4_write_moov(ngx_rtmp_session_t *s, ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "moov");
     ngx_rtmp_fmp4_write_mvhd(b);
-    ngx_rtmp_mp4_write_mvex(b);
-    ngx_rtmp_mp4_write_trak(s, b, 1);//video
-    ngx_rtmp_mp4_write_trak(s, b, 2);//audio
+    ngx_rtmp_fmp4_write_mvex(b);
+    ngx_rtmp_fmp4_write_trak(s, b, 1);//video
+    ngx_rtmp_fmp4_write_trak(s, b, 2);//audio
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
@@ -690,19 +690,19 @@ ngx_rtmp_fmp4_write_mvhd(ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "mvhd");
     //box version
-    ngx_rtmp_mfp4_box(b, 0);
+    ngx_rtmp_fmp4_box(b, 0);
     //box flags
-    ngx_rtmp_mfp4_box(b, 0);
+    ngx_rtmp_fmp4_box(b, 0);
     //create time
-    ngx_rtmp_mfp4_box(b, 0);
+    ngx_rtmp_fmp4_box(b, 0);
     //modification time
-    ngx_rtmp_mfp4_box(b, 0);
+    ngx_rtmp_fmp4_box(b, 0);
     //timescale.
     //FIXME: why 1000?
-    ngx_rtmp_mp4_field_32(b, 1000);
+    ngx_rtmp_fmp4_field_32(b, 1000);
     //duration
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_update_box_size(b, pos);
+    ngx_rtmp_fmp4_field_32(b, 0);
+    ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
 
@@ -797,7 +797,7 @@ static ngx_int_t
 ngx_rtmp_fmp4_write_udta(ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_mp4_start_box(b, "udta");
-    ngx_rtmp_fmp4_write_meta(ngx_buf_t *b);
+    ngx_rtmp_fmp4_write_meta(b);
     //write meta box
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
