@@ -736,15 +736,15 @@ ngx_rtmp_fmp4_write_matrix(ngx_buf_t *buf, uint32_t a, uint32_t b, uint32_t c,
  * |tx ty w|
  */
 
-    ngx_rtmp_mp4_field_32(buf, a << 16);  /* 16.16 format */
-    ngx_rtmp_mp4_field_32(buf, b << 16);  /* 16.16 format */
-    ngx_rtmp_mp4_field_32(buf, 0);        /* u in 2.30 format */
-    ngx_rtmp_mp4_field_32(buf, c << 16);  /* 16.16 format */
-    ngx_rtmp_mp4_field_32(buf, d << 16);  /* 16.16 format */
-    ngx_rtmp_mp4_field_32(buf, 0);        /* v in 2.30 format */
-    ngx_rtmp_mp4_field_32(buf, tx << 16); /* 16.16 format */
-    ngx_rtmp_mp4_field_32(buf, ty << 16); /* 16.16 format */
-    ngx_rtmp_mp4_field_32(buf, 1 << 30);  /* w in 2.30 format */
+    ngx_rtmp_fmp4_field_32(buf, a << 16);  /* 16.16 format */
+    ngx_rtmp_fmp4_field_32(buf, b << 16);  /* 16.16 format */
+    ngx_rtmp_fmp4_field_32(buf, 0);        /* u in 2.30 format */
+    ngx_rtmp_fmp4_field_32(buf, c << 16);  /* 16.16 format */
+    ngx_rtmp_fmp4_field_32(buf, d << 16);  /* 16.16 format */
+    ngx_rtmp_fmp4_field_32(buf, 0);        /* v in 2.30 format */
+    ngx_rtmp_fmp4_field_32(buf, tx << 16); /* 16.16 format */
+    ngx_rtmp_fmp4_field_32(buf, ty << 16); /* 16.16 format */
+    ngx_rtmp_fmp4_field_32(buf, 1 << 30);  /* w in 2.30 format */
 
     return NGX_OK;
 }
