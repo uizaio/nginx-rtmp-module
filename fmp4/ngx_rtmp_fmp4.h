@@ -67,7 +67,7 @@ ngx_int_t ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
     ngx_rtmp_fmp4_sample_t *next_samples, ngx_uint_t next_sample_mask, int isVideo);
 ngx_int_t ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, uint32_t track_id);
 ngx_int_t ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time);
-static ngx_int_t ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
+ngx_int_t ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     ngx_rtmp_fmp4_sample_t *samples, ngx_uint_t sample_mask, u_char *moof_pos);
 
 
