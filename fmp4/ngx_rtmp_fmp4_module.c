@@ -349,6 +349,13 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ctx->initMp4.len = p - ctx->initMp4.data;
     *p =0;
     ngx_rtmp_fmp4_ensure_directory(s);
+    if(ctx == NULL){
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: ctx null");
+    }else{
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: ctx not null");
+    }
     next:
         return next_publish(s, v);
 }
