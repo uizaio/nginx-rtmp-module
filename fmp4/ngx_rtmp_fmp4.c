@@ -83,7 +83,7 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
     pos = ngx_rtmp_mp4_start_box(b, "ftyp");
     ngx_rtmp_fmp4_field_32(b, 0);
     //major brand
-    ngx_rtmp_mp4_box(b, "iso5");
+    ngx_rtmp_fmp4_box(b, "iso5");
     ngx_rtmp_fmp4_box(b, "512");
     //compatible brands:
     ngx_rtmp_fmp4_box(b, "iso6");
@@ -130,7 +130,7 @@ ngx_rtmp_fmp4_write_hdlr(ngx_buf_t *b, int isVideo){
     /* pre defined */
     ngx_rtmp_fmp4_field_32(b, 0);
 
-    if (ttype == NGX_RTMP_MP4_VIDEO_TRACK) {
+    if (isVideo == 1) {
         ngx_rtmp_fmp4_box(b, "vide");
     } else {
         ngx_rtmp_fmp4_box(b, "soun");
@@ -179,7 +179,7 @@ ngx_rtmp_fmp4_write_vmhd(ngx_buf_t *b)
 
     /* reserved (graphics mode=copy) */
     ngx_rtmp_fmp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_fmp4_field_32(b, 0);
 
     return NGX_OK;
 }
@@ -190,14 +190,14 @@ ngx_rtmp_fmp4_write_smhd(ngx_buf_t *b)
     /* size is always 16, apparently */
     ngx_rtmp_fmp4_field_32(b, 16);
 
-    ngx_rtmp_mp4_box(b, "smhd");
+    ngx_rtmp_fmp4_box(b, "smhd");
 
     /* version and flags */
-    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_fmp4_field_32(b, 0);
 
     /* reserved (balance normally=0) */
-    ngx_rtmp_mp4_field_16(b, 0);
-    ngx_rtmp_mp4_field_16(b, 0);
+    ngx_rtmp_fmp4_field_16(b, 0);
+    ngx_rtmp_fmp4_field_16(b, 0);
 
     return NGX_OK;
 }
@@ -304,7 +304,7 @@ ngx_rtmp_fmp4_write_avc(ngx_rtmp_session_t *s, ngx_buf_t *b)
 }
 
 static ngx_int_t
-ngx_rtmp_mp4_write_mp4a(ngx_rtmp_session_t *s, ngx_buf_t *b)
+ngx_rtmp_fmp4_write_mp4a(ngx_rtmp_session_t *s, ngx_buf_t *b)
 {
     u_char                *pos;
     ngx_rtmp_codec_ctx_t  *codec_ctx;
@@ -449,7 +449,7 @@ ngx_rtmp_fmp4_write_stsd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo)
     if (isVideo == 1) {
         ngx_rtmp_fmp4_write_avc(s, b);
     } else {
-        ngx_rtmp_fmp4_write_audio(s, b);
+        ngx_rtmp_fmp4_write_mp4a(s, b);
     }
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
@@ -530,7 +530,7 @@ ngx_rtmp_fmp4_write_stbl(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     ngx_rtmp_fmp4_write_stsz(b);
     ngx_rtmp_fmp4_write_stco(b);
 
-    ngx_rtmp_mp4_update_box_size(b, pos);
+    ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
 }
