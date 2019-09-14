@@ -461,6 +461,9 @@ ngx_rtmp_fmp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v)
 static ngx_int_t
 ngx_rtmp_fmp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                   "fmp4: stream eof");
+    ngx_rtmp_fmp4_close_fragments(s);
     return next_stream_eof(s, v);
 }
 
