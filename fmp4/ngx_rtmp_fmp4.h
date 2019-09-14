@@ -36,7 +36,7 @@ static ngx_int_t ngx_rtmp_fmp4_write_stsz(ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_stco(ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_stbl(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo);
 static ngx_int_t ngx_rtmp_fmp4_write_minf(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo);
-static ngx_int_t ngx_rtmp_fmp4_write_mdia(ngx_buf_t *b,int isVideo);
+static ngx_int_t ngx_rtmp_fmp4_write_mdia(ngx_rtmp_session_t *s, ngx_buf_t *b,int isVideo);
 static ngx_int_t ngx_rtmp_fmp4_write_trak(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo);
 static ngx_int_t ngx_rtmp_fmp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo);
 ngx_int_t ngx_rtmp_fmp4_write_moov(ngx_rtmp_session_t *s, ngx_buf_t *b);
