@@ -656,7 +656,6 @@ ngx_rtmp_fmp4_write_mvex(ngx_buf_t *b){
     ngx_rtmp_fmp4_box(b, "trex");
     /* version & flags */
     ngx_rtmp_fmp4_field_32(b, 0);
-    ngx_rtmp_fmp4_field_32(b, 0);
     /* track id */
     ngx_rtmp_fmp4_field_32(b, 1);
     /* default sample description index */
@@ -666,11 +665,11 @@ ngx_rtmp_fmp4_write_mvex(ngx_buf_t *b){
 
     /* default sample size, 1024 for AAC */
     ngx_rtmp_fmp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
 
     ngx_rtmp_fmp4_field_32(b, 0x20);//seperate between box
     ngx_rtmp_fmp4_box(b, "trex");
     /* version & flags */
-    ngx_rtmp_fmp4_field_32(b, 0);
     ngx_rtmp_fmp4_field_32(b, 0);
     /* track id */
     ngx_rtmp_fmp4_field_32(b, 2);
