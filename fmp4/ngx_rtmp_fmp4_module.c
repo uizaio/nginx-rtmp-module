@@ -17,24 +17,6 @@ static ngx_rtmp_stream_begin_pt         next_stream_begin;
 static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 
-static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_fmp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
-static ngx_int_t ngx_rtmp_fmp4_postconfiguration(ngx_conf_t *cf);
-static ngx_int_t ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
-static ngx_int_t ngx_rtmp_fmp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
-static ngx_int_t ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v);
-static ngx_int_t ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v);
-static ngx_int_t ngx_rtmp_fmp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v);
-static ngx_int_t ngx_rtmp_fmp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v);
-static ngx_int_t ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s);
-static void ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
-static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type);
-
-
 typedef struct {
 } ngx_rtmp_fmp4_frag_t;
 
@@ -78,6 +60,23 @@ typedef struct {
     ngx_rtmp_fmp4_track_t               audio;
     ngx_rtmp_fmp4_track_t               video;
 } ngx_rtmp_fmp4_ctx_t;//current context
+
+static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf);
+static char * ngx_rtmp_fmp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
+static ngx_int_t ngx_rtmp_fmp4_postconfiguration(ngx_conf_t *cf);
+static ngx_int_t ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
+static ngx_int_t ngx_rtmp_fmp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
+static ngx_int_t ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v);
+static ngx_int_t ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v);
+static ngx_int_t ngx_rtmp_fmp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v);
+static ngx_int_t ngx_rtmp_fmp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v);
+static ngx_int_t ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s);
+static void ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
+static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
