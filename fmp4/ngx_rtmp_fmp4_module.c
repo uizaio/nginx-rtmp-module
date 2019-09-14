@@ -18,6 +18,8 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 
 typedef struct {
+    uint32_t                            timestamp;
+    uint32_t                            duration;
 } ngx_rtmp_fmp4_frag_t;
 
 typedef struct {
@@ -79,8 +81,8 @@ static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ng
 static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type);
 static ngx_int_t ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s);
 static void ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp);
-static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t);
 static ngx_rtmp_fmp4_frag_t * ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n);
+static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
