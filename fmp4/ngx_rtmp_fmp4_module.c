@@ -250,13 +250,13 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (p[-1] != '/') {
         *p++ = '/';
     }
-    p = ngx_cpymem(ctx->initMp4.data, ctx->name.data, ctx->name.len);
+    p = ngx_cpymem(p, ctx->name.data, ctx->name.len);
     if(acf->nested){
         *p++ = '/';
     }else{
         *p++ = '-';
     }
-    p = ngx_cpymem(ctx->initMp4.data, "init.mp4", sizeof("init.mp4") - 1);
+    p = ngx_cpymem(p, "init.mp4", sizeof("init.mp4") - 1);
     ctx->initMp4.len = p - ctx->initMp4.data;
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                       "fmp4: Create: %s", ctx->initMp4.data);
