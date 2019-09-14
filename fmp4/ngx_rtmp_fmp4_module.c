@@ -640,15 +640,44 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     int32_t                    d;
     ngx_rtmp_fmp4_frag_t      *f;
     ngx_rtmp_fmp4_ctx_t       *ctx;
+    ngx_int_t                  hit;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
 
     d = (int32_t) (timestamp - f->timestamp);   
+    if (d >= 0) {
+        f->duration = timestamp - f->timestamp;
+        hit = (f->duration >= dacf->fraglen);
+    }else{
+        hit = (-d > 1000);
+    }
+    if (ctx->has_video && !hit) {
+        boundary = 0;
+    }
 
-    //close audio and video frag (m4s file)
-    ngx_rtmp_fmp4_close_fragments(s);
-    ngx_rtmp_fmp4_open_fragments(s);
+    if (!ctx->has_video && ctx->has_audio) {
+        boundary = hit;
+    }
+
+    if (ctx->audio.mdat_size >= NGX_RTMP_FMP4_MAX_MDAT) {
+        boundary = 1;
+    }
+
+    if (ctx->video.mdat_size >= NGX_RTMP_FMP4_MAX_MDAT) {
+        boundary = 1;
+    }
+    if (!ctx->opened) {
+        boundary = 1;
+    }
+    if (boundary) {
+        //close audio and video frag (m4s file)
+        ngx_rtmp_fmp4_close_fragments(s);
+        ngx_rtmp_fmp4_open_fragments(s);
+        f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);
+        f->timestamp = timestamp;
+    }
+    
 
 }
 
