@@ -252,9 +252,9 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     }
     p = ngx_cpymem(ctx->initMp4.data, ctx->name.data, ctx->name.len);
     if(acf->nested){
-        *p++ = "/";
+        *p++ = '/';
     }else{
-        *p++ = "-";
+        *p++ = '-';
     }
     p = ngx_cpymem(ctx->initMp4.data, "init.mp4", sizeof("init.mp4") - 1);
     ctx->initMp4.len = p - ctx->initMp4.data;
@@ -384,7 +384,7 @@ ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
 
     static u_char              path[NGX_MAX_PATH + 1];
 
-    dacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
 
     *ngx_snprintf(path, sizeof(path) - 1, "%V", &acf->path) = 0;
 
