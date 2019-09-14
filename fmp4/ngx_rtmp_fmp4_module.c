@@ -364,11 +364,7 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     }    
     // ngx_rtmp_mpegts_close_file(&ctx->file);    
     ngx_rtmp_fmp4_next_frag(s);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: close fragment 1");
     ngx_rtmp_fmp4_write_playlist(s);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: close fragment");
     ctx->opened = 0; //close context
     ctx->id++;
     return NGX_OK;
@@ -398,8 +394,6 @@ ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
     b.pos = b.last = b.start;
     ngx_rtmp_fmp4_write_ftyp(&b);
     ngx_rtmp_fmp4_write_moov(s, &b);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: writing init to file");
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -578,8 +572,6 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 
 static void
 ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp){
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                        "fmp4: update fragments");
     ngx_rtmp_fmp4_close_fragments(s);
     ngx_rtmp_fmp4_open_fragments(s);
 
