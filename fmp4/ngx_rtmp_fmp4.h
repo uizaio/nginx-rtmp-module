@@ -10,7 +10,7 @@
 
 
 ngx_int_t
-ngx_rtmp_mp4_write_ftyp();
+ngx_rtmp_mp4_write_ftyp(ngx_buf_t *b);
 static u_char *
 ngx_rtmp_fmp4_start_box(ngx_buf_t *b, const char box[4]);
 static ngx_int_t 
