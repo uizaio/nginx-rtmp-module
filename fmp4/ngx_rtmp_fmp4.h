@@ -12,7 +12,7 @@
 ngx_int_t
 ngx_rtmp_mp4_write_ftyp();
 static u_char *
-ngx_rtmp_mp4_start_box(ngx_buf_t *b, const char box[4]);
+ngx_rtmp_fmp4_start_box(ngx_buf_t *b, const char box[4]);
 static ngx_int_t 
 ngx_rtmp_fmp4_box(ngx_buf_t *b, const char box[4]);
 static ngx_int_t
@@ -27,7 +27,7 @@ static ngx_int_t ngx_rtmp_fmp4_write_smhd(ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_dref(ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_dinf(ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_avc(ngx_rtmp_session_t *s, ngx_buf_t *b);
-static ngx_int_t ngx_rtmp_mp4_write_mp4a(ngx_rtmp_session_t *s, ngx_buf_t *b);
+static ngx_int_t ngx_rtmp_fmp4_write_mp4a(ngx_rtmp_session_t *s, ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_esds(ngx_rtmp_session_t *s, ngx_buf_t *b);
 static ngx_int_t ngx_rtmp_fmp4_write_stsd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo);
 static ngx_int_t ngx_rtmp_fmp4_write_stsc(ngx_buf_t *b);

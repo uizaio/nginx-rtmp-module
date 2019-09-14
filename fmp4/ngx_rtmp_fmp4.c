@@ -857,22 +857,3 @@ ngx_rtmp_fmp4_put_descr(ngx_buf_t *b, int tag, size_t size){
 
     return NGX_OK;
 }
-
-static ngx_int_t
-ngx_rtmp_fmp4_write_stbl(ngx_rtmp_session_t *s, ngx_buf_t *b,
-    int isVideo)
-{
-    u_char  *pos;
-
-    pos = ngx_rtmp_fmp4_start_box(b, "stbl");
-
-    ngx_rtmp_fmp4_write_stsd(s, b, isVideo);
-    ngx_rtmp_fmp4_write_stts(b);
-    ngx_rtmp_fmp4_write_stsc(b);
-    ngx_rtmp_fmp4_write_stsz(b);
-    ngx_rtmp_fmp4_write_stco(b);
-
-    ngx_rtmp_fmp4_update_box_size(b, pos);
-
-    return NGX_OK;
-}
