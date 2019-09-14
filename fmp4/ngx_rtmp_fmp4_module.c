@@ -356,6 +356,8 @@ ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v){
     if (acf == NULL || !acf->fragmented_mp4 || ctx == NULL) {
         goto next;
     }
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                   "fmp4: close stream");
     ngx_rtmp_fmp4_close_fragments(s);
     next:
         return next_close_stream(s, v);
