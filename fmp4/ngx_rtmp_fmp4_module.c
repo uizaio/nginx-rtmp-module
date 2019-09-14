@@ -67,6 +67,7 @@ static ngx_int_t ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
 static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type);
+static ngx_int_t ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
