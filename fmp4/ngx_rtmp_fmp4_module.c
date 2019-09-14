@@ -646,7 +646,9 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
 
-    d = (int32_t) (timestamp - f->timestamp);   
+    d = (int32_t) (timestamp - f->timestamp);  
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: timestamp %d", d); 
     if (d >= 0) {
         f->duration = timestamp - f->timestamp;
         hit = (f->duration >= acf->fraglen);
