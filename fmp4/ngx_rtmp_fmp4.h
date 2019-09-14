@@ -74,6 +74,7 @@ ngx_int_t ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 ngx_int_t ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, uint32_t earliest_pres_time, uint32_t latest_pres_time,
  ngx_uint_t reference_size, uint32_t reference_id);
  ngx_uint_t ngx_rtmp_fmp4_write_mdat(ngx_buf_t *b, ngx_uint_t size);
+ ngx_int_t ngx_rtmp_fmp4_write_styp(ngx_buf_t *b);
 
 
 #endif /* _NGX_RTMP_FMP4_H_INCLUDED_ */

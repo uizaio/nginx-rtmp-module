@@ -938,6 +938,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     }
     
     if(isVideo == 0){
+        next_nitems = 0;
         if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             next_nitems++;
         }
