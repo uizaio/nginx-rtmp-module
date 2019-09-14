@@ -168,13 +168,6 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
-    if(ctx == NULL){
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: ctx null");
-    }else{
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: ctx not null");
-    }
     if (acf == NULL || !acf->fragmented_mp4 || ctx == NULL || codec_ctx == NULL ||
         codec_ctx->avc_header == NULL || h->mlen < 5){
         return NGX_OK;
@@ -363,9 +356,14 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 static ngx_int_t
 ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_ctx_t         *ctx;
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: close fragment 1");
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    if(ctx == NULL){
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: ctx null");
+    }else{
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: ctx not null");
+    }
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }
