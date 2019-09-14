@@ -20,9 +20,10 @@ static ngx_int_t ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t
 static ngx_int_t ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v);
 static ngx_int_t ngx_rtmp_fmp4_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v);
 static ngx_int_t ngx_rtmp_fmp4_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v);
-static ngx_int_t ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s);
 static void ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s);
 
 
 typedef struct {
@@ -49,6 +50,7 @@ typedef struct {
     ngx_str_t                           playlist_bak;//playlist bak file name
     ngx_str_t                           initMp4;
     ngx_str_t                           stream;//stream path, ex /path/to/1.m4s
+    ngx_uint_t                          id;//id of context
 } ngx_rtmp_fmp4_ctx_t;
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
@@ -236,8 +238,11 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ctx->playlist_bak.len = p - ctx->playlist_bak.data;
     *p = 0;
     //we create init.mp4 file
-    ctx->initMp4.data = ngx_palloc(s->connection->pool, ctx->playlist.len + sizeof("init.mp4"));
-    p = ngx_cpymem(ctx->initMp4.data, ctx->playlist.data, ctx->playlist.len);
+    ctx->initMp4.data = ngx_palloc(s->connection->pool, acf->path.len + sizeof("init.mp4") + 1);
+    p = ngx_cpymem(ctx->initMp4.data, acf->path.data, acf->path.len);
+    if (p[-1] != '/') {
+        *p++ = '/';
+    }
     p = ngx_cpymem(ctx->initMp4.data, "init.mp4", sizeof("init.mp4") - 1);
     ctx->initMp4.len = p - ctx->initMp4.data;
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
@@ -249,37 +254,67 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
 //When user stops streaming
 static ngx_int_t
-ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s){
+ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_ctx_t         *ctx;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }
-    // ngx_rtmp_mpegts_close_file(&ctx->file);
-    ctx->opened = 0; //close context
+    // ngx_rtmp_mpegts_close_file(&ctx->file);    
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                       "fmp4: close fragment");
+    ctx->opened = 0; //close context
+    ctx->id++;
     return NGX_OK;
 }
 
-static void ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
+static ngx_int_t 
+ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_app_conf_t        *acf;
     ngx_rtmp_fmp4_ctx_t             *ctx;
     ngx_fd_t                        fd;
+    static u_char                   buffer[2048];//init.mp4 > 2KB?
+    ngx_buf_t                       b;
+    ngx_int_t                       rc;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
-    
+    if (fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_open_file_n " failed: '%V'",
+                      &ctx->playlist_bak);
+        return NGX_ERROR;
+    }    
+    b.start = buffer;
+    b.end = buffer + sizeof(buffer);
+    b.pos = b.last = b.start;
+    ngx_rtmp_fmp4_write_ftyp(&b);
+    ngx_rtmp_fmp4_write_moov(s, &b);
+    rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
+    if (rc == NGX_ERROR) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "dash: writing video init failed");
+    }
 
+    ngx_close_file(fd);
+    return NGX_OK;
 }
 
 static ngx_int_t
 ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
+    ngx_rtmp_fmp4_ctx_t       *ctx;
+    ngx_rtmp_fmp4_app_conf_t  *acf;
+
+    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    if (ctx->id == 0) {
+        ngx_rtmp_fmp4_write_init(s);
+    }
     return NGX_OK;
 }
 
@@ -309,7 +344,7 @@ ngx_rtmp_fmp4_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v){
     if (acf == NULL || !acf->fragmented_mp4 || ctx == NULL) {
         goto next;
     }
-    ngx_rtmp_fmp4_close_fragment(s);
+    ngx_rtmp_fmp4_close_fragments(s);
     next:
         return next_close_stream(s, v);
 }
