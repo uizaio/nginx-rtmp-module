@@ -418,7 +418,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
-                      "fmp4: write init");
+                      "fmp4: write init %d", ctx->id);
     if (ctx->id == 0) {
         ngx_rtmp_fmp4_write_init(s);
     }
