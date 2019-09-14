@@ -1078,7 +1078,7 @@ ngx_rtmp_dash_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
                           "dash: " ngx_write_fd_n " failed");
             return NGX_ERROR;
         }
-
+        //only the first sample has this info
         smpl = &t->samples[t->sample_count];
 
         smpl->delay = delay;
@@ -1086,7 +1086,7 @@ ngx_rtmp_dash_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         smpl->duration = 0;
         smpl->timestamp = timestamp;
         smpl->key = (key ? 1 : 0);
-
+        //other sample does not have any  thing
         if (t->sample_count > 0) {
             smpl = &t->samples[t->sample_count - 1];
             smpl->duration = timestamp - smpl->timestamp;
