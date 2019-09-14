@@ -163,6 +163,7 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_rtmp_codec_ctx_t      *codec_ctx;
     uint8_t                    ftype, htype;
     u_char                    *p;
+    uint32_t                   delay;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
