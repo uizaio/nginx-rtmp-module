@@ -699,13 +699,13 @@ ngx_rtmp_fmp4_write_mvhd(ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "mvhd");
     //box version
-    ngx_rtmp_fmp4_box(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
     //box flags
-    ngx_rtmp_fmp4_box(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
     //create time
-    ngx_rtmp_fmp4_box(b, 0);
+    ngx_rtmp_fngx_rtmp_mp4_field_32mp4_box(b, 0);
     //modification time
-    ngx_rtmp_fmp4_box(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
     //timescale.
     //FIXME: why 1000?
     ngx_rtmp_fmp4_field_32(b, 1000);
