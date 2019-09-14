@@ -635,9 +635,17 @@ ngx_int_t
 ngx_rtmp_fmp4_write_moov(ngx_rtmp_session_t *s, ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "moov");
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing mvhd");
     ngx_rtmp_fmp4_write_mvhd(b);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing init mvex");
     ngx_rtmp_fmp4_write_mvex(b);
+     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing init trak 1");
     ngx_rtmp_fmp4_write_trak(s, b, 0);//video
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing init trak 2");
     ngx_rtmp_fmp4_write_trak(s, b, 1);//audio
     ngx_rtmp_fmp4_update_box_size(b, pos);
 

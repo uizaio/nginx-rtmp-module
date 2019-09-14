@@ -396,12 +396,10 @@ ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
     b.start = buffer;
     b.end = buffer + sizeof(buffer);
     b.pos = b.last = b.start;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: writing init ftyp");
     ngx_rtmp_fmp4_write_ftyp(&b);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: writing init moov");
     ngx_rtmp_fmp4_write_moov(s, &b);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: writing init to file");
     rc = ngx_write_fd(fd, b.start, (size_t) (b.last - b.start));
     if (rc == NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
