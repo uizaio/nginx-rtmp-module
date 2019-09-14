@@ -831,6 +831,238 @@ ngx_rtmp_fmp4_write_udta(ngx_buf_t *b){
     return NGX_OK;
 }
 
+ngx_int_t ngx_rtmp_fmp4_write_styp(ngx_buf_t *b){
+    u_char                *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "styp");
+
+    ngx_rtmp_fmp4_box(b, "msdh");
+    ngx_rtmp_fmp4_field_32(b, 0);
+    ngx_rtmp_fmp4_box(b, "msdh");
+    ngx_rtmp_fmp4_box(b, "msix");
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+    return NGX_OK;
+}
+
+ngx_int_t ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, uint32_t earliest_pres_time, uint32_t latest_pres_time,
+ ngx_uint_t reference_size, uint32_t reference_id){
+    u_char                *pos;
+    uint32_t   duration;
+
+    duration = latest_pres_time - earliest_pres_time;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "sidx");
+    //box version
+    ngx_rtmp_fmp4_field_32(b, 1);
+    //reference id
+    ngx_rtmp_fmp4_field_32(b, reference_id);
+    //timescale
+    ngx_rtmp_fmp4_field_32(b, 1000);
+    //earliest presentation time
+    ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
+    //first offset (offset to reference moof)
+    ngx_rtmp_fmp4_field_32(b, reference_id == 1? 44 : 0);//44 is size of the second sidx
+    /* reserved */
+    ngx_rtmp_fmp4_field_16(b, 0);
+
+    /* reference count = 1 */
+    ngx_rtmp_fmp4_field_16(b, 1);
+    /* 1st bit is reference type, the rest is reference size */
+    ngx_rtmp_fmp4_field_32(b, reference_size);
+
+    /* subsegment duration */
+    ngx_rtmp_fmp4_field_32(b, duration);
+
+    /* first bit is startsWithSAP (=1), next 3 bits are SAP type (=001) */
+    ngx_rtmp_fmp4_field_8(b, 0x90);
+
+    /* SAP delta time */
+    ngx_rtmp_fmp4_field_24(b, 0);
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+    return NGX_OK;
+}
+
+ngx_int_t
+ngx_rtmp_fmp4_write_mfhd(ngx_buf_t *b, uint32_t index)
+{
+    u_char  *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "mfhd");
+
+    /* don't know what this is */
+    ngx_rtmp_fmp4_field_32(b, 0);
+
+    /* fragment index. */
+    ngx_rtmp_fmp4_field_32(b, index);
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+ngx_int_t
+ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
+    ngx_rtmp_fmp4_sample_t *samples, ngx_uint_t sample_mask, u_char *moof_pos, 
+    uint32_t next_sample_count,
+    ngx_rtmp_fmp4_sample_t *next_samples, ngx_uint_t next_sample_mask, uint32_t isVideo)
+{
+    u_char    *pos;
+    uint32_t   i, offset, nitems, next_nitems, flags;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "trun");
+
+    nitems = 0;
+
+    /* data offset present */
+    flags = 0x01;
+
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+        nitems++;
+        flags |= 0x000100;
+    }
+
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
+        nitems++;
+        flags |= 0x000200;
+    }
+
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+        nitems++;
+        flags |= 0x000400;
+    }
+
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+        nitems++;
+        flags |= 0x000800;
+    }
+    
+    if(isVideo == 0){
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+            next_nitems++;
+        }
+
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
+            next_nitems++;
+        }
+
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+            next_nitems++;
+        }
+
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+            next_nitems++;
+        }
+        //size_of_sample + 48 (next_traf[8] + tfhd[28] + tfdt[20] + trun[20])        
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 (next_sample_count * next_nitems * 4) + 48;
+    }else{
+        // = size_of_sample + 
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8;
+    }
+
+    ngx_rtmp_fmp4_field_32(b, flags);
+    ngx_rtmp_fmp4_field_32(b, sample_count);
+    ngx_rtmp_fmp4_field_32(b, offset);
+
+    for (i = 0; i < sample_count; i++, samples++) {
+
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+            ngx_rtmp_fmp4_field_32(b, samples->duration);
+        }
+
+        if (sample_mask & NGX_RTMP_MP4_SAMPLE_SIZE) {
+            ngx_rtmp_fmp4_field_32(b, samples->size);
+        }
+
+        if (sample_mask & NGX_RTMP_MP4_SAMPLE_KEY) {
+            ngx_rtmp_fmp4_field_32(b, samples->key ? 0x00000000 : 0x00010000);
+        }
+
+        if (sample_mask & NGX_RTMP_MP4_SAMPLE_DELAY) {
+            ngx_rtmp_fmp4_field_32(b, samples->delay);
+        }
+    }
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+ngx_int_t
+ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time)
+{
+    u_char  *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "tfdt");
+
+    /* version == 1 aka 64 bit integer */
+    ngx_rtmp_fmp4_field_32(b, 0x00000000);
+    ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+ngx_int_t
+ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, uint32_t track_id)
+{
+    u_char  *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "tfhd");
+
+    /* version & flags */
+    ngx_rtmp_fmp4_field_32(b, 0x00020000);
+
+    /* track id */
+    ngx_rtmp_fmp4_field_32(b, track_id);
+
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+ngx_int_t
+ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
+    uint32_t sample_count, ngx_rtmp_fmp4_sample_t *samples,
+    ngx_uint_t sample_mask, u_char *moof_pos, uint32_t next_sample_count, 
+    ngx_rtmp_fmp4_sample_t *next_samples, ngx_uint_t next_sample_mask, int isVideo)
+{
+    u_char  *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "traf");
+
+    ngx_rtmp_fmp4_write_tfhd(b, isVideo == 0 ? 1 : 2);
+    ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);
+    ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos, next_sample_count, next_samples, next_sample_mask, isVideo);
+
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
+ngx_int_t
+ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t video_earliest_pres_time,
+    uint32_t video_sample_count, ngx_rtmp_fmp4_sample_t *video_samples,
+    ngx_uint_t video_sample_mask, uint32_t audio_earliest_pres_time, int32_t audio_sample_count, ngx_rtmp_fmp4_sample_t *audio_samples,
+    ngx_uint_t audio_sample_mask, uint32_t index){
+    u_char  *pos;
+
+    pos = ngx_rtmp_fmp4_start_box(b, "moof");
+
+    ngx_rtmp_fmp4_write_mfhd(b, index);
+    //video traf
+    ngx_rtmp_fmp4_write_traf(b, video_earliest_pres_time, video_sample_count, video_samples,
+                            video_sample_mask, pos, audio_sample_count, audio_samples, audio_sample_mask, 0);
+    //audio traf
+    ngx_rtmp_fmp4_write_traf(b, audio_earliest_pres_time, audio_sample_count, audio_samples,
+                            audio_sample_mask, pos, video_sample_count, video_samples, video_sample_mask, 1);
+    ngx_rtmp_fmp4_update_box_size(b, pos);
+
+    return NGX_OK;
+}
+
  ngx_int_t
 ngx_rtmp_fmp4_write_avcc(ngx_rtmp_session_t *s, ngx_buf_t *b){
     u_char                *pos, *p;
@@ -879,6 +1111,16 @@ ngx_rtmp_fmp4_write_avcc(ngx_rtmp_session_t *s, ngx_buf_t *b){
 ngx_rtmp_fmp4_put_descr(ngx_buf_t *b, int tag, size_t size){
     ngx_rtmp_fmp4_field_8(b, (uint8_t) tag);
     ngx_rtmp_fmp4_field_8(b, size & 0x7F);
+
+    return NGX_OK;
+}
+
+ngx_uint_t
+ngx_rtmp_fmp4_write_mdat(ngx_buf_t *b, ngx_uint_t size)
+{
+    ngx_rtmp_fmp4_field_32(b, size);
+
+    ngx_rtmp_fmp4_box(b, "mdat");
 
     return NGX_OK;
 }
