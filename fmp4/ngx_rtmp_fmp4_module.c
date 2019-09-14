@@ -30,7 +30,7 @@ typedef struct {
     char                                type;
     uint32_t                            earliest_pres_time;
     uint32_t                            latest_pres_time;
-    ngx_rtmp_fmp4_sample_t               samples[NGX_RTMP_DASH_MAX_SAMPLES];
+    ngx_rtmp_fmp4_sample_t               samples[NGX_RTMP_FMP4_MAX_SAMPLES];
 } ngx_rtmp_fmp4_track_t;
 
 typedef struct{
@@ -575,7 +575,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay){
     u_char                 *p;
     size_t                  size, bsize;
-    ngx_rtmp_mp4_sample_t  *smpl;
+    ngx_rtmp_fmp4_sample_t  *smpl;
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
     p = buffer;
@@ -677,7 +677,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                    "fmp4: open fragment id=%ui, type='%c'", id, type);
 
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
 
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
 
