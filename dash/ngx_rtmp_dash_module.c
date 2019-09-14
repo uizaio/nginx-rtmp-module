@@ -988,7 +988,7 @@ ngx_rtmp_dash_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary,
 
     dacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_dash_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
-    f = ngx_rtmp_dash_get_frag(s, ctx->nfrags);
+    f = ngx_rtmp_dash_get_frag(s, ctx->nfrags);//get current fragment
 
     d = (int32_t) (timestamp - f->timestamp);
 
