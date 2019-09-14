@@ -21,6 +21,16 @@ typedef struct {
 } ngx_rtmp_fmp4_frag_t;
 
 typedef struct {
+    ngx_uint_t                          id;
+    ngx_uint_t                          opened;
+    ngx_uint_t                          mdat_size;
+    ngx_uint_t                          sample_count;
+    ngx_uint_t                          sample_mask;
+    ngx_fd_t                            fd;
+    char                                type;
+    uint32_t                            earliest_pres_time;
+    uint32_t                            latest_pres_time;
+    ngx_rtmp_fmp4_sample_t               samples[NGX_RTMP_DASH_MAX_SAMPLES];
 } ngx_rtmp_fmp4_track_t;
 
 typedef struct{
@@ -563,7 +573,54 @@ ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
 static ngx_int_t
 ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay){
+    u_char                 *p;
+    size_t                  size, bsize;
+    ngx_rtmp_mp4_sample_t  *smpl;
+
+    static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
+    p = buffer;
+    size = 0;
+
+    for (; in && size < sizeof(buffer); in = in->next) {
+
+        bsize = (size_t) (in->buf->last - in->buf->pos);
+        if (size + bsize > sizeof(buffer)) {
+            bsize = (size_t) (sizeof(buffer) - size);
+        }
+
+        p = ngx_cpymem(p, in->buf->pos, bsize);
+        size += bsize;
+    }    
+
     ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
+    //set earliest presentation time of fragment
+    if (t->sample_count == 0) {
+        t->earliest_pres_time = timestamp;
+    }
+    t->latest_pres_time = timestamp;
+    if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
+        if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_write_fd_n " failed");
+            return NGX_ERROR;
+        }
+
+        smpl = &t->samples[t->sample_count];
+
+        smpl->delay = delay;
+        smpl->size = (uint32_t) size;
+        smpl->duration = 0;
+        smpl->timestamp = timestamp;
+        smpl->key = (key ? 1 : 0);
+
+        if (t->sample_count > 0) {
+            smpl = &t->samples[t->sample_count - 1];
+            smpl->duration = timestamp - smpl->timestamp;
+        }
+
+        t->sample_count++;
+        t->mdat_size += (ngx_uint_t) size;
+    }
     return NGX_OK;
 
 }
@@ -612,7 +669,43 @@ ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s){
 static ngx_int_t
 ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     ngx_uint_t id, char type){
+    ngx_rtmp_fmp4_ctx_t   *ctx;
 
+    if (t->opened) {
+        return NGX_OK;
+    }
+    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                   "fmp4: open fragment id=%ui, type='%c'", id, type);
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
+
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
+
+    t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
+                          NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    if (t->fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: error creating fragment file");
+        return NGX_ERROR;
+    }
+
+    t->id = id;
+    t->type = type;
+    t->sample_count = 0;
+    t->earliest_pres_time = 0;
+    t->latest_pres_time = 0;
+    t->mdat_size = 0;
+    t->opened = 1;
+
+    if (type == 'v') {
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION|
+                         NGX_RTMP_FMP4_SAMPLE_DELAY|
+                         NGX_RTMP_FMP4_SAMPLE_KEY;
+    } else {
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION;
+    }
     return NGX_OK;
 }
 
