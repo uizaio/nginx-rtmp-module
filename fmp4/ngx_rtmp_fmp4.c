@@ -636,8 +636,6 @@ ngx_rtmp_fmp4_write_moov(ngx_rtmp_session_t *s, ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "moov");
     ngx_rtmp_fmp4_write_mvhd(b);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: writing init mvex");
     ngx_rtmp_fmp4_write_mvex(b);
      ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: writing init trak 1");
@@ -695,20 +693,24 @@ ngx_rtmp_fmp4_write_mvex(ngx_buf_t *b){
  ngx_int_t
 ngx_rtmp_fmp4_write_mvhd(ngx_buf_t *b){
     u_char  *pos;
+
     pos = ngx_rtmp_fmp4_start_box(b, "mvhd");
-    //box version
+
+    /* version */
     ngx_rtmp_fmp4_field_32(b, 0);
-    //box flags
+
+    /* creation time */
     ngx_rtmp_fmp4_field_32(b, 0);
-    //create time
+
+    /* modification time */
     ngx_rtmp_fmp4_field_32(b, 0);
-    //modification time
-    ngx_rtmp_fmp4_field_32(b, 0);
-    //timescale.
-    //FIXME: why 1000?
+
+    /* timescale */
     ngx_rtmp_fmp4_field_32(b, 1000);
-    //duration
+
+    /* duration */
     ngx_rtmp_fmp4_field_32(b, 0);
+
     /* reserved */
     ngx_rtmp_fmp4_field_32(b, 0x00010000);
     ngx_rtmp_fmp4_field_16(b, 0x0100);
@@ -728,6 +730,7 @@ ngx_rtmp_fmp4_write_mvhd(ngx_buf_t *b){
 
     /* next track id */
     ngx_rtmp_fmp4_field_32(b, 1);
+
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
