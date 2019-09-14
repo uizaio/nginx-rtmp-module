@@ -572,7 +572,7 @@ ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
 static ngx_int_t
 ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay){
-
+    ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
     return NGX_OK;
 
 }
@@ -582,6 +582,8 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
                         "fmp4: update fragments");
     ngx_rtmp_fmp4_close_fragments(s);
+    ngx_rtmp_fmp4_open_fragments(s);
+
 }
 
 static ngx_rtmp_fmp4_frag_t *
