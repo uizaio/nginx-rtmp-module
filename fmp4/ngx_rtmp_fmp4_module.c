@@ -80,6 +80,7 @@ static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp
 static ngx_int_t ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s);
 static void ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp);
 static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t);
+static ngx_rtmp_fmp4_frag_t * ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
@@ -634,8 +635,12 @@ static void
 ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp){
     int32_t                    d;
     ngx_rtmp_fmp4_frag_t      *f;
+    ngx_rtmp_fmp4_ctx_t       *ctx;
 
-    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
+
+    d = (int32_t) (timestamp - f->timestamp);   
 
     ngx_rtmp_fmp4_close_fragments(s);
     ngx_rtmp_fmp4_open_fragments(s);
@@ -722,7 +727,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
 
 //close temp file and prepare for new data
 static void
-ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t){
+ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t){
     done:
         //close temp file
         ngx_close_file(t->fd);
