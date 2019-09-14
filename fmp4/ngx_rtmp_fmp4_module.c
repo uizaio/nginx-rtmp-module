@@ -224,7 +224,7 @@ ngx_rtmp_fmp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
 
-    if (acf == NULL || !acf->dash || ctx == NULL ||
+    if (acf == NULL || !acf->fragmented_mp4 || ctx == NULL ||
         codec_ctx == NULL || h->mlen < 2){
         return NGX_OK;
     }
