@@ -357,8 +357,11 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 static ngx_int_t
 ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_ctx_t         *ctx;
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: close fragment 1");
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, ngx_errno,
+                      "fmp4: close fragment 2");
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }
