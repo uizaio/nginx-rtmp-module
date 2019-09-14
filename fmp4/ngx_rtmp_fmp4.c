@@ -556,7 +556,7 @@ ngx_rtmp_fmp4_write_minf(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
 }
 
 static ngx_int_t
-ngx_rtmp_fmp4_write_mdia(ngx_buf_t *b,int isVideo){
+ngx_rtmp_fmp4_write_mdia(ngx_rtmp_session_t *s, ngx_buf_t *b,int isVideo){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "mdia");
     //write mdhd box
@@ -564,7 +564,7 @@ ngx_rtmp_fmp4_write_mdia(ngx_buf_t *b,int isVideo){
     //write hdlr box
     ngx_rtmp_fmp4_write_hdlr(b, isVideo);
     //write minf box
-    ngx_rtmp_fmp4_write_minf(b, isVideo);
+    ngx_rtmp_fmp4_write_minf(s, b, isVideo);
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
@@ -575,7 +575,7 @@ ngx_rtmp_fmp4_write_trak(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     pos = ngx_rtmp_fmp4_start_box(b, "trak");
     ngx_rtmp_fmp4_write_tkhd(s, b, isVideo);
     //write edts
-    ngx_rtmp_fmp4_write_mdia(b, isVideo);
+    ngx_rtmp_fmp4_write_mdia(s, b, isVideo);
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
@@ -798,7 +798,7 @@ ngx_rtmp_fmp4_write_meta(ngx_buf_t *b){
 static ngx_int_t
 ngx_rtmp_fmp4_write_udta(ngx_buf_t *b){
     u_char  *pos;
-    pos = ngx_rtmp_mp4_start_box(b, "udta");
+    pos = ngx_rtmp_fmp4_start_box(b, "udta");
     ngx_rtmp_fmp4_write_meta(b);
     //write meta box
 
