@@ -378,7 +378,9 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     }    
     //close temp file
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
-    ngx_rtmp_fmp4_close_fragment(s, &ctx->audio);   
+    ngx_rtmp_fmp4_close_fragment(s, &ctx->audio); 
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: create new m4s file");
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
     ctx->opened = 0; //close context
@@ -644,6 +646,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
 
     d = (int32_t) (timestamp - f->timestamp);   
 
+    //close audio and video frag (m4s file)
     ngx_rtmp_fmp4_close_fragments(s);
     ngx_rtmp_fmp4_open_fragments(s);
 
@@ -657,7 +660,7 @@ ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n){
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     int test = (ctx->frag + n) % (acf->winfrags * 2 + 1);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: get frag: %d", test);
     return &ctx->frags[(ctx->frag + n) % (acf->winfrags * 2 + 1)];
 }
