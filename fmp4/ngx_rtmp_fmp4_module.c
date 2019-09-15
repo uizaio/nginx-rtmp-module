@@ -582,12 +582,10 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         f = ngx_rtmp_fmp4_get_frag(s, i);
         p = buffer;
         end = p + sizeof(buffer);
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                   "fmp4: write fragment -> playlist id=%.3f", f->duration);
         p = ngx_slprintf(p, end,
-                         "#EXTINF:%ui,\n"
+                         "#EXTINF:%.3f,\n"
                          "%ui.m4s\n",
-                         1, 2);        
+                         f->duration, f->id);        
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -821,7 +819,8 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "fmp4: %d - %d", timestamp, f->timestamp);
     d = (int32_t) (timestamp - f->timestamp);
     if (d >= 0) {
         f->duration = timestamp - f->timestamp;
