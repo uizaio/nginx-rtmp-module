@@ -817,7 +817,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 }
 
 static void
-ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp, ngx_rtmp_fmp4_track_t *t){
+ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp){
     int32_t                    d;
     ngx_rtmp_fmp4_frag_t      *f;
     ngx_rtmp_fmp4_ctx_t       *ctx;
