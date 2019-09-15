@@ -497,14 +497,14 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
 static ngx_int_t 
 ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
-    ngx_rtmp_fmp4_app_conf_t        *acf;
+    // ngx_rtmp_fmp4_app_conf_t        *acf;
     ngx_rtmp_fmp4_ctx_t             *ctx;
     ngx_fd_t                        fd;
     static u_char                   buffer[2048];//init.mp4 > 2KB?
     ngx_buf_t                       b;
     ngx_int_t                       rc;
 
-    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    // acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     fd = ngx_open_file(ctx->initMp4.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
@@ -861,7 +861,7 @@ ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    int test = (ctx->frag + n) % (acf->winfrags * 2 + 1);
+    // int test = (ctx->frag + n) % (acf->winfrags * 2 + 1);
     // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
     //                       "fmp4: get frag: %d", test);
     return &ctx->frags[(ctx->frag + n) % (acf->winfrags * 2 + 1)];
