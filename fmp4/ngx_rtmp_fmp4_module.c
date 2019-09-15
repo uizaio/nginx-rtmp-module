@@ -371,6 +371,7 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: playlist: '%s'", ctx->playlist.data);
     next:
+        ctx->id = 0;//init id = 0
         return next_publish(s, v);
 }
 
@@ -410,7 +411,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);
-    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", f->id) = 0;
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: create file %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
@@ -895,6 +896,7 @@ static ngx_int_t
 ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     ngx_uint_t id, char type){
     ngx_rtmp_fmp4_ctx_t   *ctx;
+    ngx_rtmp_fmp4_frag_t      *f;
 
     if (t->opened) {
         return NGX_OK;
@@ -921,7 +923,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->latest_pres_time = 0;
     t->mdat_size = 0;
     t->opened = 1;
-    f->id = id;
+    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);    
 
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
