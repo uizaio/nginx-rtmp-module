@@ -556,7 +556,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     }
     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "fmp4: %d", acf->fraglen);
-    max_frag = acf->fraglen * 1000;
+    max_frag = acf->fraglen;
 
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fmp4_get_frag(s, i);
