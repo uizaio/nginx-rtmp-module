@@ -433,7 +433,8 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     //we write box for data video
     mdat_size = vt->mdat_size + at->mdat_size;
     ngx_rtmp_fmp4_write_sidx(&b, vt->earliest_pres_time, vt->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 1);
-    ngx_rtmp_fmp4_write_sidx(&b, at->earliest_pres_time, at->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 1);
+    ngx_rtmp_fmp4_write_sidx(&b, at->earliest_pres_time, at->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 2);
+    b.last = pos1;
     ngx_rtmp_fmp4_write_mdat(&b, mdat_size + 8);
     if (ngx_write_fd(fd, b.pos, (size_t) (b.last - b.pos)) == NGX_ERROR) {
         goto done;
