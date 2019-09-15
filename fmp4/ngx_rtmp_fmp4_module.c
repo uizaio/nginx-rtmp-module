@@ -559,11 +559,11 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fmp4_get_frag(s, i);
         if (f->duration > max_frag) {
-            max_frag = (ngx_uint_t) (f->duration + .5)/1000;
+            max_frag = (ngx_uint_t) (f->duration + .5);
         }
     }
     p = buffer;
-    end = p + sizeof(buffer);    
+    end = p + sizeof(buffer);        
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
                      "#EXT-X-VERSION:7\n"
