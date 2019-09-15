@@ -440,6 +440,13 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     }
     vleft = (size_t) vt->mdat_size;
     aleft = (size_t) at->mdat_size;
+    if(vt->fd == NGX_INVALID_FILE){
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: no video data file");
+    }else{
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4: video data file is ok");
+    }
     #if (NGX_WIN32)
     if (SetFilePointer(vt->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER || 
     SetFilePointer(at->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
