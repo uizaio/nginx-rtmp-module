@@ -4,6 +4,9 @@
 #include <ngx_rtmp_codec_module.h>
 
 
+/**
+ * Create 4-byte number field
+ * */
  ngx_int_t
 ngx_rtmp_fmp4_field_32(ngx_buf_t *b, uint32_t n)
 {
@@ -23,7 +26,7 @@ ngx_rtmp_fmp4_field_32(ngx_buf_t *b, uint32_t n)
     return NGX_OK;
 }
 
-
+//create 3-byte number field
  ngx_int_t
 ngx_rtmp_fmp4_field_24(ngx_buf_t *b, uint32_t n)
 {
@@ -82,13 +85,16 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "ftyp");
     //major brand
-    ngx_rtmp_fmp4_box(b, "iso5");
+    ngx_rtmp_fmp4_box(b, "isom");
 
     //minor version
     ngx_rtmp_fmp4_field_32(b, 512);
     //compatible brands:
-    ngx_rtmp_fmp4_box(b, "iso6");
+    ngx_rtmp_fmp4_box(b, "isom");
+    ngx_rtmp_fmp4_box(b, "iso2");
+    ngx_rtmp_fmp4_box(b, "avc1");
     ngx_rtmp_fmp4_box(b, "mp41");
+    ngx_rtmp_fmp4_box(b, "ios5");
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
@@ -774,7 +780,7 @@ ngx_rtmp_fmp4_write_matrix(ngx_buf_t *buf, uint32_t a, uint32_t b, uint32_t c,
 }
 
 /**
- * Create a 4-byte field
+ * Create a 4-byte text field
  * */
  ngx_int_t
 ngx_rtmp_fmp4_box(ngx_buf_t *b, const char box[4]){
