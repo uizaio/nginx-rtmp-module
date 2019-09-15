@@ -83,7 +83,7 @@ static ngx_int_t ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay);
 static ngx_int_t ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t, ngx_uint_t id, char type, uint32_t timestamp);
 static ngx_int_t ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s, uint32_t timestamp);
-static void ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp, ngx_rtmp_fmp4_update_fragments);
+static void ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32_t timestamp);
 static ngx_rtmp_fmp4_frag_t * ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n);
 static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t);
 static void ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx_rtmp_fmp4_track_t *at);
@@ -798,7 +798,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 
         smpl->delay = delay;
         smpl->size = (uint32_t) size;
-        smpl->duration = t->codec.duration;
+        smpl->duration = t->codec->duration;
         smpl->timestamp = timestamp;
         smpl->key = (key ? 1 : 0);
         //if this is not first sample, we can caculate its duration
