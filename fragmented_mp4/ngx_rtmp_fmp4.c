@@ -1080,23 +1080,6 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         flags |= 0x000800;
     }
     //////
-    if(pre_size == 0){
-        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
-            next_nitems++;
-        }
-
-        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
-            next_nitems++;
-        }
-
-        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
-            next_nitems++;
-        }
-
-        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
-            next_nitems++;        
-        }
-    }
     
 
     // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-sstr/6d796f37-b4f0-475f-becd-13f1c86c2d1f
@@ -1109,18 +1092,32 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     //8byte ('mdat')
     if(pre_size == 0){
         //for video track
-        offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 88;
+        next_nitems = 0;
+        if(pre_size == 0){
+            if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+                next_nitems++;
+            }
+
+            if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
+                next_nitems++;
+            }
+
+            if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+                next_nitems++;
+            }
+
+            if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+                next_nitems++;        
+            }
+        }
+        offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 76;
     }else{
         //for audio track
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + pre_size;
     }     
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
-    ngx_rtmp_fmp4_field_32(b, offset);    
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "sample count: %d", sample_count);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "=======================");
+    ngx_rtmp_fmp4_field_32(b, offset);
     for (i = 0; i < sample_count; i++, samples++) {        
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             ngx_rtmp_fmp4_field_32(b, samples->duration);
