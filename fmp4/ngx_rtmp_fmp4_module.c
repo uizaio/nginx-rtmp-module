@@ -554,14 +554,15 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
                       &ctx->playlist_bak);
         return NGX_ERROR;
     }
-    max_frag = acf->fraglen / 1000;
+    max_frag = acf->fraglen * 1000;
 
     for (i = 0; i < ctx->nfrags; i++) {
         f = ngx_rtmp_fmp4_get_frag(s, i);
         if (f->duration > max_frag) {
             max_frag = (ngx_uint_t) (f->duration + .5);
         }
-    }
+    }    
+    max_frag = max_frag / 1000;
     p = buffer;
     end = p + sizeof(buffer);        
     p = ngx_slprintf(p, end,
