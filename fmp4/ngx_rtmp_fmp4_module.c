@@ -803,8 +803,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             smpl = &t->samples[t->sample_count - 1];
             smpl->duration = timestamp - smpl->timestamp;
         }
-        // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-        //                   "fmp4: sample-%d: %d duration: %d", key, t->sample_count, smpl->duration);
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "fmp4: sample-%d: %d duration: %d", key, t->sample_count, smpl->duration);
 
         t->sample_count++;
         t->mdat_size += (ngx_uint_t) size;
