@@ -539,6 +539,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     static u_char                   buffer[1024];
     ngx_rtmp_fmp4_frag_t            *f;
     ssize_t                         n;
+    double                          duration;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -582,12 +583,11 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         f = ngx_rtmp_fmp4_get_frag(s, i);
         p = buffer;
         end = p + sizeof(buffer);
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: duration: %d", f->duration);
+        duration = f->duration / 1000;
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%ui.m4s\n",
-                         f->duration, f->id);        
+                         duration, f->id);        
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
