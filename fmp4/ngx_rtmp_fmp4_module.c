@@ -533,6 +533,9 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     ngx_fd_t                        fd;
     ngx_uint_t                      i, max_frag;
     u_char                         *p, *end;
+    static u_char                   buffer[1024];
+    ngx_rtmp_fmp4_frag_t            *f;
+    ssize_t                         n;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
