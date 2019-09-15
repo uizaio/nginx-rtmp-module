@@ -408,10 +408,8 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     size_t                          vleft, aleft;
     ssize_t                         n;
     u_char                          *pos, *pos1;
-    ngx_rtmp_fmp4_frag_t            *f;
 
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);    
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: create file %s", ctx->stream.data);
