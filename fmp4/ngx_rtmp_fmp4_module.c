@@ -393,8 +393,7 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
 }
 
 static void
-ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx_rtmp_fmp4_track_t *at){
-    ngx_rtmp_fmp4_app_conf_t        *acf;
+ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx_rtmp_fmp4_track_t *at){    
     ngx_rtmp_fmp4_ctx_t             *ctx;
     ngx_fd_t                        fd;
     ngx_buf_t                       b;
@@ -403,11 +402,12 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     size_t                          vleft, aleft;
     ssize_t                         n;
     u_char                          *pos, *pos1;
+    ngx_rtmp_fmp4_frag_t            *f;
 
-    acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s") = 0;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    f = ngx_rtmp_dash_get_frag(s, ctx->nfrags);
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", f->timestamp) = 0;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: create file %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
@@ -440,13 +440,6 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     }
     vleft = (size_t) vt->mdat_size;
     aleft = (size_t) at->mdat_size;
-    if(vt->fd == NGX_INVALID_FILE){
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: no video data file");
-    }else{
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: video data file is ok");
-    }
     #if (NGX_WIN32)
     if (SetFilePointer(vt->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER || 
     SetFilePointer(at->fd, 0, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
