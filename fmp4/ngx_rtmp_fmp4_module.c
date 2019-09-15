@@ -546,7 +546,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     }
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4 3: open %s to create",
-                      ctx->playlist_bak.data);
+                      ctx->playlist.data);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
