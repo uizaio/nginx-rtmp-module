@@ -105,9 +105,28 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
 ngx_rtmp_fmp4_write_mdhd(ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "mdhd");
+    // /* version */
+    // ngx_rtmp_fmp4_field_32(b, 0);
+    // /*box flags*/
+    // ngx_rtmp_fmp4_field_32(b, 0);
+
+    // /* creation time */
+    // ngx_rtmp_fmp4_field_32(b, 0);
+
+    // /* modification time */
+    // ngx_rtmp_fmp4_field_32(b, 0);
+
+    // /* time scale*/
+    // ngx_rtmp_fmp4_field_32(b, 1000);
+
+    // /* duration */
+    // ngx_rtmp_fmp4_field_32(b, 0);
+    // /* lanuguage */
+    // ngx_rtmp_fmp4_field_16(b, 0x15C7);
+
+    // /* reserved */
+    // ngx_rtmp_fmp4_field_16(b, 0);
     /* version */
-    ngx_rtmp_fmp4_field_32(b, 0);
-    /*box flags*/
     ngx_rtmp_fmp4_field_32(b, 0);
 
     /* creation time */
@@ -121,6 +140,7 @@ ngx_rtmp_fmp4_write_mdhd(ngx_buf_t *b){
 
     /* duration */
     ngx_rtmp_fmp4_field_32(b, 0);
+
     /* lanuguage */
     ngx_rtmp_fmp4_field_16(b, 0x15C7);
 
