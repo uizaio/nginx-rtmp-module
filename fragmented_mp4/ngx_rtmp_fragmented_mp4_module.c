@@ -632,7 +632,7 @@ ngx_rtmp_fragmented_mp4_track_t *at)
     b.pos = b.last = b.start;
     ngx_rtmp_fmp4_write_styp(&b);
     pos = b.last;
-    b.last += 88; /* leave room for sidx */    
+    b.last += 88; /* leave room for 2 sidx */    
     /** create moof box */
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, vt->id,

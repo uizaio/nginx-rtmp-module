@@ -1206,8 +1206,8 @@ ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, ngx_uint_t reference_size,
     /* earliest presentation time */
     ngx_rtmp_fmp4_field_32(b, earliest_pres_time);
 
-    /* first offset */
-    ngx_rtmp_fmp4_field_32(b, duration); /*TODO*/
+    // first offset (offset to reference moof)
+    ngx_rtmp_fmp4_field_32(b, track_id = 1 ? 44 : 0); /*TODO*/
 
     /* reserved */
     ngx_rtmp_fmp4_field_16(b, 0);
