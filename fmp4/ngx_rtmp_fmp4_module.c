@@ -20,6 +20,7 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 typedef struct {
     uint32_t                            timestamp;//time that m4s is created
     uint32_t                            duration;//duration of a m4s
+    uint32_t                            id;
 } ngx_rtmp_fmp4_frag_t;
 
 typedef struct {
@@ -409,7 +410,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);
-    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", f->timestamp) = 0;
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", f->id) = 0;
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: create file %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
@@ -544,9 +545,6 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     if (ctx->id == 0) {
         ngx_rtmp_fmp4_write_init(s);
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4 3: open %s to create",
-                      ctx->playlist.data);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
@@ -587,7 +585,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%uL.ts\n",
-                         f->duration, f->timestamp);
+                         f->duration, f->id);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -923,6 +921,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->latest_pres_time = 0;
     t->mdat_size = 0;
     t->opened = 1;
+    f->id = id;
 
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
