@@ -34,7 +34,7 @@ typedef struct {
     uint32_t                            earliest_pres_time;
     uint32_t                            latest_pres_time;
     ngx_rtmp_fmp4_sample_t               samples[NGX_RTMP_FMP4_MAX_SAMPLES];
-    ngx_rtmp_codec_ctx_t                codec;//track codec
+    ngx_rtmp_codec_ctx_t                *codec;//track codec
 } ngx_rtmp_fmp4_track_t;
 
 typedef struct{
