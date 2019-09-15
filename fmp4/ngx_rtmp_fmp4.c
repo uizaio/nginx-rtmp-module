@@ -927,43 +927,43 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     /* data offset present */
     flags = 0x01;
 
-    // if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
-    //     nitems++;
-    //     flags |= 0x000100;
-    // }
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+        nitems++;
+        flags |= 0x000100;
+    }
 
     if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
         nitems++;
         flags |= 0x000200;
     }
 
-    // if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
-    //     nitems++;
-    //     flags |= 0x000400;
-    // }
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+        nitems++;
+        flags |= 0x000400;
+    }
 
-    // if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
-    //     nitems++;
-    //     flags |= 0x000800;
-    // }
+    if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+        nitems++;
+        flags |= 0x000800;
+    }
     
     if(isVideo == 0){
         next_nitems = 0;
-        // if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
-        //     next_nitems++;
-        // }
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
+            next_nitems++;
+        }
 
         if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
             next_nitems++;
         }
 
-        // if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
-        //     next_nitems++;
-        // }
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+            next_nitems++;
+        }
 
-        // if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
-        //     next_nitems++;
-        // }
+        if (next_sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+            next_nitems++;
+        }
         //size_of_sample + 48 (next_traf[8] + tfhd[28] + tfdt[20] + trun[20])        
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + (next_sample_count * next_nitems * 4) + 48;
     }else{
@@ -978,21 +978,21 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     for (i = 0; i < sample_count; i++, samples++) {
 
 
-        // if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION && isVideo != 1) {
-        //     ngx_rtmp_fmp4_field_32(b, samples->duration);
-        // }
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION && isVideo != 1) {
+            ngx_rtmp_fmp4_field_32(b, samples->duration);
+        }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
             ngx_rtmp_fmp4_field_32(b, samples->size);
         }
 
-        // if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
-        //     ngx_rtmp_fmp4_field_32(b, samples->key ? 0x00000000 : 0x00010000);
-        // }
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
+            ngx_rtmp_fmp4_field_32(b, samples->key ? 0x00000000 : 0x00010000);
+        }
 
-        // if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
-        //     ngx_rtmp_fmp4_field_32(b, samples->delay);
-        // }
+        if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
+            ngx_rtmp_fmp4_field_32(b, samples->delay);
+        }
     }
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
