@@ -125,7 +125,7 @@ ngx_rtmp_fmp4_write_mdhd(ngx_buf_t *b){
     ngx_rtmp_fmp4_field_16(b, 0x15C7);
 
     /* reserved */
-    ngx_rtmpfmp4_field_16(b, 0);
+    ngx_rtmp_fmp4_field_16(b, 0);
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
