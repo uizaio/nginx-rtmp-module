@@ -769,7 +769,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     p = buffer;
     size = 0;
     ngx_rtmp_fmp4_frag_t      *f;
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: duration %d", t->codec->duration);
     for (; in && size < sizeof(buffer); in = in->next) {
 
         bsize = (size_t) (in->buf->last - in->buf->pos);
