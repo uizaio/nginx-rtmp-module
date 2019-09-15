@@ -586,7 +586,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         end = p + sizeof(buffer);
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
-                         "%uL.ts\n",
+                         "%uL.m4s\n",
                          f->duration, f->id);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
@@ -925,7 +925,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->mdat_size = 0;
     t->opened = 1;
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);    
-
+    f->id = id;
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION|
