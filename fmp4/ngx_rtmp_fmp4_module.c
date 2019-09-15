@@ -900,7 +900,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     if (t->opened) {
         return NGX_OK;
     }
-    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                    "fmp4: open fragment id=%ui, type='%c'", id, type);
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
