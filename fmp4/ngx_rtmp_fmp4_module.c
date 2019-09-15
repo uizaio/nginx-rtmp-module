@@ -582,7 +582,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%uL.ts\n",
-                         f->duration, f->id);
+                         f->duration, f->timestamp);
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
