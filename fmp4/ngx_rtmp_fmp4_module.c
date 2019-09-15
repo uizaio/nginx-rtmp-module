@@ -292,10 +292,12 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     if (ctx == NULL) {
         ctx = ngx_pcalloc(s->connection->pool, sizeof(ngx_rtmp_fmp4_ctx_t));
+        ctx->id = 0;//init id = 0
         ngx_rtmp_set_ctx(s, ctx, ngx_rtmp_fmp4_module);
     }else{
         f = ctx->frags;
         ngx_memzero(ctx, sizeof(ngx_rtmp_fmp4_ctx_t));//clear ctx by filling it by zero value
+        ctx->id = 0;//init id = 0
         ctx->frags = f;
 
     }
@@ -370,8 +372,7 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_rtmp_fmp4_ensure_directory(s);
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: playlist: '%s'", ctx->playlist.data);
-    next:
-        ctx->id = 0;//init id = 0
+    next:        
         return next_publish(s, v);
 }
 
