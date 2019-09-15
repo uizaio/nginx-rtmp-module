@@ -778,7 +778,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         size += bsize;
     }    
 
-    ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
+    // ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
     //set earliest presentation time of fragment
     if (t->sample_count == 0) {
         t->earliest_pres_time = timestamp;
@@ -809,6 +809,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         t->sample_count++;
         t->mdat_size += (ngx_uint_t) size;
     }
+    ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
     return NGX_OK;
 
 }
@@ -944,13 +945,14 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
 
 //close temp file and prepare for new data
 static void
-ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t){
-    done:
-        //close temp file
-        ngx_close_file(t->fd);
+ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t){ 
+    //we need to calculate duration of the latest sample
 
-        t->fd = NGX_INVALID_FILE;
-        t->opened = 0;
+    //close temp file
+    ngx_close_file(t->fd);
+
+    t->fd = NGX_INVALID_FILE;
+    t->opened = 0;
 }
 
 static ngx_int_t
