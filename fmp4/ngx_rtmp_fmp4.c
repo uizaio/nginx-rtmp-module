@@ -88,7 +88,7 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
     ngx_rtmp_fmp4_box(b, "isom");
 
     //minor version
-    ngx_rtmp_fmp4_field_32(b, 512);
+    ngx_rtmp_fmp4_field_32(b, 1);
     //compatible brands:
     ngx_rtmp_fmp4_box(b, "isom");
     ngx_rtmp_fmp4_box(b, "iso2");
@@ -121,6 +121,11 @@ ngx_rtmp_fmp4_write_mdhd(ngx_buf_t *b){
 
     /* duration */
     ngx_rtmp_fmp4_field_32(b, 0);
+    /* lanuguage */
+    ngx_rtmp_mp4_field_16(b, 0x15C7);
+
+    /* reserved */
+    ngx_rtmp_mp4_field_16(b, 0);
     ngx_rtmp_fmp4_update_box_size(b, pos);
     return NGX_OK;
 }
