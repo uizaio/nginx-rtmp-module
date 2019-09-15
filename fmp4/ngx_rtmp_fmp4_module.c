@@ -382,9 +382,6 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
         return NGX_OK;
     }    
     ngx_rtmp_fmp4_write_data(s, &ctx->video, &ctx->audio);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log,
-                      "fmp4 2: open %s to create %d",
-                      ctx->playlist_bak.data, ctx->playlist.len);
     //close temp file
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
     ngx_rtmp_fmp4_close_fragment(s, &ctx->audio); 
@@ -547,9 +544,9 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     if (ctx->id == 0) {
         ngx_rtmp_fmp4_write_init(s);
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log,
-                      "fmp4 3: open %s to create %d",
-                      ctx->playlist_bak.data, ctx->playlist.len);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "fmp4 3: open %s to create",
+                      ctx->playlist_bak.data);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
@@ -850,9 +847,6 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     }
     if (boundary) {
         //close audio and video frag (m4s file)
-        ngx_log_error(NGX_LOG_ERR, s->connection->log,
-                      "fmp41: open %s to create %d",
-                      ctx->playlist_bak.data, ctx->playlist.len);
         ngx_rtmp_fmp4_close_fragments(s);
         ngx_rtmp_fmp4_open_fragments(s);
         f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);
