@@ -108,7 +108,7 @@ ngx_rtmp_fmp4_write_mdhd(ngx_buf_t *b){
     // /* version */
     ngx_rtmp_fmp4_field_32(b, 0);
     // /*box flags*/
-    // ngx_rtmp_fmp4_field_32(b, 0);
+    ngx_rtmp_fmp4_field_32(b, 0);
 
     // /* creation time */
     ngx_rtmp_fmp4_field_32(b, 0);
