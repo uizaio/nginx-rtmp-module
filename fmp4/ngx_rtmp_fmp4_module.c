@@ -585,7 +585,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                    "fmp4: write fragment -> playlist id=%ui", f->id);
         p = ngx_slprintf(p, end,
-                         "#EXTINF:%.3f,\n"
+                         "#EXTINFFFFF:%.3f,\n"
                          "%ui.m4s\n",
                          f->duration, f->id);        
         n = ngx_write_fd(fd, buffer, p - buffer);
