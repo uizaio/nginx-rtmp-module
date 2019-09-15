@@ -378,13 +378,13 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     if (ctx == NULL || !ctx->opened) {
         return NGX_OK;
     }    
+    ngx_rtmp_fmp4_write_data(s, &ctx->video, &ctx->audio);
     //close temp file
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
     ngx_rtmp_fmp4_close_fragment(s, &ctx->audio); 
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "==========fmp4: create new m4s file=========");
-    //we write m4s data in here?
-    ngx_rtmp_fmp4_write_data(s, &ctx->video, &ctx->audio);
+    //we write m4s data in here?    
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
     ctx->opened = 0; //close context
@@ -494,14 +494,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
         if (fd != NGX_INVALID_FILE) {
             ngx_close_file(fd);
-        }
-        ngx_close_file(vt->fd);
-        ngx_close_file(at->fd);
-
-        vt->fd = NGX_INVALID_FILE;
-        vt->opened = 0;
-        at->fd = NGX_INVALID_FILE;
-        at->opened = 0;
+        }        
 }
 
 static ngx_int_t 
