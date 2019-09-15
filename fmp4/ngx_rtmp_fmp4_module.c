@@ -85,6 +85,7 @@ static void ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boun
 static ngx_rtmp_fmp4_frag_t * ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n);
 static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t);
 static void ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx_rtmp_fmp4_track_t *at);
+static ngx_int_t ngx_rtmp_fmp4_rename_file(u_char *src, u_char *dst)
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
@@ -527,13 +528,75 @@ ngx_rtmp_fmp4_write_init(ngx_rtmp_session_t *s){
 
 static ngx_int_t
 ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
-    ngx_rtmp_fmp4_ctx_t       *ctx;
-    ngx_rtmp_fmp4_app_conf_t  *acf;
+    ngx_rtmp_fmp4_ctx_t             *ctx;
+    ngx_rtmp_fmp4_app_conf_t        *acf;
+    ngx_fd_t                        fd;
+    ngx_uint_t                      i, max_frag;
+    u_char                         *p, *end;
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     if (ctx->id == 0) {
         ngx_rtmp_fmp4_write_init(s);
+    }
+    fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
+                       NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
+    if (fd == NGX_INVALID_FILE) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_open_file_n " failed: '%V'",
+                      &ctx->playlist_bak);
+        return NGX_ERROR;
+    }
+    max_frag = acf->fraglen / 1000;
+
+    for (i = 0; i < ctx->nfrags; i++) {
+        f = ngx_rtmp_fmp4_get_frag(s, i);
+        if (f->duration > max_frag) {
+            max_frag = (ngx_uint_t) (f->duration + .5);
+        }
+    }
+    p = buffer;
+    end = p + sizeof(buffer);    
+    p = ngx_slprintf(p, end,
+                     "#EXTM3U\n"
+                     "#EXT-X-VERSION:7\n"
+                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"
+                     "#EXT-X-TARGETDURATION:%ui\n",
+                     ctx->frag, max_frag);
+    p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
+    n = ngx_write_fd(fd, buffer, p - buffer);
+    if (n < 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: " ngx_write_fd_n " failed: '%V'",
+                      &ctx->playlist_bak);
+        ngx_close_file(fd);
+        return NGX_ERROR;
+    }
+    for (i = 0; i < ctx->nfrags; i++) {
+        f = ngx_rtmp_fmp4_get_frag(s, i);
+        p = buffer;
+        end = p + sizeof(buffer);
+        p = ngx_slprintf(p, end,
+                         "#EXTINF:%.3f,\n"
+                         "%uL.ts\n",
+                         f->duration, f->id);
+        n = ngx_write_fd(fd, buffer, p - buffer);
+        if (n < 0) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: " ngx_write_fd_n " failed '%V'",
+                          &ctx->playlist_bak);
+            ngx_close_file(fd);
+            return NGX_ERROR;
+        }
+    }
+    ngx_close_file(fd);
+    if (ngx_rtmp_fmp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
+        == NGX_FILE_ERROR)
+    {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: rename failed: '%V'->'%V'",
+                      &ctx->playlist_bak, &ctx->playlist);
+        return NGX_ERROR;
     }
     return NGX_OK;
 }
@@ -874,6 +937,17 @@ ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t){
 
         t->fd = NGX_INVALID_FILE;
         t->opened = 0;
+}
+
+static ngx_int_t
+ngx_rtmp_fmp4_rename_file(u_char *src, u_char *dst){
+    /* rename file with overwrite */
+
+#if (NGX_WIN32)
+    return MoveFileEx((LPCTSTR) src, (LPCTSTR) dst, MOVEFILE_REPLACE_EXISTING);
+#else
+    return ngx_rename_file(src, dst);
+#endif
 }
 
 /**
