@@ -5,6 +5,8 @@
 #include "ngx_rtmp_fmp4.h"
 #include <ngx_rtmp_codec_module.h>
 
+static ngx_int_t ngx_rtmp_fmp4_write_mehd(ngx_buf_t *b);
+
 /**
  * Make a 32-bit array
  **/
