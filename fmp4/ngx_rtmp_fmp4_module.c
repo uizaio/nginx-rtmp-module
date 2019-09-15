@@ -583,7 +583,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         f = ngx_rtmp_fmp4_get_frag(s, i);
         p = buffer;
         end = p + sizeof(buffer);
-        duration = f->duration / 1000;
+        duration = f->duration / 1000.0
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%ui.m4s\n",
