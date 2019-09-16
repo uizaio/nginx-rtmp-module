@@ -1056,9 +1056,12 @@ ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
     pos = ngx_rtmp_fmp4_start_box(b, "traf");
 
     ngx_rtmp_fmp4_write_tfhd(b, isVideo == 0 ? 1 : 2);
-    ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);    
-    truns->last_video_trun += 40;
-    truns->last_audio_trun += 80;    
+    ngx_rtmp_fmp4_write_tfdt(b, earliest_pres_time);   
+    if(isVideo == 0){
+        truns->last_video_trun += 40;
+    }else{
+        truns->last_audio_trun += 80;
+    }        
     ngx_rtmp_fmp4_write_trun(b, sample_count, samples, sample_mask, moof_pos, next_sample_count, next_samples, next_sample_mask, isVideo, s, truns);
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
