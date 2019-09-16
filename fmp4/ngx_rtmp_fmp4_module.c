@@ -410,6 +410,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     size_t                          vleft, aleft;
     ssize_t                         n;
     u_char                          *pos, *pos1;
+    ngx_rtmp_fmp4_last_sample_trun  *truns;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);    
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;
@@ -426,20 +427,26 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     b.end = buffer + sizeof(buffer);
     b.pos = b.last = b.start;
 
-    ngx_rtmp_fmp4_write_styp(&b);
+    truns->last_video_trun = ngx_rtmp_fmp4_write_styp(&b);
+    truns->last_audio_trun = truns->last_video_trun;
 
     pos = b.last;
     b.last += 88; /* leave room for 2 sidx */
 
+    truns->last_audio_trun += 88;
+    truns->last_video_trun += 88;
+
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, at->earliest_pres_time, at->sample_count,
-                            at->samples, at->sample_mask, vt->id, s);   
+                            at->samples, at->sample_mask, vt->id, s, truns);   
     pos1 = b.last;
     b.last = pos;
     //we write box for data video
     mdat_size = vt->mdat_size + at->mdat_size;
     ngx_rtmp_fmp4_write_sidx(&b, vt->earliest_pres_time, vt->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 1);
     ngx_rtmp_fmp4_write_sidx(&b, at->earliest_pres_time, at->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 2);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: video trun: %d audio trun: %d", truns->last_video_trun, truns->last_audio_trun);
     b.last = pos1;
     ngx_rtmp_fmp4_write_mdat(&b, mdat_size + 8);
     if (ngx_write_fd(fd, b.pos, (size_t) (b.last - b.pos)) == NGX_ERROR) {
