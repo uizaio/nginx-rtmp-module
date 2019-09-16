@@ -1097,7 +1097,7 @@ ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t video_earliest_pres_time,
     pos = ngx_rtmp_fmp4_start_box(b, "moof");
 
     ngx_rtmp_fmp4_write_mfhd(b, index);
-    truns->last_video_trun += 16
+    truns->last_video_trun += 16;
     truns->last_audio_trun += 16;
     //video traf
     ngx_rtmp_fmp4_write_traf(b, video_earliest_pres_time, video_sample_count, video_samples,
