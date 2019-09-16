@@ -867,7 +867,7 @@ ngx_rtmp_codec_meta_data(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_memcpy(ctx->profile, v.profile, sizeof(v.profile));
     ngx_memcpy(ctx->level, v.level, sizeof(v.level));
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: %.3f", v.frame_rate);
+                          "fmp4: %.3f", v.duration);
     ngx_log_debug8(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
             "codec: data frame: "
             "width=%ui height=%ui duration=%ui frame_rate=%ui "
