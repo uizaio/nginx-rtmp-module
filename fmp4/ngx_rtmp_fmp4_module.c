@@ -200,7 +200,7 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     }
 
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: video info: frame rate %d duration %d", codec_ctx->frame_rate, codec_ctx->duration);
+                      "fmp4: video info: frame rate %d duration %.3f", codec_ctx->frame_rate, codec_ctx->duration);
 
     if (in->buf->last - in->buf->pos < 5) {
         return NGX_ERROR;
@@ -772,8 +772,6 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     p = buffer;
     size = 0;
     ngx_rtmp_fmp4_frag_t      *f;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: duration %d", t->codec->duration);
     for (; in && size < sizeof(buffer); in = in->next) {
 
         bsize = (size_t) (in->buf->last - in->buf->pos);
