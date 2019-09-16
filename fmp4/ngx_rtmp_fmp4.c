@@ -977,52 +977,31 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     truns->last_video_trun += 20;
     truns->last_audio_trun += 20;
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "fmp42: trun %d", truns->last_video_trun);
+    if(isVideo == 0){
+        truns->last_video_trun += (sample_count -1) * nitems * 4;
+    }else{
+        truns->last_audio_trun += (sample_count -1) * nitems * 4;
+    }
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "fmp42: trun %d", truns->last_video_trun); 
     for (i = 0; i < sample_count; i++, samples++) {
         // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
         //                   "fmp42: sample-%d: %d duration: %d", isVideo, i, samples->duration);        
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             ngx_rtmp_fmp4_field_32(b, samples->duration);
-            if(i < (sample_count - 3)){
-                if(isVideo == 0){
-                    truns->last_video_trun += 4;
-                }else{
-                    truns->last_audio_trun += 4;
-                }                                
-            }
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
             ngx_rtmp_fmp4_field_32(b, samples->size);
-            if(i < (sample_count - 3)){
-                if(isVideo == 0){
-                    truns->last_video_trun += 4;
-                }else{
-                    truns->last_audio_trun += 4;
-                }               
-            }
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
             ngx_rtmp_fmp4_field_32(b, samples->key ? 0x00000000 : 0x00010000);
-            if(i < (sample_count - 3)){
-                if(isVideo == 0){
-                    truns->last_video_trun += 4;
-                }else{
-                    truns->last_audio_trun += 4;
-                }
-            }
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
             ngx_rtmp_fmp4_field_32(b, samples->delay);
-            if(i < (sample_count - 3)){
-                if(isVideo == 0){
-                    truns->last_video_trun += 4;
-                }else{
-                    truns->last_audio_trun += 4;
-                }
-            }
         }        
     }
 
