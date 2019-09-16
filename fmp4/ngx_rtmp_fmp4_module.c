@@ -200,7 +200,8 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     }
 
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: video info: frame rate %d duration %.3f", codec_ctx->frame_rate, codec_ctx->duration);
+                      "fmp4: video info: frame rate %d video_data_rate %d sample rate %d sample size %d",
+                       codec_ctx->frame_rate, codec_ctx->video_data_rate, codec_ctx->sample_rate, codec_ctx->sample_size);
 
     if (in->buf->last - in->buf->pos < 5) {
         return NGX_ERROR;
