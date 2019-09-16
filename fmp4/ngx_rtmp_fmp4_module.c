@@ -199,9 +199,6 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         return NGX_OK;
     }
 
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: video info";
-
     if (in->buf->last - in->buf->pos < 5) {
         return NGX_ERROR;
     }
