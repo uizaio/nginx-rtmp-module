@@ -965,17 +965,17 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
             next_nitems++;
         }
         //size_of_sample + 48 (next_traf[8] + tfhd[28] + tfdt[20] + trun[20])        
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + (next_sample_count * next_nitems * 4) + 48;
+        offset = (pos - moof_pos) + 20 + ((sample_count - 1) * nitems * 4) + 8 + ((next_sample_count -1) * next_nitems * 4) + 48;
     }else{
         // = size_of_sample + 
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8;
+        offset = (pos - moof_pos) + 20 + ((sample_count - 1) * nitems * 4) + 8;
     }
 
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
     ngx_rtmp_fmp4_field_32(b, offset);
 
-    for (i = 0; i < sample_count; i++, samples++) {
+    for (i = 0; i < sample_count - 1; i++, samples++) {
         // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
         //                   "fmp42: sample-%d: %d duration: %d", isVideo, i, samples->duration);
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
