@@ -427,8 +427,9 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     b.end = buffer + sizeof(buffer);
     b.pos = b.last = b.start;
     truns = ngx_pcalloc(s->connection->pool, sizeof(ngx_rtmp_fmp4_last_sample_trun));
-    truns->last_video_trun = ngx_rtmp_fmp4_write_styp(&b);
-    truns->last_audio_trun = truns->last_video_trun;
+    ngx_rtmp_fmp4_write_styp(&b);
+    truns->last_video_trun = 24;
+    truns->last_audio_trun = 24;
 
     pos = b.last;
     b.last += 88; /* leave room for 2 sidx */
