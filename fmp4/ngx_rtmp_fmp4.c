@@ -964,11 +964,11 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
             next_nitems++;
         }
         //size_of_sample + 48 (next_traf[8] + tfhd[28] + tfdt[20] + trun[20])        
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + (next_sample_count * next_nitems * 4) + 48;
-        truns->last_video_trun += sample_count * nitems * 4;
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + (next_sample_count * next_nitems * 4) + 48;      
+        truns->last_audio_trun += sample_count * nitems * 4;  
     }else{
         // = size_of_sample + 
-        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8;
+        offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8;        
     }
 
     ngx_rtmp_fmp4_field_32(b, flags);
