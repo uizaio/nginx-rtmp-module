@@ -983,7 +983,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         //                   "fmp42: sample-%d: %d duration: %d", isVideo, i, samples->duration);        
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
             ngx_rtmp_fmp4_field_32(b, samples->duration);
-            if(i < (sample_count - 1)){
+            if(i < (sample_count - 3)){
                 if(isVideo == 0){
                     truns->last_video_trun += 4;
                 }else{
@@ -994,7 +994,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
             ngx_rtmp_fmp4_field_32(b, samples->size);
-            if(i < (sample_count - 1)){
+            if(i < (sample_count - 3)){
                 if(isVideo == 0){
                     truns->last_video_trun += 4;
                 }else{
@@ -1005,7 +1005,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
             ngx_rtmp_fmp4_field_32(b, samples->key ? 0x00000000 : 0x00010000);
-            if(i < (sample_count - 1)){
+            if(i < (sample_count - 3)){
                 if(isVideo == 0){
                     truns->last_video_trun += 4;
                 }else{
@@ -1016,7 +1016,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DELAY) {
             ngx_rtmp_fmp4_field_32(b, samples->delay);
-            if(i < (sample_count - 1)){
+            if(i < (sample_count - 3)){
                 if(isVideo == 0){
                     truns->last_video_trun += 4;
                 }else{
