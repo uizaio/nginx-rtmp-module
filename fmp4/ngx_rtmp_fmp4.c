@@ -974,12 +974,17 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     ngx_rtmp_fmp4_field_32(b, flags);
     ngx_rtmp_fmp4_field_32(b, sample_count);
     ngx_rtmp_fmp4_field_32(b, offset);
-
+    uint32_t duration = 0;
     for (i = 0; i < sample_count; i++, samples++) {
         // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
         //                   "fmp42: sample-%d: %d duration: %d", isVideo, i, samples->duration);
+        duration += sample->duration;
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_DURATION) {
-            ngx_rtmp_fmp4_field_32(b, samples->duration);
+            if(i == sample_count - 1){
+                ngx_rtmp_fmp4_field_32(b, duration / (sample_count + 1));
+            }else{
+                ngx_rtmp_fmp4_field_32(b, samples->duration);
+            }            
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
