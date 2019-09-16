@@ -936,15 +936,13 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);    
     f->id = id;
     if (type == 'v') {
-        // t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
-        //                  NGX_RTMP_FMP4_SAMPLE_DURATION|
-        //                  NGX_RTMP_FMP4_SAMPLE_DELAY|
-        //                  NGX_RTMP_FMP4_SAMPLE_KEY;
-        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE | NGX_RTMP_FMP4_SAMPLE_DELAY;
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION|
+                         NGX_RTMP_FMP4_SAMPLE_DELAY|
+                         NGX_RTMP_FMP4_SAMPLE_KEY;
     } else {
-        // t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
-        //                  NGX_RTMP_FMP4_SAMPLE_DURATION;
-        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE;
+        t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
+                         NGX_RTMP_FMP4_SAMPLE_DURATION;
     }
     return NGX_OK;
 }
