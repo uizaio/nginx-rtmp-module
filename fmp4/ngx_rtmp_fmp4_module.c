@@ -772,11 +772,15 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     u_char                 *p;
     size_t                  size, bsize;
     ngx_rtmp_fmp4_sample_t  *smpl;
+    ngx_rtmp_fmp4_ctx_t       *ctx;
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
     p = buffer;
     size = 0;
     ngx_rtmp_fmp4_frag_t      *f;
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+
     for (; in && size < sizeof(buffer); in = in->next) {
 
         bsize = (size_t) (in->buf->last - in->buf->pos);
