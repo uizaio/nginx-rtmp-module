@@ -63,7 +63,7 @@ typedef struct {
     unsigned                            has_audio:1;//if this context has audio
     ngx_rtmp_fmp4_track_t               audio;
     ngx_rtmp_fmp4_track_t               video;
-    uint32_t                            last_sample_timestamp;//the pre latest timestamp to count duration of first sample of next fragment
+    ngx_str_t                           last_chunk_file;//to save the latest chunk file name
 } ngx_rtmp_fmp4_ctx_t;//current context
 
 static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf);
@@ -414,6 +414,8 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);    
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;
+    ctx->last_chunk_file.data = ctx->stream.data;
+    ctx->last_chunk_file.len = ctx->stream.len;
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: create file %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
@@ -446,8 +448,6 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     mdat_size = vt->mdat_size + at->mdat_size;
     ngx_rtmp_fmp4_write_sidx(&b, vt->earliest_pres_time, vt->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 1);
     ngx_rtmp_fmp4_write_sidx(&b, at->earliest_pres_time, at->latest_pres_time, mdat_size + 8 + (pos1 - (pos + 88)), 2);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: video trun: %d audio trun: %d", truns->last_video_trun, truns->last_audio_trun);
     b.last = pos1;
     ngx_rtmp_fmp4_write_mdat(&b, mdat_size + 8);
     if (ngx_write_fd(fd, b.pos, (size_t) (b.last - b.pos)) == NGX_ERROR) {
@@ -792,6 +792,10 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     //set earliest presentation time of fragment
     if (t->sample_count == 0) {
         t->earliest_pres_time = timestamp;
+        if(ctx->last_chunk_file.len){
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "fmp4: latest file: %s", ctx->last_chunk_file.data);
+        }
     }
     t->latest_pres_time = timestamp;
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
@@ -940,7 +944,6 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->latest_pres_time = 0;
     t->mdat_size = 0;
     t->opened = 1;
-    ctx->last_sample_timestamp = timestamp;
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);    
     f->id = id;
     if (type == 'v') {
