@@ -412,7 +412,11 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     u_char                          *pos, *pos1;
     ngx_rtmp_fmp4_last_sample_trun  *truns;
 
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);    
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);   
+    if (ctx == NULL) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "fmp4: no ctx %s %d", ctx->stream.data, ctx->stream.len);
+    } 
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;
     ctx->last_chunk_file.len = ngx_strlen(ctx->stream.len);
     ctx->last_chunk_file.data = ngx_palloc(s->connection->pool, ctx->stream.len + 1);
