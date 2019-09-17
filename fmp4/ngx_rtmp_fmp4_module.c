@@ -410,12 +410,10 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     size_t                          vleft, aleft;
     ssize_t                         n;
     u_char                          *pos, *pos1;
-    u_char                          *p;
     ngx_rtmp_fmp4_last_sample_trun  *truns;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module); 
-    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id);
-    p
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id);    
     ctx->last_chunk_file.len = ctx->stream.len;
     ctx->last_chunk_file.data = ngx_palloc(s->connection->pool, ctx->stream.len + 10);
     *ngx_cpymem(ctx->last_chunk_file.data, ctx->stream.data, ctx->stream.len + 9);
