@@ -414,15 +414,14 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);    
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;
-    ctx->last_chunk_file.data = ctx->stream.data;
-    ctx->last_chunk_file.len = ctx->stream.len;
+    *ngx_cpymem(ctx->last_chunk_file.data, ctx->stream.data, ctx->stream.len) = 0;
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "fmp4: create file %s", ctx->stream.data);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "fmp4: error creating fmp4 temp file");
+                      "fmp4: error creating fmp4 chunk file");
         goto done;
     }
     b.start = buffer;
