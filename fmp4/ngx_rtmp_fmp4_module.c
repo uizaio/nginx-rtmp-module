@@ -843,15 +843,13 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             smpl->duration = timestamp - smpl->timestamp;
             if(key == 0){
                 ctx->audio_latest_timestamp = timestamp;
-                // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                //                     "fmp4: audio timestamp %d %d", smpl->duration, timestamp);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                                    "fmp4: audio timestamp %d %d", smpl->duration, timestamp);
             }else{
                 ctx->video_latest_timestamp = timestamp;
-                // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                //                     "fmp4: video timestamp %d %d", smpl->duration, timestamp);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                                    "fmp4: video timestamp %d %d", smpl->duration, timestamp);
             }
-            // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-            //               "fmp41: sample-%d: %d duration: %d", key, t->sample_count - 1, smpl->duration);
         }        
 
         t->sample_count++;
