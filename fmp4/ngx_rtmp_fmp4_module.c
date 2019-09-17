@@ -64,7 +64,8 @@ typedef struct {
     ngx_rtmp_fmp4_track_t               audio;
     ngx_rtmp_fmp4_track_t               video;
     ngx_str_t                           last_chunk_file;//to save the latest chunk file name
-    uint32_t                            latest_timestamp;
+    uint32_t                            video_latest_timestamp;
+    uint32_t                            audio_latest_timestamp;
     ngx_rtmp_fmp4_last_sample_trun      *last_sample_trun;
 } ngx_rtmp_fmp4_ctx_t;//current context
 
@@ -781,7 +782,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
     p = buffer;
     size = 0;
-    ngx_rtmp_fmp4_frag_t    *f;
+    // ngx_rtmp_fmp4_frag_t    *f;
     uint32_t                duration;
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -801,23 +802,32 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     //set earliest presentation time of fragment
     if (t->sample_count == 0) {
         t->earliest_pres_time = timestamp;
-        if(ctx->last_chunk_file.len){            
-            duration = timestamp - ctx->latest_timestamp;
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "fmp4: latest file: %s duration %d audio %d video %d",
-                           ctx->last_chunk_file.data, duration,
-                           ctx->last_sample_trun->last_audio_trun, ctx->last_sample_trun->last_video_trun);
+        if(ctx->last_chunk_file.len){                       
             // FILE *f = fopen( ctx->last_chunk_file.data, "r+b" );
             if(key == 1){
                 //video
                 // fseek( f, ctx->, SEEK_SET )
+                 duration = timestamp - ctx->video_latest_timestamp;
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                            "fmp4: latest file: %s duration %d video %d",
+                            ctx->last_chunk_file.data, duration,
+                            ctx->last_sample_trun->last_video_trun);
             }else{
                 //audio
-                
+                 duration = timestamp - ctx->audio_latest_timestamp;
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                            "fmp4: latest file: %s duration %d audio %d",
+                            ctx->last_chunk_file.data, duration,
+                            ctx->last_sample_trun->last_audio_trun);
             }
         }
     }
     t->latest_pres_time = timestamp;
+    if(key == 0){
+        ctx->audio_latest_timestamp = timestamp;
+    }else{
+        ctx->video_latest_timestamp = timestamp;
+    }
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -889,8 +899,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
 
         ngx_rtmp_fmp4_close_fragments(s);
         ngx_rtmp_fmp4_open_fragments(s, timestamp);
-        f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);
-        ctx->latest_timestamp = timestamp;
+        f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);        
         f->timestamp = timestamp;        
     }
     
