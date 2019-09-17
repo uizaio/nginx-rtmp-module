@@ -822,14 +822,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             }
         }
     }
-    t->latest_pres_time = timestamp;
-    if(key == 0){
-        ctx->audio_latest_timestamp = timestamp;
-    }else{
-        ctx->video_latest_timestamp = timestamp;
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                            "fmp4: video timestamp %d", timestamp);
-    }
+    t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -843,6 +836,15 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         smpl->size = (uint32_t) size;
         smpl->duration = t->codec->duration;
         smpl->timestamp = timestamp;
+        if(key == 0){
+            ctx->audio_latest_timestamp = timestamp;
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                                "fmp4: audio timestamp %d", timestamp);
+        }else{
+            ctx->video_latest_timestamp = timestamp;
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                                "fmp4: video timestamp %d", timestamp);
+        }
         smpl->key = (key ? 1 : 0);
         //if this is not first sample, we can caculate its duration
         if (t->sample_count > 0) {
