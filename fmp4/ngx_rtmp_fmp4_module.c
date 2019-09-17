@@ -809,9 +809,9 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
                 // fseek( f, ctx->, SEEK_SET )
                  duration = timestamp - ctx->video_latest_timestamp;
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                            "fmp4: latest file: %s duration %d video %d",
+                            "fmp4: latest file: %s duration %d video %d %d %d",
                             ctx->last_chunk_file.data, duration,
-                            ctx->last_sample_trun->last_video_trun);
+                            ctx->last_sample_trun->last_video_trun, timestamp, ctx->video_latest_timestamp);
             }else{
                 //audio
                  duration = timestamp - ctx->audio_latest_timestamp;
