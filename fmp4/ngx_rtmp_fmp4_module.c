@@ -848,7 +848,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             }else{
                 ctx->video_latest_timestamp = timestamp;
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                                    "fmp4: video timestamp %d %d %d", smpl->duration, timestamp, smpl->timestamp);
+                                    "fmp4: video timestamp %d %d %d %d", smpl->duration, timestamp, smpl->timestamp, t->sample_count);
             }
         }        
 
