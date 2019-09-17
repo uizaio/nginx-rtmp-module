@@ -979,8 +979,6 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     }else{
         truns->last_audio_trun += (sample_count -1) * nitems * 4 + 80;//include size of traf atom of video
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "fmp42: trun %d", truns->last_audio_trun); 
     for (i = 0; i < sample_count; i++, samples++) {
         // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
         //                   "fmp42: sample-%d: %d duration: %d", isVideo, i, samples->duration);        
