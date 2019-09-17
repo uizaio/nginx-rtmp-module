@@ -827,6 +827,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         ctx->audio_latest_timestamp = timestamp;
     }else{
         ctx->video_latest_timestamp = timestamp;
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                            "fmp4: video timestamp %d", timestamp);
     }
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
