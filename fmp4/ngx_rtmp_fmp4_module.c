@@ -805,7 +805,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     if (t->sample_count == 0) {
         t->earliest_pres_time = timestamp;
         if(ctx->last_chunk_file.len){                       
-            f = fopen( ctx->last_chunk_file.data, "r+b" );
+            f = fopen( (u_char *)ctx->last_chunk_file.data, "r+b" );
             if(isVideo == 0){
                 //video                
                 duration = timestamp - ctx->video_latest_timestamp;
