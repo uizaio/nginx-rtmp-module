@@ -809,10 +809,6 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             if(isVideo == 0){
                 //video                
                 duration = timestamp - ctx->video_latest_timestamp;
-                // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                //             "fmp4: latest file: %s duration %d video %d %d %d",
-                //             ctx->last_chunk_file.data, duration,
-                //             ctx->last_sample_trun->last_video_trun, timestamp, ctx->video_latest_timestamp);
                 fseek( f, ctx->last_sample_trun->last_video_trun, SEEK_SET);                
                 bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
                 bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
@@ -822,10 +818,6 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             }else{
                 //audio
                  duration = timestamp - ctx->audio_latest_timestamp;
-                // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                //             "fmp4: latest file: %s duration %d audio %d",
-                //             ctx->last_chunk_file.data, duration,
-                //             ctx->last_sample_trun->last_audio_trun);
                 fseek( f, ctx->last_sample_trun->last_audio_trun, SEEK_SET);                
                 bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
                 bytes[1] = ((uint32_t) duration >> 16) & 0xFF;

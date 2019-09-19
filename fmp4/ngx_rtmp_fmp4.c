@@ -1138,6 +1138,9 @@ ngx_rtmp_fmp4_put_descr(ngx_buf_t *b, int tag, size_t size){
     return NGX_OK;
 }
 
+/**
+ * Struct: 4-byte length, 4byte-mdat
+ * */
 ngx_uint_t
 ngx_rtmp_fmp4_write_mdat(ngx_buf_t *b, ngx_uint_t size)
 {
