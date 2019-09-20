@@ -610,7 +610,11 @@ ngx_rtmp_fmp4_write_tkhd(ngx_rtmp_session_t *s, ngx_buf_t *b, int isVideo){
     /* modification time */
     ngx_rtmp_fmp4_field_32(b, 0);
      /* track id */
-    ngx_rtmp_fmp4_field_32(b, 1);
+    if(isVideo == 0){
+        ngx_rtmp_fmp4_field_32(b, 1);
+    }else{
+        ngx_rtmp_fmp4_field_32(b, 2);
+    }    
 
     /* reserved */
     ngx_rtmp_fmp4_field_32(b, 0);
