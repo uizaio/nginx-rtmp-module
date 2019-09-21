@@ -772,6 +772,17 @@ ngx_rtmp_fmp4_ensure_directory(ngx_rtmp_session_t *s){
     return NGX_OK;
 }
 
+/**
+ * 
+ * @param s
+ * @param in
+ * @param t
+ * @param key
+ * @param timestamp
+ * @param delay
+ * @param isVideo 1 - video, 0 - audio
+ * @return 
+ */
 static ngx_int_t
 ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_track_t *t, ngx_int_t key, uint32_t timestamp, uint32_t delay, int isVideo){
@@ -784,7 +795,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     u_char                  bytes[4];
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer + (isVideo == 0 ? 4 : 0); //save 4 byte for nal
+    p = buffer + (isVideo == 1 ? 4 : 0); //save 4 byte for nal
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -806,7 +817,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         t->earliest_pres_time = timestamp;
         if(ctx->last_chunk_file.len){                       
             f = fopen( (const char*)ctx->last_chunk_file.data, "r+b" );
-            if(isVideo == 0){
+            if(isVideo == 1){
                 //video                
                 duration = timestamp - ctx->video_latest_timestamp;
                 fseek( f, ctx->last_sample_trun->last_video_trun, SEEK_SET);                
@@ -830,7 +841,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     }
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
-        if(isVideo == 0){
+        if(isVideo == 1){
             //write data to raw file
             //we need to insert 4byte nal component in here for video
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
