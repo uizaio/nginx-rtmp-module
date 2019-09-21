@@ -862,8 +862,6 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 
         smpl->delay = delay;
         smpl->size = (uint32_t) size + (isVideo == 1 ? 4 : 0);//we add 4byte nal in video sample
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4 - 837: sample size %d: %d",isVideo, size);
         smpl->duration = t->codec->duration;
         smpl->timestamp = timestamp;
         smpl->key = (key ? 1 : 0);
