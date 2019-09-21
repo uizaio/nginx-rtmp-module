@@ -1024,20 +1024,36 @@ ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time)
     return NGX_OK;
 }
 
+/**
+ * 8byte box type "tfhd"
+ * 2byte flag
+ * 2byte version
+ * 4byte track_id
+ * 4byte sample duration
+ * 4byte default sample size = size of the first sample in trun
+ * 4byte default sample flags
+ * @param b
+ * @param track_id
+ * @param ngx_rtmp_fmp4_sample_t
+ * @return 
+ */
 ngx_int_t
-ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, uint32_t track_id)
+ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, uint32_t track_id, ngx_rtmp_fmp4_sample_t *samples)
 {
     u_char  *pos;
+    uint32_t default_sample_size;
 
     pos = ngx_rtmp_fmp4_start_box(b, "tfhd");
 
     /* version & flags */
-    ngx_rtmp_fmp4_field_32(b, 0x00020000);
+    ngx_rtmp_fmp4_field_32(b, 0x00020010);
 
     /* track id */
     ngx_rtmp_fmp4_field_32(b, track_id);
-
-
+    
+    /* default sample size*/
+    default_sample_size = samples[0]->size;
+    ngx_rtmp_fmp4_field_32(b, default_sample_size);
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
     return NGX_OK;
@@ -1126,7 +1142,7 @@ ngx_rtmp_fmp4_write_avcc(ngx_rtmp_session_t *s, ngx_buf_t *b){
         ngx_rtmp_fmp4_data(b, p, (size_t) (in->buf->last - p));
     } else {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "dash: invalid avcc received");
+                      "fmp4: invalid avcc received");
     }
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
