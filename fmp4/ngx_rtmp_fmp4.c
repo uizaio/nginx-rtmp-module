@@ -1052,7 +1052,7 @@ ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, uint32_t track_id, ngx_rtmp_fmp4_sample_t
     ngx_rtmp_fmp4_field_32(b, track_id);
     
     /* default sample size*/
-    default_sample_size = samples[0]->size;
+    default_sample_size = samples->size;
     ngx_rtmp_fmp4_field_32(b, default_sample_size);
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
