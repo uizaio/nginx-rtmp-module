@@ -784,7 +784,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     u_char                  bytes[4];
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer;
+    p = buffer + 4; //save 4 byte for nal
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -830,6 +830,15 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     }
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
+        if(isVideo == 0){
+            //write data to raw file
+            //we need to insert 4byte nal component in here for video
+            bytes[0] = ((uint32_t) size >> 24) & 0xFF;
+            bytes[1] = ((uint32_t) size >> 16) & 0xFF;
+            bytes[2] = ((uint32_t) size >> 8) & 0xFF;
+            bytes[3] = (uint32_t) size & 0xFF;
+            ngx_cpymem(buffer, bytes, 4);
+        }        
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: " ngx_write_fd_n " failed");
@@ -839,7 +848,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         smpl = &t->samples[t->sample_count];
 
         smpl->delay = delay;
-        smpl->size = (uint32_t) size;
+        smpl->size = (uint32_t) size + (isVideo == 0 ? 4 : 0);//we add 4byte nal in video sample
         smpl->duration = t->codec->duration;
         smpl->timestamp = timestamp;
         smpl->key = (key ? 1 : 0);
