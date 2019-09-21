@@ -990,7 +990,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
-            ngx_rtmp_fmp4_field_32(b, samples->size + (isVideo == 1 ? 4 : 0));
+            ngx_rtmp_fmp4_field_32(b, samples->size);
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_KEY) {
