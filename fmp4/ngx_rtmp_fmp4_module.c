@@ -833,6 +833,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         if(isVideo == 0){
             //write data to raw file
             //we need to insert 4byte nal component in here for video
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: sample size: %d", size);
             bytes[0] = ((uint32_t) size >> 24) & 0xFF;
             bytes[1] = ((uint32_t) size >> 16) & 0xFF;
             bytes[2] = ((uint32_t) size >> 8) & 0xFF;
