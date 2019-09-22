@@ -85,16 +85,13 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
     u_char  *pos;
     pos = ngx_rtmp_fmp4_start_box(b, "ftyp");
     //major brand
-    ngx_rtmp_fmp4_box(b, "isom");
+    ngx_rtmp_fmp4_box(b, "iso5");
 
     //minor version
     ngx_rtmp_fmp4_field_32(b, 1);
     //compatible brands:
-    ngx_rtmp_fmp4_box(b, "isom");
-    ngx_rtmp_fmp4_box(b, "iso2");
-    ngx_rtmp_fmp4_box(b, "avc1");
-    ngx_rtmp_fmp4_box(b, "mp41");
-    ngx_rtmp_fmp4_box(b, "ios5");
+    ngx_rtmp_fmp4_box(b, "ios6");
+    ngx_rtmp_fmp4_box(b, "mp41");    
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
