@@ -10,7 +10,6 @@
 #define NGX_RTMP_FMP4_MAX_SAMPLES       1024
 #define NGX_RTMP_FMP4_DIR_ACCESS        0744
 
-nal
 static ngx_rtmp_publish_pt              next_publish;
 static ngx_rtmp_close_stream_pt         next_close_stream;
 static ngx_rtmp_stream_begin_pt         next_stream_begin;
