@@ -79,8 +79,7 @@ typedef struct {
     ngx_buf_t                          *aframe;
     uint64_t                            aframe_pts;
 
-    ngx_rtmp_hls_variant_t             *var;
-    ngx_str_t                           stream_id;//stream id of live entity
+    ngx_rtmp_hls_variant_t             *var;   
 } ngx_rtmp_hls_ctx_t;
 
 
