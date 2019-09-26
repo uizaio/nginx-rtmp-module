@@ -1066,7 +1066,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 
     if (rc != NGX_AGAIN) {
         //will go next if on_publish return ok
-        body = ngx_pcalloc(s->connection->pool, sizeof(u_char * 128));
+        body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * 128);
         if(body == NULL){
             return NGX_ERROR;
         }
