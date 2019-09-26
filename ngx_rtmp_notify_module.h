@@ -18,6 +18,8 @@
 #include <ngx_core.h>
 #include "ngx_rtmp_cmd_module.h"
 
+
+
 typedef struct {
     ngx_uint_t                                  flags;
     u_char                                      name[NGX_RTMP_MAX_NAME];
@@ -26,6 +28,8 @@ typedef struct {
     time_t                                      start;
     ngx_str_t                                   stream_id;//stream id of live entity
 } ngx_rtmp_notify_ctx_t;
+
+extern ngx_module_t  ngx_rtmp_notify_module;
 
 #endif /* NGX_RTMP_NOTIFY_MODULE_H */
 

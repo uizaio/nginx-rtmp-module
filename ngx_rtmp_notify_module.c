@@ -1069,7 +1069,8 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
                 break;
             }
         }        
-        for(i = begin; i <= end; i++){
+        //FIXME: get to end or end - 1?
+        for(i = begin; i < end; i++){
             *(body + j) = *(tmp_body + i); 
             j++;
         }
