@@ -1077,6 +1077,45 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
     *p = '\0';
 }
 
+u_char *str_replace(u_char *orig, u_char *rep, u_char *with)
+{
+    u_char *result;
+    u_char *ins;
+    u_char *tmp;
+    int len_rep;
+    int len_with;
+    int len_front;
+    int count;
+    if(!orig || !rep){
+        return NULL;
+    }
+    len_rep = strlen(rep);
+    if(len_rep == 0){
+        return NULL;
+    }
+    if(!with){
+        with = "";
+    }
+    len_with = strlen(with);
+    ins = orig;
+    for(count = 0; tmp = strstr(ins, rep); ++count){
+        ins = tmp + len_rep;
+    }
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    if(!result){
+        return NULL;
+    }
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
+    }
+    strcpy(tmp, orig);
+    return result;
+}
+
 
 static ngx_int_t
 ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
@@ -1111,10 +1150,13 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 //                    return NGX_ERROR;
 //                }
 //                *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", ctx->playlist.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", ctx->playlist_bak.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", ctx->name.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", ctx->stream.data);
+//                str_replace(ctx->playlist.data, ctx->name.data, body.data);
+//                str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+//                str_replace(ctx->stream.data, ctx->name.data, body.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", str_replace(ctx->playlist.data, ctx->name.data, body.data));
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", str_replace(ctx->playlist_bak.data, ctx->name.data, body.data));
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", body.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", str_replace(ctx->stream.data, ctx->name.data, body.data));
             }                        
         }
         goto next;
