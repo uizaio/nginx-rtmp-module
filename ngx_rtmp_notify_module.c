@@ -1013,18 +1013,33 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
 {
     u_char *p;
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
+    ngx_buf_t      *b;
+    u_char  body[128];
+    int     is_body;
+    int     i = 0;
     
-    p = in->buf->start;
-    while(p != in->buf->last){
+    while(in){
+        b = in->buf;
         c1= *p;
-        c2 = *(p + 1);
-        c3 = *(p + 2);
-        c4 = *(p + 3);
-        if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
-            return p + 4;
+        for (p = b->pos; p != b->last; ++p) {
+            if(is_body == 1){
+                body[i] = c1;
+                i++;
+                if(i > 128){
+                    break;//we only get 128 first characters
+                }
+            }else{                
+                c2 = *(p + 1);
+                c3 = *(p + 2);
+                c4 = *(p + 3);
+                if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
+                    is_body = 1;
+                } 
+            }                       
         }
-    }
-    return NULL;
+        in = in->next;
+    }    
+    return body;
 }
 
 
