@@ -14,6 +14,8 @@
 #ifndef NGX_RTMP_HLS_MODULE_H
 #define NGX_RTMP_HLS_MODULE_H
 
+#include "ngx_rtmp_mpegts.h"
+
 typedef struct {
     uint64_t                            id;
     uint64_t                            key_id;
