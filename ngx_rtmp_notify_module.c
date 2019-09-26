@@ -1008,6 +1008,13 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
     *p = '\0';
 }
 
+/**
+ * Get body of response from http response
+ * @param s
+ * @param in
+ * @param body
+ * @return 
+ */
 static u_char*
 ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *body)
 {
@@ -1016,13 +1023,21 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
     ngx_buf_t      *b;    
     int     is_body = 0;
     int     i = 0;
+    int     j = 0;
+    int     begin, end;
+    u_char*  tmp_body;
+    
+    tmp_body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * 128);
+    if(tmp_body == NULL){
+        return body;
+    }
     
     while(in){
         b = in->buf;        
         for (p = b->pos; p != b->last; ++p) {
             c1= *p;
             if(is_body == 1){
-                *(body + i) = c1;
+                *(tmp_body + i) = c1;
                 i++;
                 if(i > 128){
                     break;//we only get 128 first characters
@@ -1031,8 +1046,6 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
                 c2 = *(p + 1);
                 c3 = *(p + 2);
                 c4 = *(p + 3);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla %d-%d-%d-%d", c1, c2, c3, c4);
                 if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
                     is_body = 1;
                 } 
@@ -1040,6 +1053,26 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
         }
         in = in->next;
     }    
+    //we need to remove any space at the begining and end of body
+    if(is_body == 1){
+        tmp_body;
+        for(begin = 0; begin <= i; begin++){
+            c1 = (tmp_body + begin);
+            if(c1 != ' ' && c1 != '\r' && c1 != '\n'){
+                break;
+            }
+        }
+        for(end = i; end >= 0; end--){
+            c1 = (tmp_body + end);
+            if(c1 != ' ' && c1 != '\r' && c1 != '\n'){
+                break;
+            }
+        }        
+        for(i = begin; i <= end; i++){
+            *(body + j) = *(tmp_body + i);
+            j++;
+        }
+    }
     return body;
 }
 
