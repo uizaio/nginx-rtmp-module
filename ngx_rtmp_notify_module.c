@@ -1070,7 +1070,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
             }
         }        
         //FIXME: get to end or end - 1?
-        for(i = begin; i <= end; i++){
+        for(i = begin; i < end; i++){
             *(body + j) = *(tmp_body + i); 
             j++;
         }
@@ -1105,8 +1105,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         if(body == NULL){
             return NGX_ERROR;
         }
-        body = ngx_rtmp_notify_parse_http_body(s, in, body);        
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla '%s'", ctx->stream_id.data);
+        body = ngx_rtmp_notify_parse_http_body(s, in, body);                
         if(body != NULL){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);   
                         
