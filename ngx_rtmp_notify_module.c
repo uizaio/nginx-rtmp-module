@@ -1088,6 +1088,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
     u_char                      *body;
+    ngx_rtmp_hls_ctx_t          hcaf;
 
     static ngx_str_t    location = ngx_string("location");   
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);       
@@ -1104,11 +1105,16 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         }
         body = ngx_rtmp_notify_parse_http_body(s, in, body);
         if(body != NULL){
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla %s", body);
-        }else{
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla nobody");
+            hcaf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
+            if (hacf != NULL || hacf->hls) {
+                hacf->stream_id.len = strlen((const char*)body);
+                hacf->stream.data = ngx_pcalloc(s->connection->pool, hacf->stream_id.len);
+                if(hacf->stream.data == NULL){
+                    return NGX_ERROR;
+                }
+                *ngx_cpymem(hacf->stream.data, body, hacf->stream_id.len) = 0;
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla '%s'", hacf->stream.data, body);
+            }
         }
         goto next;
     }
