@@ -1110,8 +1110,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 //                if(ctx->stream_id.data == NULL){
 //                    return NGX_ERROR;
 //                }
-//                *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
-            }                        
+////                *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
+//            }                        
         }
         goto next;
     }
