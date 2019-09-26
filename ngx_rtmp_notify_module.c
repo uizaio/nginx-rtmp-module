@@ -1099,11 +1099,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
         return NGX_ERROR;
     }
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla 1");
     if (rc != NGX_AGAIN) {
         //will go next if on_publish return ok
         body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * 128);
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla");
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla 2");
         if(body == NULL){
             return NGX_ERROR;
         }
