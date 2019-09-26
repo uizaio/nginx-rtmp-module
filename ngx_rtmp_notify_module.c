@@ -951,8 +951,8 @@ ngx_rtmp_notify_parse_http_header(ngx_rtmp_session_t *s,
  * @param body
  * @return 
  */
-static u_char*
-ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *body)
+static ngx_str_t
+ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_str_t body)
 {
     u_char *p;
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
@@ -1004,6 +1004,11 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
             }
         }        
         //FIXME: get to end or end - 1?
+        body->data = ngx_pcalloc(s->connection->pool, sizeof(u_char) (end - begin + 1));
+        if(body->data == NULL){
+            return body;
+        }
+        body->len = end - begin + 1;
         for(i = begin; i <= end; i++){
             *(body + j) = *(tmp_body + i); 
             j++;
@@ -1083,7 +1088,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_url_t                  *u;
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
-    u_char                      *body;
+    ngx_str_t                   body;
     ngx_rtmp_hls_ctx_t           *ctx;
 
     static ngx_str_t    location = ngx_string("location");
@@ -1103,7 +1108,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         if(body != NULL){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
             if(ctx != NULL){
-                ctx->stream_id.len = strlen((const char*)body);
+                ctx->stream_id.len = body->len;
                 ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
                 if(ctx->stream_id.data == NULL){
                     return NGX_ERROR;
