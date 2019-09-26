@@ -1004,7 +1004,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_str_
             }
         }        
         //FIXME: get to end or end - 1?
-        body->data = ngx_pcalloc(s->connection->pool, sizeof(u_char) (end - begin + 1));
+        body->data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));
         if(body->data == NULL){
             return body;
         }
