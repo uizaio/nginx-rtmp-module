@@ -1033,7 +1033,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
                 c3 = *(p + 2);
                 c4 = *(p + 3);
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla %c-%c-%c-%c", c1, c2, c3, c4);
+                      "notify: ducla %d-%d-%d-%d", c1, c2, c3, c4);
                 if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
                     is_body = 1;
                 } 
