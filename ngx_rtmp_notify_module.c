@@ -991,6 +991,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
         in = in->next;
     }    
     //we need to remove any space at the begining and end of body
+    i--;
     if(is_body == 1){        
         for(begin = 0; begin <= i; begin++){
             c1 = *(tmp_body + begin);
