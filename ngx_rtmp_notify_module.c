@@ -1104,12 +1104,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
-            if(ctx != NULL){
-                ctx->stream_id.len = body.len;
-                ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
-                if(ctx->stream_id.data == NULL){
-                    return NGX_ERROR;
-                }
+//            if(ctx != NULL){
+//                ctx->stream_id.len = body.len;
+//                ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
+//                if(ctx->stream_id.data == NULL){
+//                    return NGX_ERROR;
+//                }
 //                *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
             }                        
         }
