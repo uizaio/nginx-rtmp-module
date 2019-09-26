@@ -1017,6 +1017,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     static ngx_str_t    location = ngx_string("location");
 
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: ducla '%d'", rc);
     if (rc == NGX_ERROR) {
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
         return NGX_ERROR;
@@ -1032,9 +1034,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                    "notify: publish redirect received");
 
     rc = ngx_rtmp_notify_parse_http_header(s, in, &location, name,
-                                           sizeof(name) - 1);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla '%d'", rc);
+                                           sizeof(name) - 1);    
     if (rc <= 0) {
         goto next;
     }    
