@@ -1009,21 +1009,20 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
 }
 
 static u_char*
-ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
+ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *body)
 {
     u_char *p;
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
-    ngx_buf_t      *b;
-    u_char  body[128];
+    ngx_buf_t      *b;    
     int     is_body = 0;
     int     i = 0;
     
     while(in){
-        b = in->buf;
-        c1= *p;
+        b = in->buf;        
         for (p = b->pos; p != b->last; ++p) {
+            c1= *p;
             if(is_body == 1){
-                body[i] = c1;
+                *(body + i) = c1;
                 i++;
                 if(i > 128){
                     break;//we only get 128 first characters
@@ -1067,7 +1066,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 
     if (rc != NGX_AGAIN) {
         //will go next if on_publish return ok
-        body = ngx_rtmp_notify_parse_http_body(s, in);
+        body = ngx_pcalloc(s->connection->pool, sizeof(u_char * 128));
+        if(body == NULL){
+            return NGX_ERROR;
+        }
+        body = ngx_rtmp_notify_parse_http_body(s, in, body);
         if(body != NULL){
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify: ducla '%s'", body);
