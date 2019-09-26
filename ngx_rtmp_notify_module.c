@@ -12,6 +12,7 @@
 #include "ngx_rtmp_netcall_module.h"
 #include "ngx_rtmp_record_module.h"
 #include "ngx_rtmp_relay_module.h"
+#include "hls/ngx_rtmp_hls_module.h"
 
 
 static ngx_rtmp_connect_pt                      next_connect;
