@@ -1104,14 +1104,18 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
-//            if(ctx != NULL){
+            if(ctx != NULL){
 //                ctx->stream_id.len = body.len;
 //                ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
 //                if(ctx->stream_id.data == NULL){
 //                    return NGX_ERROR;
 //                }
-////                *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
-//            }                        
+//                *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", ctx->playlist.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", ctx->playlist_bak.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", ctx->name.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", stream.data);
+            }                        
         }
         goto next;
     }
