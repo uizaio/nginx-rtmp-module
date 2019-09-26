@@ -952,7 +952,7 @@ ngx_rtmp_notify_parse_http_header(ngx_rtmp_session_t *s,
  * @return 
  */
 static ngx_str_t
-ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_str_t body)
+ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
 {
     u_char *p;
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
@@ -962,6 +962,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_str_
     int     j = 0;
     int     begin, end;
     u_char*  tmp_body;
+    ngx_str_t body
     
     tmp_body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * 128);
     if(tmp_body == NULL){
@@ -1004,13 +1005,13 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_str_
             }
         }        
         //FIXME: get to end or end - 1?
-        body->data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));
-        if(body->data == NULL){
+        body.data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));
+        if(body.data == NULL){
             return body;
         }
-        body->len = end - begin + 1;
+        body.len = end - begin + 1;
         for(i = begin; i <= end; i++){
-            *(body + j) = *(tmp_body + i); 
+            *(body.data + j) = *(tmp_body + i); 
             j++;
         }
     }
@@ -1099,16 +1100,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         return NGX_ERROR;
     }
 
-    if (rc != NGX_AGAIN) {
-        body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * 128); 
-        if(body == NULL){
-            return NGX_ERROR;
-        }
-        body = ngx_rtmp_notify_parse_http_body(s, in, body);                
-        if(body != NULL){                        
+    if (rc != NGX_AGAIN) {        
+        body = ngx_rtmp_notify_parse_http_body(s, in);                
+        if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
             if(ctx != NULL){
-                ctx->stream_id.len = body->len;
+                ctx->stream_id.len = body.len;
                 ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
                 if(ctx->stream_id.data == NULL){
                     return NGX_ERROR;
