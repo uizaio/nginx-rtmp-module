@@ -1015,7 +1015,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
     ngx_buf_t      *b;
     u_char  body[128];
-    int     is_body;
+    int     is_body = 0;
     int     i = 0;
     
     while(in){
