@@ -1033,12 +1033,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 
     rc = ngx_rtmp_notify_parse_http_header(s, in, &location, name,
                                            sizeof(name) - 1);
-    
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: ducla '%d'", rc);
     if (rc <= 0) {
         goto next;
-    }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla '%s'", v->name);
+    }    
     if (ngx_strncasecmp(name, (u_char *) "rtmp://", 7)) {
         *ngx_cpymem(v->name, name, rc) = 0;
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
