@@ -1010,10 +1010,11 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
             return body;
         }
         body.len = end - begin + 1;
-        for(i = begin; i <= end - 1; i++){
+        for(i = begin; i <= end; i++){
             *(body.data + j) = *(tmp_body + i); 
             j++;
         }
+        *(body.data + j) = '\0';
     }
     return body;
 }
