@@ -1032,12 +1032,13 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                    "notify: publish redirect received");
 
     rc = ngx_rtmp_notify_parse_http_header(s, in, &location, name,
-                                           sizeof(name) - 1);    
-    if (rc <= 0) {
-        goto next;
-    }    
+                                           sizeof(name) - 1);  
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla '%s'", name);
+                      "notify: ducla '%s'", v->name);
+    if (rc <= 0) {
+        //will go next if on_publish return ok
+        goto next;
+    }
     if (ngx_strncasecmp(name, (u_char *) "rtmp://", 7)) {
         *ngx_cpymem(v->name, name, rc) = 0;
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
@@ -1046,8 +1047,6 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     }
     
     /* push */
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla 1");
     nacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_notify_module);
     if (nacf->relay_redirect) {
         ngx_rtmp_notify_set_name(v->name, NGX_RTMP_MAX_NAME, name, (size_t) rc);
