@@ -1022,8 +1022,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
     ngx_buf_t      *b;    
     int     is_body = 0;
-    int     i = 0;
-    int     j = 0;
+    int     i = 0;    
     int     begin, end;
     u_char*  tmp_body;
     
@@ -1068,8 +1067,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
             }
         }        
         for(i = begin; i <= end; i++){
-            *(body + j) = *(tmp_body + i);
-            j++;
+            *(body + i) = *(tmp_body + i);            
         }
     }
     return body;
@@ -1105,7 +1103,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         body = ngx_rtmp_notify_parse_http_body(s, in, body);
         if(body != NULL){
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: ducla '%s'", body);
+                      "notify: ducla %s", body);
         }else{
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify: ducla nobody");
