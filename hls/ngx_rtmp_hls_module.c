@@ -1392,7 +1392,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 //    if(notify_ctx == NULL){
 //        return NGX_ERROR;
 //    }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: stream_id: '%s'", notify_ctx->stream_id.data);
+//    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: stream_id: '%s'", notify_ctx->stream_id.data);
     ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                    "hls: publish: name='%s' type='%s'",
                    v->name, v->type);
