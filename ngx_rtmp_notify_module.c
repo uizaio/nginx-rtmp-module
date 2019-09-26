@@ -1015,7 +1015,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     u_char                      name[NGX_RTMP_MAX_NAME];
 
     static ngx_str_t    location = ngx_string("location");
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: ducla");
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);    
     if (rc == NGX_ERROR) {
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
