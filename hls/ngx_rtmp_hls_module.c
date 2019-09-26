@@ -35,20 +35,20 @@ static ngx_int_t ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s,
 #define NGX_RTMP_HLS_DIR_ACCESS         0744
 
 
-typedef struct {
-    uint64_t                            id;
-    uint64_t                            key_id;
-    ngx_str_t                          *datetime;
-    double                              duration;
-    unsigned                            active:1;
-    unsigned                            discont:1; /* before */
-} ngx_rtmp_hls_frag_t;
-
-
-typedef struct {
-    ngx_str_t                           suffix;
-    ngx_array_t                         args;
-} ngx_rtmp_hls_variant_t;
+//typedef struct {
+//    uint64_t                            id;
+//    uint64_t                            key_id;
+//    ngx_str_t                          *datetime;
+//    double                              duration;
+//    unsigned                            active:1;
+//    unsigned                            discont:1; /* before */
+//} ngx_rtmp_hls_frag_t;
+//
+//
+//typedef struct {
+//    ngx_str_t                           suffix;
+//    ngx_array_t                         args;
+//} ngx_rtmp_hls_variant_t;
 
 //
 //typedef struct {
