@@ -1115,7 +1115,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 return NGX_ERROR;
             }
             *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla '%s'", ctx->stream_id.data);
+//            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla '%s'", ctx->stream_id.data);
         }
         goto next;
     }
