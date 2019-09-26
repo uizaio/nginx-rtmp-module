@@ -797,6 +797,13 @@ ngx_rtmp_notify_record_done_create(ngx_rtmp_session_t *s, void *arg,
 }
 
 
+/**
+ * NGX_OK: mean user is passed to continue publish stream
+ * NGX_AGAIN: mean user is redirected to some where
+ * @param s
+ * @param in
+ * @return 
+ */
 static ngx_int_t
 ngx_rtmp_notify_parse_http_retcode(ngx_rtmp_session_t *s,
         ngx_chain_t *in)
@@ -1013,16 +1020,19 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_url_t                  *u;
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
+    u_char                      *p;
 
     static ngx_str_t    location = ngx_string("location");   
-    rc = ngx_rtmp_notify_parse_http_retcode(s, in);    
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla %d - %d", rc, NGX_AGAIN);
+    rc = ngx_rtmp_notify_parse_http_retcode(s, in);       
     if (rc == NGX_ERROR) {
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
         return NGX_ERROR;
     }
 
     if (rc != NGX_AGAIN) {
+        //will go next if on_publish return ok
+        p = in->buf->start;
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla %s", p);
         goto next;
     }
 
@@ -1033,8 +1043,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 
     rc = ngx_rtmp_notify_parse_http_header(s, in, &location, name,
                                            sizeof(name) - 1);
-    if (rc <= 0) {
-        //will go next if on_publish return ok
+    if (rc <= 0) {        
         goto next;
     }
     if (ngx_strncasecmp(name, (u_char *) "rtmp://", 7)) {
