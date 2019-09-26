@@ -338,7 +338,7 @@ static ngx_command_t ngx_rtmp_hls_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_hls_app_conf_t, hls_api_url),
       NULL
-    }
+    },
 
     ngx_null_command
 };
