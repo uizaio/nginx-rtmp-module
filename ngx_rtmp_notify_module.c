@@ -1057,7 +1057,6 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         }else{
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify: ducla nobody");
-        }else{
         }
         goto next;
     }
