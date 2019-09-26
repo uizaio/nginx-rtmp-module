@@ -1101,7 +1101,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         }
         body = ngx_rtmp_notify_parse_http_body(s, in, body);                
         if(body != NULL){                        
-//            ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
+            ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
 ////                        
 //            ctx->stream_id.len = strlen((const char*)body);
 //            ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
