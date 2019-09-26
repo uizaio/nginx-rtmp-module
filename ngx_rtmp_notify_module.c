@@ -1033,10 +1033,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 
     rc = ngx_rtmp_notify_parse_http_header(s, in, &location, name,
                                            sizeof(name) - 1);
+    
     if (rc <= 0) {
         goto next;
     }
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: ducla '%s'", v->name);
     if (ngx_strncasecmp(name, (u_char *) "rtmp://", 7)) {
         *ngx_cpymem(v->name, name, rc) = 0;
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
@@ -1072,7 +1074,6 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                       "notify: push failed '%V'", &local_name);
         return NGX_ERROR;
     }
-
     ngx_rtmp_relay_push(s, &local_name, &target);
 
 next:
@@ -1119,7 +1120,7 @@ ngx_rtmp_notify_play_handle(ngx_rtmp_session_t *s,
     if (ngx_strncasecmp(name, (u_char *) "rtmp://", 7)) {
         *ngx_cpymem(v->name, name, rc) = 0;
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: play redirect to '%s'", v->name);
+                      "notify: play redirect to '%s'", v->name);        
         goto next;
     }
 
