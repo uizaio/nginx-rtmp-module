@@ -71,4 +71,3 @@ typedef struct {
 extern ngx_module_t  ngx_rtmp_hls_module;
 
 #endif /* NGX_RTMP_HLS_MODULE_H */
-
