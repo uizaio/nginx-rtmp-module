@@ -1114,7 +1114,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", ctx->playlist.data);
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", ctx->playlist_bak.data);
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", ctx->name.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", stream.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", ctx->stream.data);
             }                        
         }
         goto next;
