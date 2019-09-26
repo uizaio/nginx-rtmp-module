@@ -1008,6 +1008,25 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
     *p = '\0';
 }
 
+static u_char*
+ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
+{
+    u_char *p;
+    u_char c1,c2,c3,c4;//header always end with \r\n\r\n
+    
+    p = in->buf->start;
+    while(p != in->buf->last){
+        c1= *p;
+        c2 = *(p + 1);
+        c3 = *(p + 2);
+        c4 = *(p + 3);
+        if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
+            return p + 4;
+        }
+    }
+    return NULL;
+}
+
 
 static ngx_int_t
 ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
@@ -1020,7 +1039,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_url_t                  *u;
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
-    u_char                      *p;
+    u_char                      *body;
 
     static ngx_str_t    location = ngx_string("location");   
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);       
@@ -1031,8 +1050,15 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 
     if (rc != NGX_AGAIN) {
         //will go next if on_publish return ok
-        p = in->buf->start;
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla %s", p);
+        body = ngx_rtmp_notify_parse_http_body(s, in);
+        if(body != NULL){
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: ducla '%s'", body);
+        }else{
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: ducla nobody");
+        }else{
+        }
         goto next;
     }
 
