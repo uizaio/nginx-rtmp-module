@@ -1077,7 +1077,7 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
     *p = '\0';
 }
 
-char *str_replace(u_char *orig, u_char *rep, u_char *with)
+char *str_replace(char *orig, char *rep, char *with)
 {
     char *result;
     char *ins;
