@@ -1103,6 +1103,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     if (rc != NGX_AGAIN) {
         //will go next if on_publish return ok
         body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * 128);
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla");
         if(body == NULL){
             return NGX_ERROR;
         }
