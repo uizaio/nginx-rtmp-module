@@ -1056,13 +1056,13 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, u_char *
     //we need to remove any space at the begining and end of body
     if(is_body == 1){        
         for(begin = 0; begin <= i; begin++){
-            c1 = (tmp_body + begin);
+            c1 = *(tmp_body + begin);
             if(c1 != ' ' && c1 != '\r' && c1 != '\n'){
                 break;
             }
         }
         for(end = i; end >= 0; end--){
-            c1 = (tmp_body + end);
+            c1 = *(tmp_body + end);
             if(c1 != ' ' && c1 != '\r' && c1 != '\n'){
                 break;
             }
