@@ -66,5 +66,7 @@ typedef struct {
     ngx_rtmp_hls_variant_t             *var;
 } ngx_rtmp_hls_ctx_t;
 
+extern ngx_module_t  ngx_rtmp_hls_module;
+
 #endif /* NGX_RTMP_HLS_MODULE_H */
 
