@@ -11,6 +11,7 @@
 #include <ngx_rtmp_codec_module.h>
 #include "ngx_rtmp_mpegts.h"
 #include "ngx_rtmp_notify_module.h"
+#include "ngx_rtmp_hls_module.h"
 
 
 static ngx_rtmp_publish_pt              next_publish;
@@ -49,39 +50,40 @@ typedef struct {
     ngx_array_t                         args;
 } ngx_rtmp_hls_variant_t;
 
-
-typedef struct {
-    unsigned                            opened:1;
-
-    ngx_rtmp_mpegts_file_t              file;
-
-    ngx_str_t                           playlist;
-    ngx_str_t                           playlist_bak;
-    ngx_str_t                           var_playlist;
-    ngx_str_t                           var_playlist_bak;
-    ngx_str_t                           stream;
-    ngx_str_t                           keyfile;
-    ngx_str_t                           name;
-    u_char                              key[16];
-
-    uint64_t                            frag;
-    uint64_t                            frag_ts;
-    uint64_t                            key_id;
-    ngx_uint_t                          nfrags;
-    ngx_rtmp_hls_frag_t                *frags; /* circular 2 * winfrags + 1 */
-
-    ngx_uint_t                          audio_cc;
-    ngx_uint_t                          video_cc;
-    ngx_uint_t                          key_frags;
-
-    uint64_t                            aframe_base;
-    uint64_t                            aframe_num;
-
-    ngx_buf_t                          *aframe;
-    uint64_t                            aframe_pts;
-
-    ngx_rtmp_hls_variant_t             *var;   
-} ngx_rtmp_hls_ctx_t;
+//
+//typedef struct {
+//    unsigned                            opened:1;
+//
+//    ngx_rtmp_mpegts_file_t              file;
+//
+//    ngx_str_t                           playlist;
+//    ngx_str_t                           playlist_bak;
+//    ngx_str_t                           var_playlist;
+//    ngx_str_t                           var_playlist_bak;
+//    ngx_str_t                           stream;
+//    ngx_str_t                           keyfile;
+//    ngx_str_t                           name;
+//    u_char                              key[16];
+//
+//    uint64_t                            frag;
+//    uint64_t                            frag_ts;
+//    uint64_t                            key_id;
+//    ngx_uint_t                          nfrags;
+//    ngx_rtmp_hls_frag_t                *frags; /* circular 2 * winfrags + 1 */
+//
+//    ngx_uint_t                          audio_cc;
+//    ngx_uint_t                          video_cc;
+//    ngx_uint_t                          key_frags;
+//
+//    uint64_t                            aframe_base;
+//    uint64_t                            aframe_num;
+//
+//    ngx_buf_t                          *aframe;
+//    uint64_t                            aframe_pts;
+//
+//    ngx_rtmp_hls_variant_t             *var;
+//    ngx_str_t                           stream_id;//stream id of live entity
+//} ngx_rtmp_hls_ctx_t;
 
 
 typedef struct {
@@ -1377,8 +1379,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_buf_t                      *b;
     size_t                          len;
     ngx_rtmp_hls_variant_t         *var;
-    ngx_uint_t                      n;
-    ngx_rtmp_notify_ctx_t           *notify_ctx;
+    ngx_uint_t                      n;    
 
     hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);    
     if (hacf == NULL || !hacf->hls || hacf->path.len == 0) {
@@ -1388,11 +1389,6 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (s->auto_pushed) {
         goto next;
     }
-    notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
-    if(notify_ctx == NULL){
-        return NGX_ERROR;
-    }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: stream_id: '%s'", notify_ctx->stream_id.data);
     ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                    "hls: publish: name='%s' type='%s'",
                    v->name, v->type);

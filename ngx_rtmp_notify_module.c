@@ -12,7 +12,8 @@
 #include "ngx_rtmp_netcall_module.h"
 #include "ngx_rtmp_record_module.h"
 #include "ngx_rtmp_relay_module.h"
-#include "ngx_rtmp_notify_module.h"
+#include "ngx_rtmp_hls_module.h"
+#include "hls/ngx_rtmp_hls_module.h"
 
 
 static ngx_rtmp_connect_pt                      next_connect;
@@ -83,14 +84,13 @@ typedef struct {
 } ngx_rtmp_notify_srv_conf_t;
 
 
-//typedef struct {
-//    ngx_uint_t                                  flags;
-//    u_char                                      name[NGX_RTMP_MAX_NAME];
-//    u_char                                      args[NGX_RTMP_MAX_ARGS];
-//    ngx_event_t                                 update_evt;
-//    time_t                                      start;
-//    ngx_str_t                                   stream_id;//stream id of live entity
-//} ngx_rtmp_notify_ctx_t;
+typedef struct {
+    ngx_uint_t                                  flags;
+    u_char                                      name[NGX_RTMP_MAX_NAME];
+    u_char                                      args[NGX_RTMP_MAX_ARGS];
+    ngx_event_t                                 update_evt;
+    time_t                                      start;    
+} ngx_rtmp_notify_ctx_t;
 
 
 typedef struct {
@@ -1091,7 +1091,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
     u_char                      *body;
-    ngx_rtmp_notify_ctx_t       *ctx;
+    ngx_rtmp_hls_ctx_t           *ctx;
 
     static ngx_str_t    location = ngx_string("location");   
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);       
@@ -1107,7 +1107,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         }
         body = ngx_rtmp_notify_parse_http_body(s, in, body);                
         if(body != NULL){                        
-            ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);   
+            ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                         
             ctx->stream_id.len = strlen((const char*)body);
             ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
@@ -1115,7 +1115,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 return NGX_ERROR;
             }
             *ngx_cpymem(ctx->stream_id.data, body, ctx->stream_id.len) = 0;
-//            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla '%s'", ctx->stream_id.data);
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: ducla '%s'", ctx->stream_id.data);
         }
         goto next;
     }
