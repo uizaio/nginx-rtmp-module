@@ -1013,8 +1013,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in)
         for(i = begin; i <= end; i++){
             *(body.data + j) = *(tmp_body + i); 
             j++;
-        }
-        *(body.data + j) = '\0';
+        }        
     }
     return body;
 }
@@ -1154,6 +1153,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 //                str_replace(ctx->playlist.data, ctx->name.data, body.data);
 //                str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
 //                str_replace(ctx->stream.data, ctx->name.data, body.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: length '%d'", body.len);
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", str_replace(ctx->playlist.data, ctx->name.data, body.data));
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", str_replace(ctx->playlist_bak.data, ctx->name.data, body.data));
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", body.data);
