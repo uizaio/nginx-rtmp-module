@@ -1090,7 +1090,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
     u_char                      *body;
-    ngx_rtmp_notify_ctx_t       ctx;
+    ngx_rtmp_notify_ctx_t       *ctx;
 
     static ngx_str_t    location = ngx_string("location");   
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);       
