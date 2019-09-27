@@ -1086,7 +1086,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     }    
     free(tmp_body);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1088: %d", body.len);
+                          "notify-1088: %d", j);
     return body;
 }
 
