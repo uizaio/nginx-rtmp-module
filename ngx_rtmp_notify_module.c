@@ -1146,11 +1146,6 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
             if(ctx != NULL){
-                ctx->stream_id.len = body.len;
-                ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
-                if(ctx->stream_id.data == NULL){
-                    return NGX_ERROR;
-                }
                 ngx_memcpy(ctx->stream_id.data, body.data, body.len);                
                 p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
                 if(p != NULL){
@@ -1167,8 +1162,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->stream.data = p;
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
-                ctx->name.data = ctx->stream_id.data;
-                ctx->name.len = ctx->stream_id.len;
+                ctx->name.data = body.data;
+                ctx->name.len = body.len;
             }                        
         }
         goto next;
