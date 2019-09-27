@@ -1054,7 +1054,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     }    
     //we need to remove any space at the begining and end of body
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1056: %s", content_length);
+                          "notify-1056: %d", content_length);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-1058: %s", tmp_body);
     i--;
