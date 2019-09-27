@@ -1074,7 +1074,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             }
         }        
         //FIXME: get to end or end - 1?                   
-        body.data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));
+        body.data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));        
         if(body.data == NULL){
             return body;
         }              
@@ -1086,7 +1086,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     }    
     free(tmp_body);
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1088: %s", body.data);
+                          "notify-1088: %d", body.len);
     return body;
 }
 
