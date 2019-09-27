@@ -82,7 +82,7 @@ typedef struct {
 } http_header;
 
 typedef struct {  
-    http_header                                 headers[16];
+    http_header                                 hs[16];
     int                                         count;//number of headers
 } http_headers;
 
@@ -988,10 +988,10 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
                     }
                 }
                 for(k = 0; k < j; k++){
-                    headers.header[h].name[k] = buff[k];
+                    headers.hs[h].name[k] = buff[k];
                 }
                 for(k = 0; i - k > j; k++){
-                    headers.header[h].value[k] = buff[i - k];
+                    headers.hs[h].value[k] = buff[i - k];
                 }
                 h++;//next header
                 i = 0;//reset buff
@@ -1210,7 +1210,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         headers = ngx_rtmp_notify_get_http_header(s, in);
         for(i = 0; i < headers.count; i++){
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1212:'%s'", headers.headers[i].name);
+                      "notify-1212:'%s'", headers.hs[i].name);
         }
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
