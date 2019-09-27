@@ -1024,9 +1024,8 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     u_char*  tmp_body;
     ngx_str_t body;    
     
-    content_length += 3;
-    ngx_pfree(s->connection->pool, tmp_body);//HACK:free it before use
-    tmp_body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * content_length);//extend for \n\r\n
+    content_length += 3;    
+    tmp_body = malloc(sizeof(u_char) * content_length);//extend for \n\r\n
     if(tmp_body == NULL){
         return body;
     }
@@ -1074,9 +1073,8 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
                 break;
             }
         }        
-        //FIXME: get to end or end - 1?
-        ngx_pfree(s->connection->pool, body.data);//HACK: free it before using
-        body.data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));
+        //FIXME: get to end or end - 1?        
+        body.data = malloc(sizeof(u_char) * (end - begin + 1));
         if(body.data == NULL){
             return body;
         }
@@ -1086,6 +1084,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             j++;
         }        
     }    
+    free(tmp_body);
     return body;
 }
 
@@ -1242,9 +1241,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
 //                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-//                      "notify-1164:'%s'", ctx->stream.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1238:'%s'", body.data);
+//                      "notify-1164:'%s'", ctx->stream.data);                
                 p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->name.data = p;
@@ -1252,6 +1249,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 }
             }                        
         }
+        free(body.data);
         goto next;
     }
 
