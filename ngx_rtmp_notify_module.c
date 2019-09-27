@@ -975,15 +975,17 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 buff[i] = c1;
                 i++;
                 
-            }else{
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-979: %s %d", buff, h);
+            }else{                
                 p1 = strtok(buff, delim);
                 while(p1 != NULL){
                     if(j == 0){
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "notify-983: %s", p1);
                         strcpy(header[h].name, p1);
                         j++;
                     }else{
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "notify-983: %s", p1);
                         strcpy(header[h].value, p1);
                         j = 0;
                         h++;
