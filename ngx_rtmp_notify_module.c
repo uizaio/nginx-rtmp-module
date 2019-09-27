@@ -1085,7 +1085,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             j++;
         }        
     }    
-    ngx_pfree(s->connection->pool, tmp_body); 
+//    ngx_pfree(s->connection->pool, tmp_body); 
     *(body.data + j + 1) = '\0';
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-1088: %s", body.data);    
@@ -1255,10 +1255,10 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 }
             }                        
         }
-        if(body.data != NULL){
-//            free(body.data);
-            ngx_pfree(s->connection->pool, body.data);
-        }        
+//        if(body.data != NULL){
+////            free(body.data);
+//            ngx_pfree(s->connection->pool, body.data);
+//        }        
         goto next;
     }
 
