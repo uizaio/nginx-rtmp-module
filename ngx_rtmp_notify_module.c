@@ -980,19 +980,15 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 //read all buff
                 for(j = 0; j < i; j++){
                     if(buff[j] != ':'){
-                        if(is_header_name == 0){
-                            header[h].name[k] = buff[j];                            
-                        }else{
-                            header[h].value[k] = buff[j];                            
-                        }                        
-                        k++;
-                    }else{
-                        if(is_header_name == 0){
-                            is_header_name = 1;
-                            k = 0;
-                        }                                                
+                        break;
                     }
-                }   
+                }
+                for(k = 0; k < j; k++){
+                    header[h].name[k] = buff[j];
+                }
+                for(k = 0; i - k > j; k++){
+                    header[h].value[k] = buff[i - k];
+                }
                 h++;//next header
                 i = 0;//reset buff
             }
@@ -1205,8 +1201,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     }
     
     if (rc != NGX_AGAIN) {        
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1145:'%s'", in->buf->start);
+//        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+//                      "notify-1145:'%s'", in->buf->start);
         ngx_rtmp_notify_get_http_header(s, in);
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
