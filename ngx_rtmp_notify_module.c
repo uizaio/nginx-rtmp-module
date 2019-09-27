@@ -985,7 +985,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                     }
                 }
                 for(k = 0; k < j; k++){
-                    header[h].name[k] = buff[j];
+                    header[h].name[k] = buff[k];
                 }
                 for(k = 0; i - k > j; k++){
                     header[h].value[k] = buff[i - k];
