@@ -1036,7 +1036,6 @@ ngx_rtmp_stat_handler(ngx_http_request_t *r)
         }
         return ngx_http_output_filter(r, &out);
     } else {
-        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "STAT XML!!!\n");
         ngx_rtmp_core_main_conf_t      *cmcf;
         ngx_chain_t                    *cl, *l, **ll, ***lll;
         off_t                           len;
