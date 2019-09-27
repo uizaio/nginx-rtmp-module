@@ -1011,7 +1011,7 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
  * @param body
  * @return 
  */
-static ngx_str_t
+static ngx_str_t*
 ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int content_length, ngx_str_t *body)
 {
     u_char *p;
@@ -1201,6 +1201,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     http_headers                headers;
     int                         i = 0;
     int                         content_length = 0;
+    ngx_rtmp_notify_app_conf_t  *nacf;
+    ngx_rtmp_hls_ctx_t          *ctx;
 
     static ngx_str_t    location = ngx_string("location");
 
