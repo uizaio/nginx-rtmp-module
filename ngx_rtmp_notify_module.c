@@ -76,6 +76,11 @@ typedef struct {
     ngx_flag_t                                  relay_redirect;
 } ngx_rtmp_notify_app_conf_t;
 
+typedef struct {
+    u_char *                                    name;
+    u_char *                                    value;
+} ngx_rtmp_notify_http_header;
+
 
 typedef struct {
     ngx_url_t                                  *url[NGX_RTMP_NOTIFY_SRV_MAX];
@@ -943,6 +948,57 @@ ngx_rtmp_notify_parse_http_header(ngx_rtmp_session_t *s,
     return NGX_OK;
 }
 
+static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_str_t* in)
+{
+    ngx_rtmp_notify_http_header header[12];
+    char        buff[256];
+    ngx_buf_t   *b;
+    char        *p, *p1;
+    char        c1,c2,c3,c4;//header always end with \r\n\r\n    
+    int         i = 0;
+    char        delim[] = ":";
+    int         j = 0;
+    int         h = 0;
+    
+    
+    while(in){
+        b = in->buf;
+        for (p = b->pos; p != b->last; ++p) {
+            c1 = *p;
+            c2 = *(p + 1);
+            c3 = *(p + 2);
+            c4 = *(p + 3);
+            if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
+                break;//end of header
+            }
+            if(c1 != '\r' && c2 != '\n'){
+                buff[i] = c1;
+                i++;
+                
+            }else{
+                p1 = strtok(buff, delim);
+                while(p1 != NULL){
+                    if(j == 0){
+                        header[h].name = p1;
+                        j++;
+                    }else{
+                        header[h].value = p1;
+                        j = 0;
+                    }
+                }
+                h++;
+                i = 0;
+            }
+        }
+        in = in->next;
+    }
+    for(i = 0; i < h; i++){
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "notify-997: %s", header[i].name);
+    }
+    
+}
+
 
 /**
  * Get body of response from http response
@@ -1141,11 +1197,10 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         return NGX_ERROR;
     }
     
-    if (rc != NGX_AGAIN) {
-        ngx_rtmp_notify_parse_http_header(s, in, &location, name,
-                                           sizeof(name) - 1);
+    if (rc != NGX_AGAIN) {        
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1145:'%s'", *name);
+                      "notify-1145:'%s'", in->buf->start);
+        ngx_rtmp_notify_get_http_header(s, in);
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
