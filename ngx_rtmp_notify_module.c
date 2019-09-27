@@ -1157,13 +1157,13 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->playlist.data = p;
                     ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
                 }
-                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "notify-1160: %s", &ctx->playlist.data);
+                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "notify-1160: %s", ctx->playlist.data);
                 p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->playlist_bak.data = p;
                     ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
                 }
-                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "notify-1166: %s", &ctx->playlist_bak.data);
+                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "notify-1166: %s", ctx->playlist_bak.data);
                 p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->stream.data = p;
