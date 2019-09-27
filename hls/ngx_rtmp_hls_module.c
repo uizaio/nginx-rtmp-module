@@ -1029,7 +1029,7 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
                       "hls: failed to initialize hls encryption");
         return NGX_ERROR;
     }
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", ctx->stream.data);
     if (ngx_rtmp_mpegts_open_file(&ctx->file, ctx->stream.data,
                                   s->connection->log)
         != NGX_OK)

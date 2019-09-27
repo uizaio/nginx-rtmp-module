@@ -1166,14 +1166,10 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->stream.data = p;
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", ctx->playlist.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", ctx->playlist_bak.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", body.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", ctx->stream.data);
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", str_replace(ctx->playlist.data, ctx->name.data, body.data));
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", str_replace(ctx->playlist_bak.data, ctx->name.data, body.data));
+//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", ctx->playlist.data);
+//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", ctx->playlist_bak.data);
 //                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", body.data);
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", str_replace(ctx->stream.data, ctx->name.data, body.data));
+//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", ctx->stream.data);
             }                        
         }
         goto next;
