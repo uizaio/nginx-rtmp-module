@@ -1050,6 +1050,9 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
                 } 
             }                       
         }
+        if(i > content_length){
+            break;
+        }
         in = in->next;
     }    
     //we need to remove any space at the begining and end of body
