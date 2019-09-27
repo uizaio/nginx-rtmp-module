@@ -77,8 +77,8 @@ typedef struct {
 } ngx_rtmp_notify_app_conf_t;
 
 typedef struct {
-    u_char *                                    name;
-    u_char *                                    value;
+    u_char                                    name[128];
+    u_char                                    value[128];
 } ngx_rtmp_notify_http_header;
 
 
@@ -955,8 +955,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
     ngx_buf_t   *b;
     char        *p, *p1;
     char        c1,c2,c3,c4;//header always end with \r\n\r\n    
-    int         i = 0;
-    char        delim[] = ":";
+    int         i = 0;    
     int         j = 0;
     int         h = 0;
     int         k = 0;
