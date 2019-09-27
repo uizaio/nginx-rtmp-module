@@ -948,12 +948,12 @@ ngx_rtmp_notify_parse_http_header(ngx_rtmp_session_t *s,
     return NGX_OK;
 }
 
-static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* in)
-{
-    ngx_rtmp_notify_http_header header[12];
+static int ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* in, 
+        ngx_rtmp_notify_http_header* headers)
+{    
     char        buff[256];
     ngx_buf_t   *b;
-    char        *p, *p1;
+    char        *p;
     char        c1,c2,c3,c4;//header always end with \r\n\r\n    
     int         i = 0;    
     int         j = 0;
@@ -977,30 +977,24 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 
             }else{  
                 //read all buff
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-981: %s", buff);
                 for(j = 0; j < i; j++){
                     if(buff[j] == ':'){
                         break;
                     }
                 }
                 for(k = 0; k < j; k++){
-                    header[h].name[k] = buff[k];
+                    (header + h)->name[k] = buff[k];
                 }
                 for(k = 0; i - k > j; k++){
-                    header[h].value[k] = buff[i - k];
+                    (header + h).value[k] = buff[i - k];
                 }
                 h++;//next header
                 i = 0;//reset buff
             }
         }
         in = in->next;
-    }
-    for(j = 0; j < h; j++){
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-998: %s", header[j].name);
-    }
-    
+    }    
+    return h;
 }
 
 
@@ -1190,8 +1184,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
     ngx_str_t                   body;
-    ngx_rtmp_hls_ctx_t           *ctx;
+    ngx_rtmp_hls_ctx_t          *ctx;
     u_char                      *p;
+    ngx_rtmp_header_t           headers[16];
+    int                         i = 0;
+    int                         content_length = 0;
 
     static ngx_str_t    location = ngx_string("location");
 
@@ -1204,7 +1201,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     if (rc != NGX_AGAIN) {        
 //        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
 //                      "notify-1145:'%s'", in->buf->start);
-        ngx_rtmp_notify_get_http_header(s, in);
+        ngx_rtmp_notify_get_http_header(s, in, headers);
+        
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
