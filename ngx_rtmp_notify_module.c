@@ -1026,7 +1026,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     
     content_length += 3;
     
-    tmp_body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * content_length);//extend for \n\r\n
+    tmp_body = malloc(sizeof(u_char) * content_length);//extend for \n\r\n
     if(tmp_body == NULL){
         return body;
     }
@@ -1085,6 +1085,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             j++;
         }        
     }
+    free(tmp_body);
     return body;
 }
 
