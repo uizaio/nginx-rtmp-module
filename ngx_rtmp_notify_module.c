@@ -1030,7 +1030,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
         return body;
     }
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1032: %s", tmp_body);
+                          "notify-1032: %d", content_length);
     while(in){
         b = in->buf;        
         for (p = b->pos; p != b->last; ++p) {
@@ -1048,10 +1048,10 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
                 if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
                     is_body = 1;
                 } 
-            }                       
-        }
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1053: %s", tmp_body);
+            }  
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "notify-1052: %s", tmp_body);
+        }        
         if(i > content_length){
             break;
         }
