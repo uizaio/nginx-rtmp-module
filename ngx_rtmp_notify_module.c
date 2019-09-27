@@ -1214,7 +1214,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 break;
             }
         }
-        body = ngx_rtmp_notify_parse_http_body(s, in);                
+        body = ngx_rtmp_notify_parse_http_body(s, in, content_length);                
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
             if(ctx != NULL){                              
