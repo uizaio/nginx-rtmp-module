@@ -1152,6 +1152,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     return NGX_ERROR;
                 }
                 ngx_memcpy(ctx->stream_id.data, body.data, body.len);
+                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "notify-1155: %Z", &ctx->stream_id);
                 p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->playlist.data = p;
@@ -1167,6 +1168,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->stream.data = p;
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
+                ctx->name.data = ctx->stream_id.data;
+                ctx->name.len = ctx->stream_id.len;
             }                        
         }
         goto next;

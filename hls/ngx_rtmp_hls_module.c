@@ -1318,15 +1318,9 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
     if (len + 1 + ctx->name.len + 1 > sizeof(zpath)) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: too long path");
         return NGX_ERROR;
-    }
-    if(ctx->stream_id.len == 0){
-        ngx_snprintf(zpath, sizeof(zpath) - 1, "%*s/%V%Z", len, path->data,
+    }    
+    ngx_snprintf(zpath, sizeof(zpath) - 1, "%*s/%V%Z", len, path->data,
                  &ctx->name);
-    }else{
-        ngx_snprintf(zpath, sizeof(zpath) - 1, "%*s/%V%Z", len, path->data,
-                 &ctx->stream_id);
-    }        
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1329: %s %s", zpath, ctx->stream_id.data);
     if (ngx_file_info(zpath, &fi) != NGX_FILE_ERROR) {
 
         if (ngx_is_dir(&fi)) {
