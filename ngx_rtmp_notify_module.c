@@ -1209,8 +1209,10 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 //                      "notify-1145:'%s'", in->buf->start);
         headers = ngx_rtmp_notify_get_http_header(s, in);
         for(i = 0; i < headers.count; i++){
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1212:'%s'", headers.hs[i].name);
+            if(strcmp(headers.hs[i].name, "Content-Length") == 0){
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify-1214: %s", headers.hs[i].name);
+            }
         }
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
