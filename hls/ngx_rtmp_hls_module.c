@@ -1029,6 +1029,8 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
                       "hls: failed to initialize hls encryption");
         return NGX_ERROR;
     }    
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "hls - 1033: %s", ctx->stream.data);
     if (ngx_rtmp_mpegts_open_file(&ctx->file, ctx->stream.data,
                                   s->connection->log)
         != NGX_OK)
@@ -1270,7 +1272,7 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
         return NGX_ERROR;
     }    
     ngx_snprintf(zpath, sizeof(zpath), "%V%Z", path); 
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: %s", zpath);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1273: %s", zpath);
     if (ngx_file_info(zpath, &fi) == NGX_FILE_ERROR) {
 
         if (ngx_errno != NGX_ENOENT) {
@@ -1320,7 +1322,7 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
 
     ngx_snprintf(zpath, sizeof(zpath) - 1, "%*s/%V%Z", len, path->data,
                  &ctx->name);
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1323: %s", zpath);
     if (ngx_file_info(zpath, &fi) != NGX_FILE_ERROR) {
 
         if (ngx_is_dir(&fi)) {
