@@ -1163,6 +1163,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 }
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify-1164:'%s'", ctx->stream.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify-1166:'%s'", body.data);
                 p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->name.data = p;
