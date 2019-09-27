@@ -1013,7 +1013,6 @@ ngx_rtmp_stat_handler(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
     if (slcf->format == NGX_RTMP_STAT_FORMAT_PROMETHEUS){
-        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "STAT PROMETHEUS!!!\n");
         ngx_int_t                 rc;
         ngx_chain_t               out;
         ngx_buf_t                 *b;
