@@ -1322,7 +1322,7 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
 
     ngx_snprintf(zpath, sizeof(zpath) - 1, "%*s/%V%Z", len, path->data,
                  &ctx->name);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1323: %s", zpath);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1323: %s", ctx->stream_id.data);
     if (ngx_file_info(zpath, &fi) != NGX_FILE_ERROR) {
 
         if (ngx_is_dir(&fi)) {

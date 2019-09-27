@@ -1146,11 +1146,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
             if(ctx != NULL){
-//                ctx->stream_id.len = body.len;
-//                ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
-//                if(ctx->stream_id.data == NULL){
-//                    return NGX_ERROR;
-//                }
+                ctx->stream_id.len = body.len;
+                ctx->stream_id.data = ngx_pcalloc(s->connection->pool, ctx->stream_id.len);
+                if(ctx->stream_id.data == NULL){
+                    return NGX_ERROR;
+                }
+                ngx_memcpy(ctx->stream_id.data, body.data, body.len);
                 p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->playlist.data = p;
@@ -1166,10 +1167,6 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->stream.data = p;
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist path '%s'", ctx->playlist.data);
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist bak path '%s'", ctx->playlist_bak.data);
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: name '%s'", body.data);
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: stream '%s'", ctx->stream.data);
             }                        
         }
         goto next;
