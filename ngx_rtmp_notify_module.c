@@ -1162,8 +1162,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx->stream.data = p;
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
-                ctx->name.data = body.data;
-                ctx->name.len = body.len;
+                p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
+                if(p != NULL){
+                    ctx->name.data = p;
+                    ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                }
             }                        
         }
         goto next;
