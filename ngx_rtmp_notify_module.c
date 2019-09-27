@@ -1012,7 +1012,7 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
  * @return 
  */
 static ngx_str_t
-ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int content_length)
+ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int content_length, ngx_str_t *body)
 {
     u_char *p;
     u_char c1,c2,c3,c4;//header always end with \r\n\r\n
@@ -1021,8 +1021,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     int     i = 0; 
     int     j = 0;
     int     begin, end;
-    u_char*  tmp_body;
-    ngx_str_t body;    
+    u_char*  tmp_body;      
     
     content_length += 3;    
     tmp_body = malloc(sizeof(u_char) * content_length);//extend for \n\r\n
@@ -1074,13 +1073,13 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             }
         }        
         //FIXME: get to end or end - 1?        
-        body.data = malloc(sizeof(u_char) * (end - begin + 1));
+        body->data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 1));
         if(body.data == NULL){
             return body;
         }
-        body.len = end - begin + 1;
+        body->len = end - begin + 1;
         for(i = begin; i <= end; i++){
-            *(body.data + j) = *(tmp_body + i); 
+            *(body->data + j) = *(tmp_body + i); 
             j++;
         }        
     }    
@@ -1195,11 +1194,9 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_int_t                   rc;
     ngx_str_t                   local_name;
     ngx_rtmp_relay_target_t     target;
-    ngx_url_t                  *u;
-    ngx_rtmp_notify_app_conf_t *nacf;
+    ngx_url_t                  *u;    
     u_char                      name[NGX_RTMP_MAX_NAME];
-    ngx_str_t                   body;
-    ngx_rtmp_hls_ctx_t          *ctx;
+    ngx_str_t                   *body;    
     u_char                      *p;
     http_headers                headers;
     int                         i = 0;
@@ -1221,35 +1218,39 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 break;
             }
         }
-        body = ngx_rtmp_notify_parse_http_body(s, in, content_length);                
-        if(body.len > 0){                        
+        body = ngx_rtmp_notify_parse_http_body(s, in, content_length, body);                
+        if(body->len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
             if(ctx != NULL){                              
-                p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
+                p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body->data);
                 if(p != NULL){
                     ctx->playlist.data = p;
-                    ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
+                    ctx->playlist.len = ctx->playlist.len - ctx->name.len + body->len;
                 }                
-                p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+                p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body->data);
                 if(p != NULL){
                     ctx->playlist_bak.data = p;
-                    ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
+                    ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body->len;
                 }                
-                p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
+                p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body->data);
                 if(p != NULL){
                     ctx->stream.data = p;
-                    ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
+                    ctx->stream.len = ctx->stream.len - ctx->name.len + body->len;
                 }
 //                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-//                      "notify-1164:'%s'", ctx->stream.data);                
-                p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
+//                      "notify-1164:'%s'", ctx->stream.data);
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify-1238:'%s'", body->data);
+                p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body->data);
                 if(p != NULL){
                     ctx->name.data = p;
-                    ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                    ctx->name.len = ctx->name.len - ctx->name.len + body->len;
                 }
             }                        
         }
-        free(body.data);
+        if(body->data != NULL){
+            ngx_pfree(s->connection->pool, body->data);
+        }
         goto next;
     }
 
