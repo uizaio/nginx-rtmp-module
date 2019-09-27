@@ -1211,7 +1211,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         for(i = 0; i < headers.count; i++){
             if(strcmp(headers.hs[i].name, "Content-Length") == 0){
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1214: %d", atoi(headers.hs[i].data));
+                      "notify-1214: %d", atoi(headers.hs[i].value));
             }
         }
         body = ngx_rtmp_notify_parse_http_body(s, in);                
