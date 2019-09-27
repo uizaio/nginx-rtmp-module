@@ -997,10 +997,10 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
         }
         in = in->next;
     }
-//    for(i = 0; i < h; i++){
-//        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-//                          "notify-999: %s", header[i].name);
-//    }
+    for(i = 0; i < h; i++){
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "notify-999: %s", header[i].name);
+    }
     
 }
 
