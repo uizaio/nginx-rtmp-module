@@ -958,7 +958,7 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
     http_headers headers;
     char        buff[256];
     ngx_buf_t   *b;
-    char        *p, *p1;
+    char        *p;
     char        c1,c2,c3,c4;//header always end with \r\n\r\n    
     int         i = 0;    
     int         j = 0;
@@ -990,8 +990,8 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
                 for(k = 0; k < j; k++){
                     headers.hs[h].name[k] = buff[k];
                 }
-                for(k = 0; i - k > j; k++){
-                    headers.hs[h].value[k] = buff[i - k];
+                for(k = 0; k + j < i; k++){
+                    headers.hs[h].value[k] = buff[k + j + 1];
                 }
                 h++;//next header
                 i = 0;//reset buff
