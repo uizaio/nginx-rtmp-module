@@ -959,6 +959,8 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
     char        delim[] = ":";
     int         j = 0;
     int         h = 0;
+    int         k = 0;
+    int         is_header_name = 0;
     
     
     while(in){
@@ -975,33 +977,32 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 buff[i] = c1;
                 i++;
                 
-            }else{                
-                p1 = strtok(buff, delim);
-                while(p1 != NULL){
-                    if(j == 0){
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-983: %s", p1);
-                        strcpy(header[h].name, p1);
-                        j++;
+            }else{  
+                //read all buff
+                for(j = 0; j < i; j++){
+                    if(buff[j] != ':'){
+                        if(is_header_name == 0){
+                            *(header[h].name + k) = buff[j];                            
+                        }else{
+                            *(header[h].value + k) = buff[j];                            
+                        }                        
+                        k++;
                     }else{
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-983: %s", p1);
-                        strcpy(header[h].value, p1);
-                        j = 0;
-                        h++;
-                        break;
+                        if(is_header_name == 0){
+                            is_header_name = 1;
+                            k = 0;
+                        }                                                
                     }
-                    //make it start from the last it rememebered
-                    p1 = strtok(NULL, delim);
-                }                
-                i = 0;
+                }   
+                h++;//next header
+                i = 0;//reset buff
             }
         }
         in = in->next;
     }
     for(j = 0; j < h; j++){
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-999: %s", header[j].name);
+                          "notify-1004: %s", header[j].name);
     }
     
 }
