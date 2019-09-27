@@ -1050,7 +1050,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
                 } 
             }  
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1052: %s", tmp_body);
+                          "notify-1052: %c", c1);
         }        
         if(i >= content_length){
             break;
