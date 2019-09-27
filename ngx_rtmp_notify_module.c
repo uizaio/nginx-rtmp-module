@@ -986,18 +986,18 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                     }else{
                         header[h].value = p1;
                         j = 0;
+                        h++;
                         break;
                     }
                     //make it start from the last it rememebered
                     p1 = strtok(NULL, delim);
-                }
-                h++;
+                }                
                 i = 0;
             }
         }
         in = in->next;
     }
-    for(j = 0; j < h; j++){
+    for(j = 0; j < h - 1; j++){
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-999: %s", header[j].name);
     }
