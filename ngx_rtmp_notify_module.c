@@ -985,6 +985,8 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                         header[h].value = p1;
                         j = 0;
                     }
+                    //make it start from the last it rememebered
+                    p1 = strtok(NULL, delim);
                 }
                 h++;
                 i = 0;
