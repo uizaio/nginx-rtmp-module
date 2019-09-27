@@ -981,10 +981,10 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 p1 = strtok(buff, delim);
                 while(p1 != NULL){
                     if(j == 0){
-                        header[h].name = p1;
+                        strcpy(header[h].name, p1);
                         j++;
                     }else{
-                        header[h].value = p1;
+                        strcpy(header[h].value, p1);
                         j = 0;
                         h++;
                         break;
@@ -997,7 +997,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
         }
         in = in->next;
     }
-    for(j = 0; j < h - 1; j++){
+    for(j = 0; j < h; j++){
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-999: %s", header[j].name);
     }
