@@ -1025,7 +1025,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
     ngx_str_t body;    
     
     content_length += 3;    
-    tmp_body = malloc(sizeof(u_char) * content_length);//extend for \n\r\n
+    tmp_body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * content_length);//extend for \n\r\n
     if(tmp_body == NULL){
         return body;
     }
@@ -1054,9 +1054,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
         }
         in = in->next;
     }    
-    //we need to remove any space at the begining and end of body
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1056: %d", content_length);
+    //we need to remove any space at the begining and end of body    
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-1058: %s", tmp_body);
     i--;
@@ -1085,7 +1083,7 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             j++;
         }        
     }    
-    free(tmp_body);    
+    ngx_pfree(s->connection->pool, tmp_body);    
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-1088: %s", body.data);    
     return body;
