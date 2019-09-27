@@ -949,7 +949,7 @@ ngx_rtmp_notify_parse_http_header(ngx_rtmp_session_t *s,
 }
 
 static int ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* in, 
-        ngx_rtmp_notify_http_header* headers)
+        ngx_rtmp_notify_http_header* header)
 {    
     char        buff[256];
     ngx_buf_t   *b;
