@@ -1151,18 +1151,18 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
 //                if(ctx->stream_id.data == NULL){
 //                    return NGX_ERROR;
 //                }
-                p = str_replace(ctx->playlist.data, ctx->name.data, body.data);
+                p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->playlist.data = p;
                     ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
                 }
-                p = str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+                p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->playlist_bak.data = p;
                     ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
                 }
-                p = str_replace(ctx->stream.data, ctx->name.data, body.data);
-                if(p != null){
+                p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
+                if(p != NULL){
                     ctx->stream.data = p;
                     ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                 }
