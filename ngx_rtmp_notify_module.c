@@ -1038,8 +1038,8 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             if(is_body == 1){
                 *(tmp_body + i) = c1;                
                 i++;
-                if(i > content_length){
-                    goto next;
+                if(i >= content_length){
+                    break;
                 }
             }else{                
                 c2 = *(p + 1);
@@ -1052,12 +1052,10 @@ ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int cont
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                           "notify-1052: %s", tmp_body);
         }        
-        if(i > content_length){
+        if(i >= content_length){
             break;
         }
         in = in->next;
-        next:
-                    break;
     }    
     //we need to remove any space at the begining and end of body    
 //    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
