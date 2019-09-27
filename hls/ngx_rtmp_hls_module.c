@@ -1324,7 +1324,7 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
                  &ctx->name);
     }else{
         ngx_snprintf(zpath, sizeof(zpath) - 1, "%*s/%V%Z", len, path->data,
-                 &ctx->stream_id.data);
+                 ctx->stream_id);
     }        
     if (ngx_file_info(zpath, &fi) != NGX_FILE_ERROR) {
 
