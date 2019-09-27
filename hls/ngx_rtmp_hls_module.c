@@ -1272,7 +1272,7 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
         return NGX_ERROR;
     }    
     ngx_snprintf(zpath, sizeof(zpath), "%V%Z", path); 
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1273: %s", zpath);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls-1275: %s", zpath);
     if (ngx_file_info(zpath, &fi) == NGX_FILE_ERROR) {
 
         if (ngx_errno != NGX_ENOENT) {
@@ -1344,7 +1344,8 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
     }
 
     /* NGX_ENOENT */
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "hls - 1348: %s'", zpath);
     if (ngx_create_dir(zpath, NGX_RTMP_HLS_DIR_ACCESS) == NGX_FILE_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "hls: " ngx_create_dir_n " failed on '%s'", zpath);
