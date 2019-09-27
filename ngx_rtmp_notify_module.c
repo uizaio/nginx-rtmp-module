@@ -971,7 +971,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
             if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
                 break;//end of header
             }
-            if(c1 != '\r' /*&& c2 != '\n'*/){
+            if(c1 != '\n' /*&& c2 != '\n'*/){
                 buff[i] = c1;
                 i++;
                 
