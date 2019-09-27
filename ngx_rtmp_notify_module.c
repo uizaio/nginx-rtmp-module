@@ -1145,8 +1145,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         body = ngx_rtmp_notify_parse_http_body(s, in);                
         if(body.len > 0){                        
             ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
-            if(ctx != NULL){
-                ngx_memcpy(ctx->stream_id.data, body.data, body.len);                
+            if(ctx != NULL){                              
                 p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
                 if(p != NULL){
                     ctx->playlist.data = p;
