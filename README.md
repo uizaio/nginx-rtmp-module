@@ -286,10 +286,10 @@ rtmp_auto_push directive.
             location /stat {
                 rtmp_stat all;
                 # use prometheus format, if you is not set then default xml format.
-				rtmp_stat_display_format prometheus;
-				# addition text size for prometheus format only
+		rtmp_stat_display_format prometheus;
+		# addition text size for prometheus format only
                 # if not set then default 30720 (30Kb)
-				rtmp_stat_prometheus_sizes 30720;
+		rtmp_stat_prometheus_sizes 30720;
                 # If format is xml, Use this stylesheet to view XML
                 # as web page in browser
                 rtmp_stat_stylesheet stat.xsl;
