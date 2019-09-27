@@ -1205,8 +1205,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     }
     
     if (rc != NGX_AGAIN) {        
-//        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-//                      "notify-1145:'%s'", in->buf->start);
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify-1208:'%s'", in->buf->start);
         headers = ngx_rtmp_notify_get_http_header(s, in);
         for(i = 0; i < headers.count; i++){
             if(strcmp(headers.hs[i].name, "Content-Length") == 0){
