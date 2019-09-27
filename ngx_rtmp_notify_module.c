@@ -977,7 +977,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 
             }else{
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-979: %s-%d", buff, h);
+                          "notify-979: %s %d", buff, h);
                 p1 = strtok(buff, delim);
                 while(p1 != NULL){
                     if(j == 0){
