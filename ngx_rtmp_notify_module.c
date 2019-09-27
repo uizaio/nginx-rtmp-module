@@ -958,8 +958,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
     int         i = 0;    
     int         j = 0;
     int         h = 0;
-    int         k = 0;
-    int         is_header_name = 0;
+    int         k = 0;    
     
     
     while(in){
@@ -978,8 +977,10 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
                 
             }else{  
                 //read all buff
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                          "notify-981: %s", buff);
                 for(j = 0; j < i; j++){
-                    if(buff[j] != ':'){
+                    if(buff[j] == ':'){
                         break;
                     }
                 }
@@ -997,7 +998,7 @@ static void ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* 
     }
     for(j = 0; j < h; j++){
         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                          "notify-1004: %s", header[j].name);
+                          "notify-998: %s", header[j].name);
     }
     
 }
