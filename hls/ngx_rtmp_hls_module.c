@@ -958,9 +958,7 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "hls: failed to initialize hls encryption");
         return NGX_ERROR;
-    }    
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "hls - 1033: %s", ctx->stream.data);
+    }
     if (ngx_rtmp_mpegts_open_file(&ctx->file, ctx->stream.data,
                                   s->connection->log)
         != NGX_OK)
@@ -2080,7 +2078,12 @@ ngx_rtmp_hls_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
     return next_stream_eof(s, v);
 }
 
-
+/**
+ * Clean up stream directory
+ * @param ppath
+ * @param playlen
+ * @return 
+ */
 static ngx_int_t
 ngx_rtmp_hls_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
 {
@@ -2234,6 +2237,8 @@ static time_t
 #endif
 ngx_rtmp_hls_cleanup(void *data)
 {
+    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
+                              "hls: cleanup started");
     ngx_rtmp_hls_cleanup_t *cleanup = data;
 
     ngx_rtmp_hls_cleanup_dir(&cleanup->path, cleanup->playlen);
@@ -2394,7 +2399,8 @@ ngx_rtmp_hls_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
         if (conf->slot == NULL) {
             return NGX_CONF_ERROR;
         }
-
+        //http://nginx.org/en/docs/dev/development_guide.html keyword: ngx_path_t
+        //this handler will be run time to time
         conf->slot->manager = ngx_rtmp_hls_cleanup;
         conf->slot->name = conf->path;
         conf->slot->data = cleanup;
