@@ -34,56 +34,6 @@ static ngx_int_t ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s,
 #define NGX_RTMP_HLS_DIR_ACCESS         0744
 
 
-//typedef struct {
-//    uint64_t                            id;
-//    uint64_t                            key_id;
-//    ngx_str_t                          *datetime;
-//    double                              duration;
-//    unsigned                            active:1;
-//    unsigned                            discont:1; /* before */
-//} ngx_rtmp_hls_frag_t;
-//
-//
-//typedef struct {
-//    ngx_str_t                           suffix;
-//    ngx_array_t                         args;
-//} ngx_rtmp_hls_variant_t;
-//
-//
-//typedef struct {
-//    unsigned                            opened:1;
-//
-//    ngx_rtmp_mpegts_file_t              file;
-//
-//    ngx_str_t                           playlist;
-//    ngx_str_t                           playlist_bak;
-//    ngx_str_t                           var_playlist;
-//    ngx_str_t                           var_playlist_bak;
-//    ngx_str_t                           stream;
-//    ngx_str_t                           keyfile;
-//    ngx_str_t                           name;
-//    u_char                              key[16];
-//
-//    uint64_t                            frag;
-//    uint64_t                            frag_ts;
-//    uint64_t                            key_id;
-//    ngx_uint_t                          nfrags;
-//    ngx_rtmp_hls_frag_t                *frags; /* circular 2 * winfrags + 1 */
-//
-//    ngx_uint_t                          audio_cc;
-//    ngx_uint_t                          video_cc;
-//    ngx_uint_t                          key_frags;
-//
-//    uint64_t                            aframe_base;
-//    uint64_t                            aframe_num;
-//
-//    ngx_buf_t                          *aframe;
-//    uint64_t                            aframe_pts;
-//
-//    ngx_rtmp_hls_variant_t             *var;
-//} ngx_rtmp_hls_ctx_t;
-
-
 typedef struct {
     ngx_str_t                           path;
     ngx_msec_t                          playlen;
@@ -91,33 +41,6 @@ typedef struct {
 } ngx_rtmp_hls_cleanup_t;
 
 
-typedef struct {
-    ngx_flag_t                          hls;
-    ngx_msec_t                          fraglen;
-    ngx_msec_t                          max_fraglen;
-    ngx_msec_t                          muxdelay;
-    ngx_msec_t                          sync;
-    ngx_msec_t                          playlen;
-    ngx_uint_t                          winfrags;
-    ngx_flag_t                          continuous;
-    ngx_flag_t                          nested;
-    ngx_str_t                           path;
-    ngx_uint_t                          naming;
-    ngx_uint_t                          datetime;
-    ngx_uint_t                          slicing;
-    ngx_uint_t                          type;
-    ngx_path_t                         *slot;
-    ngx_msec_t                          max_audio_delay;
-    size_t                              audio_buffer_size;
-    ngx_flag_t                          cleanup;
-    ngx_array_t                        *variant;
-    ngx_str_t                           base_url;
-    ngx_int_t                           granularity;
-    ngx_flag_t                          keys;
-    ngx_str_t                           key_path;
-    ngx_str_t                           key_url;
-    ngx_uint_t                          frags_per_key;
-} ngx_rtmp_hls_app_conf_t;
 
 
 #define NGX_RTMP_HLS_NAMING_SEQUENTIAL  1
@@ -330,6 +253,13 @@ static ngx_command_t ngx_rtmp_hls_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_hls_app_conf_t, frags_per_key),
       NULL },
+    { ngx_string("hls_hide_stream_key"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_flag_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_hls_app_conf_t, hide_stream_key),
+      NULL
+    },
 
     ngx_null_command
 };
@@ -2396,6 +2326,7 @@ ngx_rtmp_hls_create_app_conf(ngx_conf_t *cf)
     conf->granularity = NGX_CONF_UNSET;
     conf->keys = NGX_CONF_UNSET;
     conf->frags_per_key = NGX_CONF_UNSET_UINT;
+    conf->hide_stream_key = NGX_CONF_UNSET;
 
     return conf;
 }
@@ -2436,6 +2367,7 @@ ngx_rtmp_hls_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_str_value(conf->key_path, prev->key_path, "");
     ngx_conf_merge_str_value(conf->key_url, prev->key_url, "");
     ngx_conf_merge_uint_value(conf->frags_per_key, prev->frags_per_key, 0);
+    ngx_conf_merge_value(conf->hide_stream_key, prev->hide_stream_key, 0);
 
     if (conf->fraglen) {
         conf->winfrags = conf->playlen / conf->fraglen;

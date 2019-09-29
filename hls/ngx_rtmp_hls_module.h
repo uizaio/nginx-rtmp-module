@@ -66,6 +66,35 @@ typedef struct {
     ngx_rtmp_hls_variant_t             *var;
 } ngx_rtmp_hls_ctx_t;
 
+typedef struct {
+    ngx_flag_t                          hls;
+    ngx_msec_t                          fraglen;
+    ngx_msec_t                          max_fraglen;
+    ngx_msec_t                          muxdelay;
+    ngx_msec_t                          sync;
+    ngx_msec_t                          playlen;
+    ngx_uint_t                          winfrags;
+    ngx_flag_t                          continuous;
+    ngx_flag_t                          nested;
+    ngx_str_t                           path;
+    ngx_uint_t                          naming;
+    ngx_uint_t                          datetime;
+    ngx_uint_t                          slicing;
+    ngx_uint_t                          type;
+    ngx_path_t                         *slot;
+    ngx_msec_t                          max_audio_delay;
+    size_t                              audio_buffer_size;
+    ngx_flag_t                          cleanup;
+    ngx_array_t                        *variant;
+    ngx_str_t                           base_url;
+    ngx_int_t                           granularity;
+    ngx_flag_t                          keys;
+    ngx_str_t                           key_path;
+    ngx_str_t                           key_url;
+    ngx_uint_t                          frags_per_key;
+    ngx_flag_t                          hide_stream_key;
+} ngx_rtmp_hls_app_conf_t;
+
 extern ngx_module_t  ngx_rtmp_hls_module;
 
 #endif /* NGX_RTMP_HLS_MODULE_H */

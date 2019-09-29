@@ -1208,6 +1208,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     http_headers                headers;
     int                         i = 0;
     int                         content_length = 0;
+    ngx_rtmp_hls_app_conf_t     *hacf;
 
     static ngx_str_t    location = ngx_string("location");
 
@@ -1217,48 +1218,43 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         return NGX_ERROR;
     }
     
-    if (rc != NGX_AGAIN) {                
-        headers = ngx_rtmp_notify_get_http_header(s, in);
-        for(i = 0; i < headers.count; i++){
-            if(strcmp(headers.hs[i].name, "Content-Length") == 0){
-                content_length = atoi(headers.hs[i].value);
-                break;
+    if (rc != NGX_AGAIN) {     
+        hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
+        if(hacf != NULL && hacf->hide_stream_key){
+            headers = ngx_rtmp_notify_get_http_header(s, in);
+            for(i = 0; i < headers.count; i++){
+                if(strcmp(headers.hs[i].name, "Content-Length") == 0){
+                    content_length = atoi(headers.hs[i].value);
+                    break;
+                }
             }
-        }
-        body = ngx_rtmp_notify_parse_http_body(s, in, content_length);                
-        if(body.len > 0){                        
-            ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
-            if(ctx != NULL){                              
-                p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
-                if(p != NULL){
-                    ctx->playlist.data = p;
-                    ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
-                }                
-                p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
-                if(p != NULL){
-                    ctx->playlist_bak.data = p;
-                    ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
-                }                
-                p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
-                if(p != NULL){
-                    ctx->stream.data = p;
-                    ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
-                }
-//                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-//                      "notify-1164:'%s'", ctx->stream.data);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify-1238:'%s'", body.data);
-                p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
-                if(p != NULL){
-                    ctx->name.data = p;
-                    ctx->name.len = ctx->name.len - ctx->name.len + body.len;
-                }
-            }                        
-        }
-//        if(body.data != NULL){
-////            free(body.data);
-//            ngx_pfree(s->connection->pool, body.data);
-//        }        
+            body = ngx_rtmp_notify_parse_http_body(s, in, content_length);                
+            if(body.len > 0){                        
+                ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
+                if(ctx != NULL){                              
+                    p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->playlist.data = p;
+                        ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
+                    }                
+                    p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->playlist_bak.data = p;
+                        ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
+                    }                
+                    p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->stream.data = p;
+                        ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
+                    }
+                    p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->name.data = p;
+                        ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                    }
+                }                        
+            }
+        }           
         goto next;
     }
 
