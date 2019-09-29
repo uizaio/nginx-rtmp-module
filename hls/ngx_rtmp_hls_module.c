@@ -1269,8 +1269,6 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
     }
 
     /* NGX_ENOENT */
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "hls - 1348: %s'", zpath);
     if (ngx_create_dir(zpath, NGX_RTMP_HLS_DIR_ACCESS) == NGX_FILE_ERROR) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "hls: " ngx_create_dir_n " failed on '%s'", zpath);
@@ -2098,7 +2096,8 @@ ngx_rtmp_hls_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
     ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
                    "hls: cleanup path='%V' playlen=%M",
                    ppath, playlen);
-
+    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                              "hls: cleanup %V", ppath);
     if (ngx_open_dir(ppath, &dir) != NGX_OK) {
         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,
                       "hls: cleanup open dir failed '%V'", ppath);
@@ -2217,7 +2216,8 @@ ngx_rtmp_hls_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
         ngx_log_debug3(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
                        "hls: cleanup '%V' mtime=%T age=%T",
                        &name, mtime, ngx_cached_time->sec - mtime);
-
+        ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                              "hls: delete file %s", path);
         if (ngx_delete_file(path) == NGX_FILE_ERROR) {
             ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
                           "hls: cleanup " ngx_delete_file_n " failed on '%V'",
