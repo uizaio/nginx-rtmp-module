@@ -96,6 +96,7 @@ typedef struct {
 } ngx_rtmp_hls_app_conf_t;
 
 extern ngx_module_t  ngx_rtmp_hls_module;
+void ngx_rtmp_hls_restore_stream(ngx_rtmp_session_t *s);
 
 #endif /* NGX_RTMP_HLS_MODULE_H */
 

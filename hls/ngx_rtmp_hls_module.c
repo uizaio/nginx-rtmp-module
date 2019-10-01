@@ -988,7 +988,7 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
 }
 
 
-static void
+void
 ngx_rtmp_hls_restore_stream(ngx_rtmp_session_t *s)
 {
     ngx_rtmp_hls_ctx_t             *ctx;
@@ -1009,7 +1009,8 @@ ngx_rtmp_hls_restore_stream(ngx_rtmp_session_t *s)
     file.log = s->connection->log;
 
     ngx_str_set(&file.name, "m3u8");
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "hls: open file %s", ctx->playlist.data);
     file.fd = ngx_open_file(ctx->playlist.data, NGX_FILE_RDONLY, NGX_FILE_OPEN,
                             0);
     if (file.fd == NGX_INVALID_FILE) {
@@ -1166,7 +1167,11 @@ ngx_rtmp_hls_restore_stream(ngx_rtmp_session_t *s)
                 f->key_id = key_id;
 
                 ngx_rtmp_hls_next_frag(s);
-
+                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "hls: restore fragment '%*s' id=%uL, "
+                               "duration=%.3f, frag=%uL, nfrags=%ui",
+                               (size_t) (last - p), p, f->id, f->duration,
+                               ctx->frag, ctx->nfrags);
                 ngx_log_debug6(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                                "hls: restore fragment '%*s' id=%uL, "
                                "duration=%.3f, frag=%uL, nfrags=%ui",
@@ -1477,7 +1482,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
                    &ctx->playlist, &ctx->playlist_bak,
                    &ctx->stream, &ctx->keyfile);
 
-    if (hacf->continuous) {
+    if (hacf->continuous && !hacf->hide_stream_key) {        
         ngx_rtmp_hls_restore_stream(s);
     }
 
@@ -2096,7 +2101,7 @@ ngx_rtmp_hls_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
     ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
                    "hls: cleanup path='%V' playlen=%M",
                    ppath, playlen);
-    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
                               "hls: cleanup %V", ppath);
     if (ngx_open_dir(ppath, &dir) != NGX_OK) {
         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,

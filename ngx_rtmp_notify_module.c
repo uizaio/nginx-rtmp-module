@@ -1247,6 +1247,16 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                         ctx->name.len = ctx->name.len - ctx->name.len + body.len;
                     }
                 }                        
+            }else{
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: no hide key to implement");
+                return NGX_ERROR;
+            }
+            if(hacf->continuous){
+                //keep old ts file and begin from the latest ts chunk
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: restore from latest hls");
+                ngx_rtmp_hls_restore_stream(s);
             }
         }           
         goto next;
