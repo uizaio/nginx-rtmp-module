@@ -12,6 +12,7 @@
 #include "ngx_rtmp_netcall_module.h"
 #include "ngx_rtmp_record_module.h"
 #include "ngx_rtmp_relay_module.h"
+#include "hls/ngx_rtmp_hls_module.h"
 
 
 static ngx_rtmp_connect_pt                      next_connect;
@@ -74,6 +75,16 @@ typedef struct {
     ngx_flag_t                                  update_strict;
     ngx_flag_t                                  relay_redirect;
 } ngx_rtmp_notify_app_conf_t;
+
+typedef struct {
+    u_char                                    name[128];
+    u_char                                    value[128];
+} http_header;
+
+typedef struct {  
+    http_header                                 hs[16];
+    int                                         count;//number of headers
+} http_headers;
 
 
 typedef struct {
@@ -942,6 +953,139 @@ ngx_rtmp_notify_parse_http_header(ngx_rtmp_session_t *s,
     return NGX_OK;
 }
 
+static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_chain_t* in)
+{
+    http_headers headers;
+    char        buff[256];
+    ngx_buf_t   *b;
+    char        *p;
+    char        c1,c2,c3,c4;//header always end with \r\n\r\n    
+    int         i = 0;    
+    int         j = 0;
+    int         h = 0;
+    int         k = 0;    
+    
+    
+    while(in){
+        b = in->buf;
+        for (p = b->pos; p != b->last; ++p) {
+            c1 = *p;
+            c2 = *(p + 1);
+            c3 = *(p + 2);
+            c4 = *(p + 3);
+            if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
+                break;//end of header
+            }
+            if(c1 != '\n'){
+                buff[i] = c1;
+                i++;
+                
+            }else{  
+                //read all buff
+                for(j = 0; j < i; j++){
+                    if(buff[j] == ':'){
+                        break;
+                    }
+                }
+                for(k = 0; k < j; k++){
+                    headers.hs[h].name[k] = buff[k];
+                }
+                for(k = 0; k + j < i; k++){
+                    headers.hs[h].value[k] = buff[k + j + 1];
+                }
+                h++;//next header
+                i = 0;//reset buff
+            }
+        }
+        in = in->next;
+    } 
+    headers.count = h;
+    return headers;
+}
+
+
+/**
+ * Get body of response from http response
+ * @param s
+ * @param in
+ * @param body
+ * @return 
+ */
+static ngx_str_t
+ngx_rtmp_notify_parse_http_body(ngx_rtmp_session_t *s, ngx_chain_t *in, int content_length)
+{
+    u_char *p;
+    u_char c1,c2,c3,c4;//header always end with \r\n\r\n
+    ngx_buf_t      *b;    
+    int     is_body = 0;
+    int     i = 0; 
+    int     j = 0;
+    int     begin, end;
+    u_char*  tmp_body;
+    ngx_str_t body;    
+    
+    content_length += 3;    
+    tmp_body = ngx_pcalloc(s->connection->pool, sizeof(u_char) * content_length + 1);//extend for \n\r\n
+    if(tmp_body == NULL){
+        return body;
+    }
+    while(in){
+        b = in->buf;        
+        for (p = b->pos; p != b->last; ++p) {
+            c1= *p;
+            if(is_body == 1){
+                *(tmp_body + i) = c1;                
+                i++;
+                if(i >= content_length){
+                    *(tmp_body + i + 1) = '\0';
+                    break;
+                }
+            }else{                
+                c2 = *(p + 1);
+                c3 = *(p + 2);
+                c4 = *(p + 3);
+                if(c1 == '\r' && c2 == '\n' && c3 == '\r' && c4 == '\n'){
+                    is_body = 1;
+                } 
+            }              
+        }                
+        in = in->next;
+        if(i >= content_length){
+            break;
+        }
+    }    
+    //we need to remove any space at the begining and end of body;
+    i--;
+    if(is_body == 1){        
+        for(begin = 0; begin <= i; begin++){
+            c1 = *(tmp_body + begin);
+            if(c1 != ' ' && c1 != '\r' && c1 != '\n'){
+                break;
+            }
+        }
+        for(end = i; end >= 0; end--){
+            c1 = *(tmp_body + end);
+            if(c1 != ' ' && c1 != '\r' && c1 != '\n'){
+                break;
+            }
+        }        
+        //FIXME: get to end or end - 1?                   
+        body.data = ngx_pcalloc(s->connection->pool, sizeof(u_char) * (end - begin + 2));       
+//        body.data = malloc(sizeof(u_char) * (end - begin + 1));
+        if(body.data == NULL){
+            return body;
+        }              
+        body.len = end - begin + 1;
+        for(i = begin; i <= end; i++){
+            *(body.data + j) = *(tmp_body + i); 
+            j++;
+        }        
+    }    
+//    ngx_pfree(s->connection->pool, tmp_body); 
+    *(body.data + j + 1) = '\0';
+    return body;
+}
+
 
 static void
 ngx_rtmp_notify_clear_flag(ngx_rtmp_session_t *s, ngx_uint_t flag)
@@ -1001,6 +1145,45 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
     *p = '\0';
 }
 
+char *str_replace(char *orig, char *rep, char *with)
+{
+    char *result;
+    char *ins;
+    char *tmp;
+    int len_rep;
+    int len_with;
+    int len_front;
+    int count;
+    if(!orig || !rep){
+        return NULL;
+    }
+    len_rep = strlen(rep);
+    if(len_rep == 0){
+        return NULL;
+    }
+    if(!with){
+        with = "";
+    }
+    len_with = strlen(with);
+    ins = orig;
+    for(count = 0; tmp = strstr(ins, rep); ++count){
+        ins = tmp + len_rep;
+    }
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    if(!result){
+        return NULL;
+    }
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
+    }
+    strcpy(tmp, orig);
+    return result;
+}
+
 
 static ngx_int_t
 ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
@@ -1013,6 +1196,13 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     ngx_url_t                  *u;
     ngx_rtmp_notify_app_conf_t *nacf;
     u_char                      name[NGX_RTMP_MAX_NAME];
+    ngx_str_t                   body;
+    ngx_rtmp_hls_ctx_t          *ctx;
+    u_char                      *p;
+    http_headers                headers;
+    int                         i = 0;
+    int                         content_length = 0;
+    ngx_rtmp_hls_app_conf_t     *hacf;
 
     static ngx_str_t    location = ngx_string("location");
 
@@ -1021,8 +1211,54 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
         return NGX_ERROR;
     }
-
-    if (rc != NGX_AGAIN) {
+    
+    if (rc != NGX_AGAIN) {     
+        hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
+        if(hacf != NULL && hacf->hide_stream_key){
+            headers = ngx_rtmp_notify_get_http_header(s, in);
+            for(i = 0; i < headers.count; i++){
+                if(strcmp(headers.hs[i].name, "Content-Length") == 0){
+                    content_length = atoi(headers.hs[i].value);
+                    break;
+                }
+            }
+            body = ngx_rtmp_notify_parse_http_body(s, in, content_length);                
+            if(body.len > 0){                        
+                ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
+                if(ctx != NULL){                              
+                    p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->playlist.data = p;
+                        ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
+                    }                
+                    p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->playlist_bak.data = p;
+                        ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
+                    }                
+                    p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->stream.data = p;
+                        ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
+                    }
+                    p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
+                    if(p != NULL){
+                        ctx->name.data = p;
+                        ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                    }
+                }                        
+            }else{
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: no hide key to implement");
+                return NGX_ERROR;
+            }
+            if(hacf->continuous){
+                //keep old ts file and begin from the latest ts chunk
+                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: restore from latest hls");
+                ngx_rtmp_hls_restore_stream(s);
+            }
+        }           
         goto next;
     }
 
