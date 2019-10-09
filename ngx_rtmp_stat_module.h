@@ -89,15 +89,15 @@
 
 #define RTMP_CLIENT_DROPPED_FMT "# HELP node_rtmp_client_dropped.\n"    \
                     "# TYPE node_rtmp_client_dropped gauge\n" \
-                    "node_rtmp_client_dropped{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\",client=\"%V\"} %ui\n"
+                    "node_rtmp_client_dropped{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\",client=\"%V\"} %ui\n"
 
 #define RTMP_CLIENT_AVSYNC_FMT  "# HELP node_rtmp_client_avsync Number of clients dropped.\n"    \
                     "# TYPE node_rtmp_client_avsync counter\n" \
-                    "node_rtmp_client_avsync{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\",client=\"%V\"} %D\n"
+                    "node_rtmp_client_avsync{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\",client=\"%V\"} %D\n"
 
 #define RTMP_CLIENT_TIMESTAMP_FMT   "# HELP node_rtmp_client_timestamp_milliseconds.\n"    \
                     "# TYPE node_rtmp_client_timestamp_milliseconds counter\n"   \
-                    "node_rtmp_client_timestamp_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\",client=\"%V\"} %D\n"
+                    "node_rtmp_client_timestamp_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\",client=\"%V\"} %D\n"
 // meta/video
 #define RTMP_META_VIDEO_FPS_FMT "# HELP node_rtmp_meta_video_fps Frame Rate of video.\n"    \
                     "# TYPE node_rtmp_meta_video_fps gauge\n"   \
