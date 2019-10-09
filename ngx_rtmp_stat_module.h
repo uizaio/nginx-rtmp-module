@@ -22,9 +22,9 @@
                     "# TYPE node_rtmp_pid gauge\n"  \
                     "node_rtmp_pid{ngx_version=\"%s\",rtmp_version=\"%s\"} %ui\n"
 
-#define RTMP_UPTIME_FMT "# HELP node_rtmp_uptime_milliseconds This is the total number of milliseconds uptime.\n"    \
-                    "# TYPE node_rtmp_uptime_milliseconds counter\n" \
-                    "node_rtmp_uptime_milliseconds{ngx_version=\"%s\",rtmp_version=\"%s\"} %T\n"
+#define RTMP_UPTIME_FMT "# HELP node_rtmp_uptime_seconds This is the total number of seconds uptime.\n"    \
+                    "# TYPE node_rtmp_uptime_seconds counter\n" \
+                    "node_rtmp_uptime_seconds{ngx_version=\"%s\",rtmp_version=\"%s\"} %T\n"
                 
 #define RTMP_NACCEPTED_FMT  "# HELP node_rtmp_naccepted Total number of rtmp accepted.\n"  \
                     "# TYPE node_rtmp_naccepted counter\n"  \
