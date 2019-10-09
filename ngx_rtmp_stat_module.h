@@ -14,17 +14,17 @@
 
 #define STYLESHEET_DEFAULT "static/stat.xsl"
 
-// 30Kb
-#define METRIC_DEFAULT_SIZE 30720
+// 40Kb
+#define METRIC_DEFAULT_SIZE 40960
 // rtmp
 
 #define RTMP_PID_FMT "# HELP node_rtmp_pid pid value of rtmp.\n"  \
                     "# TYPE node_rtmp_pid gauge\n"  \
                     "node_rtmp_pid{ngx_version=\"%s\",rtmp_version=\"%s\"} %ui\n"
 
-#define RTMP_UPTIME_FMT "# HELP node_rtmp_uptime_seconds This is the total number of seconds uptime.\n"    \
-                    "# TYPE node_rtmp_uptime_seconds counter\n" \
-                    "node_rtmp_uptime_seconds{ngx_version=\"%s\",rtmp_version=\"%s\"} %T\n"
+#define RTMP_UPTIME_FMT "# HELP node_rtmp_uptime_milliseconds This is the total number of milliseconds uptime.\n"    \
+                    "# TYPE node_rtmp_uptime_milliseconds counter\n" \
+                    "node_rtmp_uptime_milliseconds{ngx_version=\"%s\",rtmp_version=\"%s\"} %T\n"
                 
 #define RTMP_NACCEPTED_FMT  "# HELP node_rtmp_naccepted Total number of rtmp accepted.\n"  \
                     "# TYPE node_rtmp_naccepted counter\n"  \
@@ -46,9 +46,9 @@
                     "# TYPE node_rtmp_bytes_out_bytes gauge\n"   \
                     "node_rtmp_bytes_out_bytes{ngx_version=\"%s\",rtmp_version=\"%s\"} %uL\n"
 // server/application/stream
-#define RTMP_STREAM_TIME_FMT    "# HELP node_rtmp_stream_time_seconds This is the total number of seconds time.\n"    \
-                    "# TYPE node_rtmp_stream_time_seconds counter\n" \
-                    "node_rtmp_stream_time_seconds{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\"} %i\n"
+#define RTMP_STREAM_TIME_FMT    "# HELP node_rtmp_stream_time_milliseconds This is the total number of milliseconds time.\n"    \
+                    "# TYPE node_rtmp_stream_time_milliseconds counter\n" \
+                    "node_rtmp_stream_time_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\"} %i\n"
 
 #define RTMP_STREAM_BW_IN_FMT   "# HELP node_rtmp_stream_bw_in_bits Bandwidth inputted of stream.\n" \
                     "# TYPE node_rtmp_stream_bw_in_bits gauge\n"   \
@@ -83,9 +83,9 @@
                     "# TYPE node_rtmp_client_id untyped\n"  \
                     "node_rtmp_client_id{pid=\"%ui\",app_name=\"%V\",session_id ="",stream_name=\"%s\",client=\"%V\"} %ui\n"
 
-#define RTMP_CLIENT_TIME_FMT    "# HELP node_rtmp_client_time_seconds This is the total seconds of a client.\n"    \
-                    "# TYPE node_rtmp_client_time_seconds counter\n" \
-                    "node_rtmp_client_time_seconds{pid=\"%ui\",app_name=\"%V\",session_id ="",stream_name=\"%s\",client=\"%V\"} %i\n"
+#define RTMP_CLIENT_TIME_FMT    "# HELP node_rtmp_client_time_milliseconds This is the total milliseconds of a client.\n"    \
+                    "# TYPE node_rtmp_client_time_milliseconds counter\n" \
+                    "node_rtmp_client_time_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id ="",stream_name=\"%s\",client=\"%V\"} %i\n"
 
 #define RTMP_CLIENT_DROPPED_FMT "# HELP node_rtmp_client_dropped.\n"    \
                     "# TYPE node_rtmp_client_dropped gauge\n" \
@@ -95,9 +95,9 @@
                     "# TYPE node_rtmp_client_avsync counter\n" \
                     "node_rtmp_client_avsync{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\",client=\"%V\"} %D\n"
 
-#define RTMP_CLIENT_TIMESTAMP_FMT   "# HELP node_rtmp_client_timestamp_seconds.\n"    \
-                    "# TYPE node_rtmp_client_timestamp_seconds counter\n"   \
-                    "node_rtmp_client_timestamp_seconds{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\",client=\"%V\"} %D\n"
+#define RTMP_CLIENT_TIMESTAMP_FMT   "# HELP node_rtmp_client_timestamp_milliseconds.\n"    \
+                    "# TYPE node_rtmp_client_timestamp_milliseconds counter\n"   \
+                    "node_rtmp_client_timestamp_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id="",stream_name=\"%s\",client=\"%V\"} %D\n"
 // meta/video
 #define RTMP_META_VIDEO_FPS_FMT "# HELP node_rtmp_meta_video_fps Frame Rate of video.\n"    \
                     "# TYPE node_rtmp_meta_video_fps gauge\n"   \
