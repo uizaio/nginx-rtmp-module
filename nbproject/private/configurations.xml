@@ -68,9 +68,11 @@
       <in>ngx_rtmp_send.c</in>
       <in>ngx_rtmp_shared.c</in>
       <in>ngx_rtmp_stat_module.c</in>
+      <in>ngx_rtmp_stat_module.h</in>
       <in>ngx_rtmp_streams.h</in>
       <in>ngx_rtmp_version.h</in>
     </df>
+    <itemPath>RELEASE_NOTE.txt</itemPath>
   </logicalFolder>
   <projectmakefile></projectmakefile>
   <confs>

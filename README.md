@@ -1,6 +1,16 @@
 # NGINX-based Media Streaming Server
 ## nginx-rtmp-module
 
+### Notice
+We fork this project for internal using.
+Now, we need to publish some internal feature for opensource community.
+
+For pulling request, please contact me `<ducla@uiza.io>`
+
+For updating new features/fixing bugs detail, please see RELEASE_NOTE.txt
+
+### Our homepage
+https://uiza.io
 
 ### Project blog
 
@@ -8,13 +18,7 @@
 
 ### Wiki manual
 
-  https://github.com/arut/nginx-rtmp-module/wiki/Directives
-
-### Google group
-
-  https://groups.google.com/group/nginx-rtmp
-
-  https://groups.google.com/group/nginx-rtmp-ru (Russian)
+  https://github.com/uizaio/nginx-rtmp-module/wiki/Directives
 
 ### Donation page (Paypal etc)
 

@@ -48,6 +48,7 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>nbproject/private/launcher.properties</itemPath>
     </logicalFolder>
+    <itemPath>RELEASE_NOTE.txt</itemPath>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
@@ -75,6 +76,8 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="RELEASE_NOTE.txt" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="dash/ngx_rtmp_dash_module.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="dash/ngx_rtmp_mp4.c" ex="false" tool="0" flavor2="0">
