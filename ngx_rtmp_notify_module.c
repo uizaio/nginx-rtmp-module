@@ -1211,9 +1211,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
         return NGX_ERROR;
     }
-    
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: 2");
     if (rc != NGX_AGAIN) {     
         hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: 1");
         if(hacf != NULL && hacf->hide_stream_key){
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify: a");
