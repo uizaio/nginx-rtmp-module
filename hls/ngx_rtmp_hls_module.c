@@ -1201,7 +1201,7 @@ ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path)
     hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
 
     if (path->len + 1 > sizeof(zpath)) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: too long path");
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: too long path: %s", path->data);
         return NGX_ERROR;
     }    
     ngx_snprintf(zpath, sizeof(zpath), "%V%Z", path);     
