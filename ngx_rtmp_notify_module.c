@@ -1266,7 +1266,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             if(hacf->continuous){
                 //keep old ts file and begin from the latest ts chunk
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: restore from latest hls");
+                      "notify: restore from latest hls %d", body.len);
                 ngx_rtmp_hls_restore_stream(s);
             }
         }           
