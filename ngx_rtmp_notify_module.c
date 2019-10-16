@@ -1222,6 +1222,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     break;
                 }
             }
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: content len %d", content_length);
             body = ngx_rtmp_notify_parse_http_body(s, in, content_length);    
             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify: on_publish body len %d", body.len);            
