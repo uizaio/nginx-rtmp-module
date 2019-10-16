@@ -1211,62 +1211,56 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         ngx_rtmp_notify_clear_flag(s, NGX_RTMP_NOTIFY_PUBLISHING);
         return NGX_ERROR;
     }
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: 2");
     if (rc != NGX_AGAIN) {     
         hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: 1");
         if(hacf != NULL && hacf->hide_stream_key){
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: a");
             headers = ngx_rtmp_notify_get_http_header(s, in);
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: b");
             for(i = 0; i < headers.count; i++){
                 if(strcmp(headers.hs[i].name, "Content-Length") == 0){
                     content_length = atoi(headers.hs[i].value);
                     break;
                 }
             }
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: content len %d", content_length);
-            body = ngx_rtmp_notify_parse_http_body(s, in, content_length);    
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: on_publish body len %d", body.len);            
-            if(body.len > 0){                        
-                ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
-                if(ctx != NULL){                              
-                    p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
-                    if(p != NULL){
-                        ctx->playlist.data = p;
-                        ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
-                    }                
-                    p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
-                    if(p != NULL){
-                        ctx->playlist_bak.data = p;
-                        ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
-                    }                
-                    p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
-                    if(p != NULL){
-                        ctx->stream.data = p;
-                        ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
-                    }
-                    p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
-                    if(p != NULL){
-                        ctx->name.data = p;
-                        ctx->name.len = ctx->name.len - ctx->name.len + body.len;
-                    }
-                }                        
+            if(content_length > 0){
+                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
+                if(body.len > 0){                        
+                    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
+                    if(ctx != NULL){                              
+                        p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
+                        if(p != NULL){
+                            ctx->playlist.data = p;
+                            ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
+                        }                
+                        p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+                        if(p != NULL){
+                            ctx->playlist_bak.data = p;
+                            ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
+                        }                
+                        p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
+                        if(p != NULL){
+                            ctx->stream.data = p;
+                            ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
+                        }
+                        p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
+                        if(p != NULL){
+                            ctx->name.data = p;
+                            ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                        }
+                    }                        
+                }else{
+                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                        "notify: no hide key to implement");
+                    return NGX_ERROR;
+                }
             }else{
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: no hide key to implement");
-                return NGX_ERROR;
-            }
+                        "notify: no content length");
+                    return NGX_ERROR;
+            }            
             if(hacf->continuous){
                 //keep old ts file and begin from the latest ts chunk
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: restore from latest hls %d", body.len);
+                      "notify: restore from latest hls");
                 ngx_rtmp_hls_restore_stream(s);
             }
         }           
