@@ -1169,7 +1169,7 @@ char *str_replace(char *orig, char *rep, char *with)
     for(count = 0; tmp = strstr(ins, rep); ++count){
         ins = tmp + len_rep;
     }
-    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    tmp = result = malloc(strlen((const char *)orig) + (len_with - len_rep) * count + 1);
     if(!result){
         return NULL;
     }
