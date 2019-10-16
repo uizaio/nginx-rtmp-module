@@ -1215,7 +1215,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     if (rc != NGX_AGAIN) {     
         hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
         if(hacf != NULL && hacf->hide_stream_key){
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: a");
             headers = ngx_rtmp_notify_get_http_header(s, in);
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: b");
             for(i = 0; i < headers.count; i++){
                 if(strcmp(headers.hs[i].name, "Content-Length") == 0){
                     content_length = atoi(headers.hs[i].value);
