@@ -1250,6 +1250,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                             *ngx_cpymem(&ctx->name.data, (const void *)p, ctx->name.len) = 0;
                             free(p);
                         }
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 6");
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s", ctx->name.data);
                     }                        
                 }else{
                     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
