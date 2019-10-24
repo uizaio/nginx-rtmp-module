@@ -883,7 +883,7 @@ ngx_rtmp_hls_close_fragment(ngx_rtmp_session_t *s)
                    "hls: close fragment n=%uL", ctx->frag);
 
     ngx_rtmp_mpegts_close_file(&ctx->file);
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "hls: close stream");
     ctx->opened = 0;
 
     ngx_rtmp_hls_next_frag(s);
