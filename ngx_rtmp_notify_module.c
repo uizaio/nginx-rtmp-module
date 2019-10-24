@@ -1152,7 +1152,7 @@ char *str_replace(char *orig, char *rep, char *with)
     int newWlen = strlen(with);
     int oldWlen = strlen(rep);
     for(i = 0; orig[i] != '\0'; i++){
-        if(strstr(&s[i], oldW) == &s[i]){
+        if(strstr(&s[i], rep) == &s[i]){
             cnt++;
             i += oldWlen - 1;
         }
@@ -1160,12 +1160,12 @@ char *str_replace(char *orig, char *rep, char *with)
     result = (char *)malloc(i + cnt * (newWlen - oldWlen) + 1);
     i = 0;
     while(*orig){
-        if(strstr(orig, rep) == s){
+        if(strstr(orig, rep) == orig){
             strcpy(&result[i], with);
             i += newWlen;
             orig += oldWlen;
         }else{
-            result[i++] = *s++;
+            result[i++] = *orig++;
         }
     }
     result[i] = '\0';
