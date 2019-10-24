@@ -1152,7 +1152,7 @@ char *str_replace(char *orig, char *rep, char *with)
     int newWlen = strlen(with);
     int oldWlen = strlen(rep);
     for(i = 0; orig[i] != '\0'; i++){
-        if(strstr(&s[i], rep) == &s[i]){
+        if(strstr(&orig[i], rep) == &orig[i]){
             cnt++;
             i += oldWlen - 1;
         }
