@@ -1247,7 +1247,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify:%d",ctx->stream.len);
                             ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
                             // *ngx_cpymem(ctx->stream.data, p, ctx->stream.len) = 0;
-                            free(p);
+                            // free(p);
                             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s  %d", ctx->stream.data, ctx->stream.len);
                         }
                         p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
