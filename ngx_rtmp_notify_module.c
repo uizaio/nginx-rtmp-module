@@ -1226,9 +1226,10 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                             ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 4");
                             free(p);
                             
-                        }                
+                        }
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 5 - %s", ctx->name.data);                
                         p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 5");
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 6");
                         if(p != NULL){
                             // ctx->playlist_bak.data = p;                            
                             ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
