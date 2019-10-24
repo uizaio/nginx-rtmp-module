@@ -1233,25 +1233,31 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                             ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
                             ctx->playlist.data = ngx_palloc(s->connection->pool, ctx->playlist.len + 1);
                             *ngx_cpymem(ctx->playlist.data, p, ctx->playlist.len + 1) = 0;
-                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s    %d", ctx->playlist.data, ctx->playlist.len);
+                            // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s    %d", ctx->playlist.data, ctx->playlist.len);
                         }                
                         p = (u_char*)str_replace(s, ctx->playlist_bak.data, ctx->name.data, body.data);
                         if(p != NULL){
                             ngx_pfree(s->connection->pool, ctx->playlist_bak.data);
-                            ctx->playlist_bak.data = p;
+                            // ctx->playlist_bak.data = p;
                             ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
+                            ctx->playlist_bak.data = ngx_palloc(s->connection->pool, ctx->playlist_bak.len + 1);
+                            *ngx_cpymem(ctx->playlist_bak.data, p, ctx->playlist_bak.len + 1) = 0;
                         }                
                         p = (u_char*)str_replace(s, ctx->stream.data, ctx->name.data, body.data);
                         if(p != NULL){
                             ngx_pfree(s->connection->pool, ctx->stream.data);
-                            ctx->stream.data = p;
+                            // ctx->stream.data = p;
                             ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
+                            ctx->stream.data = ngx_palloc(s->connection->pool, ctx->stream.len + 1);
+                            *ngx_cpymem(ctx->stream.data, p, ctx->stream.len + 1) = 0;
                         }
                         p = (u_char*)str_replace(s, ctx->name.data, ctx->name.data, body.data);
                         if(p != NULL){
                             ngx_pfree(s->connection->pool, ctx->name.data);
-                            ctx->name.data = p;
+                            // ctx->name.data = p;
                             ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                            ctx->name.data = ngx_palloc(s->connection->pool, ctx->name.len + 1);
+                            *ngx_cpymem(ctx->name.data, p, ctx->name.len + 1) = 0;
                         }
                     }                        
                 }else{
