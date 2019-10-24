@@ -1221,8 +1221,11 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                         if(p != NULL){
                             // ctx->playlist.data = p;                            
                             ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
+                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 3");
                             *ngx_cpymem(&ctx->playlist.data, p, ctx->playlist.len) = 0;
+                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 4");
                             free(p);
+                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 5");
                         }                
                         p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
                         if(p != NULL){
