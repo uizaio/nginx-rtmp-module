@@ -1148,27 +1148,39 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
 char *str_replace(char *orig, char *rep, char *with)
 {
     char *result;
-    int i, cnt = 0;
-    int newWlen = strlen(with);
-    int oldWlen = strlen(rep);
-    for(i = 0; orig[i] != '\0'; i++){
-        if(strstr(&orig[i], rep) == &orig[i]){
-            cnt++;
-            i += oldWlen - 1;
-        }
+    char *ins;
+    char *tmp;
+    int len_rep;
+    int len_with;
+    int len_front;
+    int count;
+    if(!orig || !rep){
+        return NULL;
     }
-    result = (char *)malloc(i + cnt * (newWlen - oldWlen) + 1);
-    i = 0;
-    while(*orig){
-        if(strstr(orig, rep) == orig){
-            strcpy(&result[i], with);
-            i += newWlen;
-            orig += oldWlen;
-        }else{
-            result[i++] = *orig++;
-        }
+    len_rep = strlen(rep);
+    if(len_rep == 0){
+        return NULL;
     }
-    result[i] = '\0';
+    if(!with){
+        with = "";
+    }
+    len_with = strlen(with);
+    ins = orig;
+    for(count = 0; tmp = strstr(ins, rep); ++count){
+        ins = tmp + len_rep;
+    }
+    tmp = result = malloc(strlen((const char *)orig) + (len_with - len_rep) * count + 1);
+    if(!result){
+        return NULL;
+    }
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
+    }
+    strcpy(tmp, orig);
     return result;
 }
 
@@ -1211,49 +1223,38 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             }
             if(content_length > 0){
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: parse http body");
-                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 1");           
+                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
                 if(body.len > 0){                        
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                     if(ctx != NULL){                              
                         p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 2");
                         if(p != NULL){
-                            // ctx->playlist.data = p;                            
+                            // ctx->playlist.data = p;
                             ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
-                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 3");
-                            *ngx_cpymem(&ctx->playlist.data, p, ctx->playlist.len) = 0;
-                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 4");
+                            *ngx_cpymem(ctx->playlist.data, p, ctx->playlist.len) = 0;
                             free(p);
-                            
-                        }
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 5 - %s", ctx->name.data);                
+                        }                
                         p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 6");
                         if(p != NULL){
-                            // ctx->playlist_bak.data = p;                            
+                            // ctx->playlist_bak.data = p;
                             ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
-                            *ngx_cpymem(&ctx->playlist.data, p, ctx->playlist_bak.len) = 0;
+                            *ngx_cpymem(ctx->playlist_bak.data, p, ctx->playlist_bak.len) = 0;
                             free(p);
                         }                
                         p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
                         if(p != NULL){
                             // ctx->stream.data = p;
-                            
                             ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
-                            *ngx_cpymem(&ctx->stream.data, p, ctx->stream.len) = 0;
+                            *ngx_cpymem(ctx->stream.data, p, ctx->stream.len) = 0;
                             free(p);
                         }
                         p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
                         if(p != NULL){
                             // ctx->name.data = p;
-                            
                             ctx->name.len = ctx->name.len - ctx->name.len + body.len;
-                            *ngx_cpymem(&ctx->name.data, (const void *)p, ctx->name.len) = 0;
+                            *ngx_cpymem(ctx->name.data, p, ctx->name.len) = 0;
                             free(p);
                         }
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 6");
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s", ctx->name.data);
                     }                        
                 }else{
                     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
