@@ -359,7 +359,7 @@ ngx_rtmp_mpegts_open_file(ngx_rtmp_mpegts_file_t *file, u_char *path,
 
     if (file->fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, log, ngx_errno,
-                      "hls: error creating fragment file");
+                      "hls: error creating fragment file %s", path);
         return NGX_ERROR;
     }
 
