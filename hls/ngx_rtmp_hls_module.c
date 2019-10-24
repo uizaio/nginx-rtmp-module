@@ -1167,11 +1167,6 @@ ngx_rtmp_hls_restore_stream(ngx_rtmp_session_t *s)
                 f->key_id = key_id;
 
                 ngx_rtmp_hls_next_frag(s);
-                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "hls: restore fragment '%*s' id=%uL, "
-                               "duration=%.3f, frag=%uL, nfrags=%ui",
-                               (size_t) (last - p), p, f->id, f->duration,
-                               ctx->frag, ctx->nfrags);
                 ngx_log_debug6(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                                "hls: restore fragment '%*s' id=%uL, "
                                "duration=%.3f, frag=%uL, nfrags=%ui",
