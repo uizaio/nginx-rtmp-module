@@ -1219,30 +1219,32 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                         p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
                         ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: 2");
                         if(p != NULL){
-                            // ctx->playlist.data = p;
-                            *ngx_cpymem(&ctx->playlist.data, (const void *)p, body.len) = 0;
+                            // ctx->playlist.data = p;                            
                             ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
+                            *ngx_cpymem(&ctx->playlist.data, p, ctx->playlist.len) = 0;
                             free(p);
                         }                
                         p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
                         if(p != NULL){
-                            // ctx->playlist_bak.data = p;
-                            *ngx_cpymem(&ctx->playlist.data, (const void *)p, body.len) = 0;
+                            // ctx->playlist_bak.data = p;                            
                             ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
+                            *ngx_cpymem(&ctx->playlist.data, p, ctx->playlist_bak.len) = 0;
                             free(p);
                         }                
                         p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
                         if(p != NULL){
                             // ctx->stream.data = p;
-                            *ngx_cpymem(&ctx->stream.data, (const void *)p, body.len) = 0;
+                            
                             ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
+                            *ngx_cpymem(&ctx->stream.data, p, ctx->stream.len) = 0;
                             free(p);
                         }
                         p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
                         if(p != NULL){
                             // ctx->name.data = p;
-                            *ngx_cpymem(&ctx->name.data, (const void *)p, body.len) = 0;
+                            
                             ctx->name.len = ctx->name.len - ctx->name.len + body.len;
+                            *ngx_cpymem(&ctx->name.data, (const void *)p, ctx->name.len) = 0;
                             free(p);
                         }
                     }                        
