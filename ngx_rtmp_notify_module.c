@@ -1145,7 +1145,7 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
     *p = '\0';
 }
 
-char *str_replace(char *orig, char *rep, char *with)
+char *str_replace(ngx_rtmp_session_t *s, char *orig, char *rep, char *with)
 {
     char *result;
     char *ins;
@@ -1169,7 +1169,7 @@ char *str_replace(char *orig, char *rep, char *with)
     for(count = 0; tmp = strstr(ins, rep); ++count){
         ins = tmp + len_rep;
     }
-    tmp = result = malloc(strlen((const char *)orig) + (len_with - len_rep) * count + 1);
+    tmp = result = ngx_pcalloc(s->connection->pool, strlen((const char *)orig) + (len_with - len_rep) * count + 1);
     if(!result){
         return NULL;
     }
@@ -1227,35 +1227,25 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 if(body.len > 0){                        
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                     if(ctx != NULL){                              
-                        p = (u_char*)str_replace(ctx->playlist.data, ctx->name.data, body.data);
+                        p = (u_char*)str_replace(s, ctx->playlist.data, ctx->name.data, body.data);
                         if(p != NULL){
-                            // ctx->playlist.data = p;
+                            ctx->playlist.data = p;
                             ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
-                            *ngx_cpymem(ctx->playlist.data, p, ctx->playlist.len) = 0;
-                            free(p);
                         }                
-                        p = (u_char*)str_replace(ctx->playlist_bak.data, ctx->name.data, body.data);
+                        p = (u_char*)str_replace(s, ctx->playlist_bak.data, ctx->name.data, body.data);
                         if(p != NULL){
-                            // ctx->playlist_bak.data = p;
+                            ctx->playlist_bak.data = p;
                             ctx->playlist_bak.len = ctx->playlist_bak.len - ctx->name.len + body.len;
-                            *ngx_cpymem(ctx->playlist_bak.data, p, ctx->playlist_bak.len) = 0;
-                            free(p);
                         }                
-                        p = (u_char*)str_replace(ctx->stream.data, ctx->name.data, body.data);
+                        p = (u_char*)str_replace(s, ctx->stream.data, ctx->name.data, body.data);
                         if(p != NULL){
                             ctx->stream.data = p;
-                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify:%d",ctx->stream.len);
                             ctx->stream.len = ctx->stream.len - ctx->name.len + body.len;
-                            // *ngx_cpymem(ctx->stream.data, p, ctx->stream.len) = 0;
-                            // free(p);
-                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s  %d", ctx->stream.data, ctx->stream.len);
                         }
-                        p = (u_char*)str_replace(ctx->name.data, ctx->name.data, body.data);
+                        p = (u_char*)str_replace(s, ctx->name.data, ctx->name.data, body.data);
                         if(p != NULL){
-                            // ctx->name.data = p;
+                            ctx->name.data = p;
                             ctx->name.len = ctx->name.len - ctx->name.len + body.len;
-                            *ngx_cpymem(ctx->name.data, p, ctx->name.len) = 0;
-                            free(p);
                         }
                     }                        
                 }else{
