@@ -2096,8 +2096,6 @@ ngx_rtmp_hls_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
     ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
                    "hls: cleanup path='%V' playlen=%M",
                    ppath, playlen);
-    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
-                              "hls: cleanup %V", ppath);
     if (ngx_open_dir(ppath, &dir) != NGX_OK) {
         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,
                       "hls: cleanup open dir failed '%V'", ppath);
