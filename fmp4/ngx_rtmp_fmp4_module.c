@@ -354,7 +354,8 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     }
     ctx->playlist.len = p - ctx->playlist.data;
     *p = 0;
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                       "ffmp4: streamdata='%s'", ctx->stream.data);
     ctx->playlist_bak.data = ngx_palloc(s->connection->pool,
                                         ctx->playlist.len + sizeof(".bak"));
     p = ngx_cpymem(ctx->playlist_bak.data, ctx->playlist.data,
