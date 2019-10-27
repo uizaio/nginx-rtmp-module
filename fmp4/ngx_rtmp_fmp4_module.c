@@ -840,17 +840,17 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     // }    
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
-        // if(isVideo == 1){
-        //     //write data to raw file
-        //     //we need to insert 4byte nal component in here for video
-        //     // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-        //     //               "fmp4 - 837: sample size: %d", size);
-        //     bytes[0] = ((uint32_t) size >> 24) & 0xFF;
-        //     bytes[1] = ((uint32_t) size >> 16) & 0xFF;
-        //     bytes[2] = ((uint32_t) size >> 8) & 0xFF;
-        //     bytes[3] = (uint32_t) size & 0xFF;
-        //     ngx_cpymem(buffer, bytes, 4);
-        // }        
+        if(isVideo == 1){
+            //write data to raw file
+            //we need to insert 4byte nal component in here for video
+            // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+            //               "fmp4 - 837: sample size: %d", size);
+            bytes[0] = ((uint32_t) size >> 24) & 0xFF;
+            bytes[1] = ((uint32_t) size >> 16) & 0xFF;
+            bytes[2] = ((uint32_t) size >> 8) & 0xFF;
+            bytes[3] = (uint32_t) size & 0xFF;
+            ngx_cpymem(buffer, bytes, 4);
+        }        
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: " ngx_write_fd_n " failed");
