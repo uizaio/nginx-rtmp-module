@@ -847,8 +847,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         if(isVideo == 1){
             //write data to raw file
             //we need to insert 4byte nal component in here for video
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4 - 837: sample size: %d", size);
+            // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+            //               "fmp4 - 837: sample size: %d", size);
             bytes[0] = ((uint32_t) size >> 24) & 0xFF;
             bytes[1] = ((uint32_t) size >> 16) & 0xFF;
             bytes[2] = ((uint32_t) size >> 8) & 0xFF;
@@ -982,8 +982,6 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
         return NGX_OK;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                   "fmp4: open fragment id=%ui, type='%c', name='%s'", id, type, ctx->stream.data);
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
 
     t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
@@ -993,7 +991,8 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
                       "fmp4: error creating fragment file");
         return NGX_ERROR;
     }
-
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: a");
     t->id = id;
     t->type = type;
     t->sample_count = 0;    
@@ -1003,6 +1002,8 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->opened = 1;
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);    
     f->id = id;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: b");
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION|
@@ -1012,6 +1013,8 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION;
     }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: c");
     return NGX_OK;
 }
 
