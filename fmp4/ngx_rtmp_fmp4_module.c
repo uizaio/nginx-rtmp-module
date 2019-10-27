@@ -951,7 +951,7 @@ static ngx_int_t
 ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s, uint32_t timestamp){
     ngx_rtmp_fmp4_ctx_t  *ctx;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                    "fmp4: open fragments");
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -981,8 +981,11 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
         return NGX_OK;
     }
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                   "fmp4: 3",);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                    "fmp4: open fragment id=%ui, type='%c', name='%s'", id, type, ctx->stream.data);
-
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                   "fmp4: 4",);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
 
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
