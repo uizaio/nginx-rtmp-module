@@ -811,12 +811,14 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     }    
 
     ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
-    //set earliest presentation time of fragment
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: 3");
+    //set earliest presentation time of fragment    
     if (t->sample_count == 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: 3 - %d", ctx->last_chunk_file.len);
         t->earliest_pres_time = timestamp;
         if(ctx->last_chunk_file.len){                       
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: 4");
             f = fopen( (const char*)ctx->last_chunk_file.data, "r+b" );
             if(isVideo == 1){
                 //video                
@@ -839,9 +841,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             }
             fclose(f);
         }
-    }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: 4");
+    }    
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         if(isVideo == 1){
@@ -928,9 +928,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
 
         ngx_rtmp_fmp4_close_fragments(s);
         ngx_rtmp_fmp4_open_fragments(s, timestamp);
-        f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags); 
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "fmp4: 2 ");       
+        f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);     
         f->timestamp = timestamp;        
     }
     
@@ -969,8 +967,6 @@ ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s, uint32_t timestamp){
     ngx_rtmp_fmp4_open_fragment(s, &ctx->audio, ctx->id, 'a', timestamp);
 
     ctx->opened = 1;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                   "fmp4: 1 \n");
     return NGX_OK;
 }
 
