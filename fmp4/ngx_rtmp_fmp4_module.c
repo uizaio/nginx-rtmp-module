@@ -790,11 +790,10 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_sample_t  *smpl;
     ngx_rtmp_fmp4_ctx_t     *ctx;
     FILE                    *f;
-    uint32_t                duration;
-    u_char                  bytes[4];
+    uint32_t                duration;    
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer + (isVideo == 1 ? 3 : 0); //save 4 byte for nal
+    p = buffer + (isVideo == 1 ? 4 : 0); //save 4 byte for nal
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -846,10 +845,10 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
             //               "fmp4 - 837: sample size: %d", size);
             
-            bytes[0] = ((uint32_t) size >> 24) & 0xFF;
-            bytes[1] = ((uint32_t) size >> 16) & 0xFF;
-            bytes[2] = ((uint32_t) size >> 8) & 0xFF;
-            bytes[3] = (uint32_t) size & 0xFF;
+            buffer[0] = ((uint32_t) size >> 24) & 0xFF;
+            buffer[1] = ((uint32_t) size >> 16) & 0xFF;
+            buffer[2] = ((uint32_t) size >> 8) & 0xFF;
+            buffer[3] = (uint32_t) size & 0xFF;
             ngx_cpymem(buffer, bytes, 4);
         }        
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
