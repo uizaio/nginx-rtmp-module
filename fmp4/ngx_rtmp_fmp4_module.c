@@ -812,6 +812,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 
     ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
     //set earliest presentation time of fragment
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: 3");
     if (t->sample_count == 0) {
         t->earliest_pres_time = timestamp;
         if(ctx->last_chunk_file.len){                       
@@ -838,6 +840,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             fclose(f);
         }
     }
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: 4");
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         if(isVideo == 1){
