@@ -1989,7 +1989,8 @@ ngx_rtmp_hls_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         *out.last++ = 0;
         *out.last++ = 1;
         *out.last++ = src_nal_type;
-
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "hls: nal_type %d", src_nal_type);
         /* NAL body */
 
         if (out.end - out.last < (ngx_int_t) len) {
