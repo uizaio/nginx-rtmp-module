@@ -794,7 +794,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     u_char                  bytes[4];
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer + (isVideo == 1 ? 4 : 0); //save 4 byte for nal
+    p = buffer + (isVideo == 1 ? 3 : 0); //save 4 byte for nal
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
