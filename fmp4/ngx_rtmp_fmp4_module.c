@@ -849,7 +849,6 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             buffer[1] = ((uint32_t) size >> 16) & 0xFF;
             buffer[2] = ((uint32_t) size >> 8) & 0xFF;
             buffer[3] = (uint32_t) size & 0xFF;
-            ngx_cpymem(buffer, bytes, 4);
         }        
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
