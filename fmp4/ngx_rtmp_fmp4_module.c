@@ -819,27 +819,27 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         if(ctx->last_chunk_file.len){                       
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: 4");
-            f = fopen( (const char*)ctx->last_chunk_file.data, "r+b" );
-            if(isVideo == 1){
-                //video                
-                duration = timestamp - ctx->video_latest_timestamp;
-                fseek( f, ctx->last_sample_trun->last_video_trun, SEEK_SET);                
-                bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
-                bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
-                bytes[2] = ((uint32_t) duration >> 8) & 0xFF;
-                bytes[3] = (uint32_t) duration & 0xFF;
-                fwrite(bytes, sizeof(bytes), 1, f);
-            }else{
-                //audio
-                 duration = timestamp - ctx->audio_latest_timestamp;
-                fseek( f, ctx->last_sample_trun->last_audio_trun, SEEK_SET);                
-                bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
-                bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
-                bytes[2] = ((uint32_t) duration >> 8) & 0xFF;
-                bytes[3] = (uint32_t) duration & 0xFF;
-                fwrite(bytes, sizeof(bytes), 1, f);
-            }
-            fclose(f);
+            // f = fopen( (const char*)ctx->last_chunk_file.data, "r+b" );
+            // if(isVideo == 1){
+            //     //video                
+            //     duration = timestamp - ctx->video_latest_timestamp;
+            //     fseek( f, ctx->last_sample_trun->last_video_trun, SEEK_SET);                
+            //     bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
+            //     bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
+            //     bytes[2] = ((uint32_t) duration >> 8) & 0xFF;
+            //     bytes[3] = (uint32_t) duration & 0xFF;
+            //     fwrite(bytes, sizeof(bytes), 1, f);
+            // }else{
+            //     //audio
+            //      duration = timestamp - ctx->audio_latest_timestamp;
+            //     fseek( f, ctx->last_sample_trun->last_audio_trun, SEEK_SET);                
+            //     bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
+            //     bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
+            //     bytes[2] = ((uint32_t) duration >> 8) & 0xFF;
+            //     bytes[3] = (uint32_t) duration & 0xFF;
+            //     fwrite(bytes, sizeof(bytes), 1, f);
+            // }
+            // fclose(f);
         }
     }    
     t->latest_pres_time = timestamp;    
