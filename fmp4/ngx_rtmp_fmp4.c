@@ -94,8 +94,8 @@ ngx_rtmp_fmp4_write_ftyp(ngx_buf_t *b){
     // ngx_rtmp_fmp4_box(b, "iso2");
     // ngx_rtmp_fmp4_box(b, "avc1");
     // ngx_rtmp_fmp4_box(b, "mp41");
-    // ngx_rtmp_fmp4_box(b, "ios5");
-    gx_rtmp_fmp4_box(b, "ios5");
+    // ngx_rtmp_fmp4_box(b, "iso5");
+    gx_rtmp_fmp4_box(b, "iso5");
 
     //minor version
     ngx_rtmp_fmp4_field_32(b, 512);
