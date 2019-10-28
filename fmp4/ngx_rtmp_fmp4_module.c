@@ -223,6 +223,8 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ctx->has_video = 1;
     in->buf->pos += 5;
     ctx->video.codec = codec_ctx;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                       "fmp4: nal byte = %d", odec_ctx->avc_nal_bytes);
     return ngx_rtmp_fmp4_append(s, in, &ctx->video, ftype == 1, h->timestamp,
                                 delay, 1);
 }
