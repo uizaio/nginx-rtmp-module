@@ -980,6 +980,8 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         for(i = 0; i < next_sample_count; i++){
             video_data_size += next_samples->size;
         }
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "fmp4: video size %d", video_data_size);
         // = size_of_sample + 
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + video_data_size;        
     }
@@ -1012,13 +1014,13 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
             ngx_rtmp_fmp4_field_32(b, samples->delay);
         }        
     }
-    if(isVideo){
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: video size %d", video_data_size);
-    }else{
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                          "fmp4: audio size %d", video_data_size);
-    }
+    // if(isVideo){
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                       "fmp4: video size %d", video_data_size);
+    // }else{
+    //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    //                       "fmp4: audio size %d", video_data_size);
+    // }
 
     ngx_rtmp_fmp4_update_box_size(b, pos);
 
