@@ -929,7 +929,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
 {
     u_char    *pos;
     uint32_t   i, offset, nitems, next_nitems, flags;
-    ngx_uint_t   video_data_size;
+    ngx_uint_t   video_data_size  = 0;
 
     pos = ngx_rtmp_fmp4_start_box(b, "trun");    
     nitems = 0;
@@ -1002,7 +1002,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
-            video_data_size += samples->size;
+            video_data_size += (ngx_uint_t)samples->size;
             ngx_rtmp_fmp4_field_32(b, samples->size);
         }
 
