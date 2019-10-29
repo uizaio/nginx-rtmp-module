@@ -618,6 +618,8 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
             return NGX_ERROR;
         }
     }
+    p = buffer;
+    end = p + sizeof(buffer);
     p = ngx_slprintf(p, end, "#EXT-X-ENDLIST\n");
     n = ngx_write_fd(fd, buffer, p - buffer);
     ngx_close_file(fd);
