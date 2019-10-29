@@ -588,7 +588,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
                      "#EXT-X-VERSION:7\n"
                      "#EXT-X-TARGETDURATION:%ui\n"
                      "#EXT-X-MEDIA-SEQUENCE:%uL\n",                     
-                     ctx->frag, max_frag);
+                     max_frag, ctx->frag);
     p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
     p = ngx_slprintf(p, end, "#EXT-X-DISCONTINUITY\n");
@@ -955,9 +955,6 @@ ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n){
 static ngx_int_t
 ngx_rtmp_fmp4_open_fragments(ngx_rtmp_session_t *s, uint32_t timestamp){
     ngx_rtmp_fmp4_ctx_t  *ctx;
-
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                   "fmp4: open fragments");
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
 
