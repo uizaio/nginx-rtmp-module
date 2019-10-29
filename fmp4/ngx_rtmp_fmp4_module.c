@@ -591,7 +591,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
                      max_frag, ctx->frag);
     p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
-    p = ngx_slprintf(p, end, "#EXT-X-DISCONTINUITY\n");
+    // p = ngx_slprintf(p, end, "#EXT-X-DISCONTINUITY\n");
     n = ngx_write_fd(fd, buffer, p - buffer);
     if (n < 0) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -608,8 +608,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%ui.m4s\n",
-                         duration, f->id);        
-        p = ngx_slprintf(p, end, "##EXT-X-ENDLIST\n");
+                         duration, f->id);                
         n = ngx_write_fd(fd, buffer, p - buffer);
         if (n < 0) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
@@ -619,6 +618,8 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
             return NGX_ERROR;
         }
     }
+    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST\n");
+    n = ngx_write_fd(fd, buffer, p - buffer);
     ngx_close_file(fd);
     if (ngx_rtmp_fmp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
         == NGX_FILE_ERROR)
