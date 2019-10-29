@@ -399,9 +399,7 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_write_data(s, &ctx->video, &ctx->audio);
     //close temp file
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
-    ngx_rtmp_fmp4_close_fragment(s, &ctx->audio); 
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                          "==========fmp4: create new m4s file=========");
+    ngx_rtmp_fmp4_close_fragment(s, &ctx->audio);
     //we write m4s data in here?    
     ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
@@ -640,8 +638,6 @@ ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                   "fmp4: nfrags %d frag %d", ctx->nfrags, ctx->frag);
     if (ctx->nfrags == acf->winfrags) {
         ctx->frag++;
     } else {
@@ -800,7 +796,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     uint32_t                duration;        
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer + (isVideo ? 0 : 0);/*We reverse 7 first byte of audio frame to save its header*/
+    p = buffer;/*We reverse 7 first byte of audio frame to save its header*/
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
