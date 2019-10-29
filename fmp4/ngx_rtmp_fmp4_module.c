@@ -382,8 +382,6 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ctx->initMp4.len = p - ctx->initMp4.data;
     *p =0;
     ngx_rtmp_fmp4_ensure_directory(s);
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "fmp4: playlist: '%s'", ctx->playlist.data);
     next:        
         return next_publish(s, v);
 }
