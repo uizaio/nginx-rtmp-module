@@ -66,15 +66,17 @@ ngx_int_t ngx_rtmp_fmp4_write_moof(ngx_buf_t *b, uint32_t video_earliest_pres_ti
     uint32_t video_sample_count, ngx_rtmp_fmp4_sample_t *video_samples,
     ngx_uint_t video_sample_mask, uint32_t audio_earliest_pres_time, int32_t audio_sample_count, ngx_rtmp_fmp4_sample_t *audio_samples,
     ngx_uint_t audio_sample_mask, uint32_t index, ngx_rtmp_session_t *s, ngx_rtmp_fmp4_last_sample_trun *truns);
-ngx_int_t ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
+nngx_int_t
+ngx_rtmp_fmp4_write_traf(ngx_buf_t *b, uint32_t earliest_pres_time,
     uint32_t sample_count, ngx_rtmp_fmp4_sample_t *samples,
-    ngx_uint_t sample_mask, u_char *moof_pos, uint32_t next_sample_count, 
-    ngx_uint_t next_sample_mask, int isVideo, ngx_rtmp_session_t *s, ngx_rtmp_fmp4_last_sample_trun *truns);
+    ngx_uint_t sample_mask, u_char *moof_pos, uint32_t next_sample_count,  ngx_rtmp_fmp4_sample_t *next_samples,
+        ngx_uint_t next_sample_mask, int isVideo, ngx_rtmp_session_t *s, ngx_rtmp_fmp4_last_sample_trun *truns);
 ngx_int_t ngx_rtmp_fmp4_write_tfhd(ngx_buf_t *b, uint32_t track_id);
 ngx_int_t ngx_rtmp_fmp4_write_tfdt(ngx_buf_t *b, uint32_t earliest_pres_time);
-ngx_int_t ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
+ngx_int_t
+ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
     ngx_rtmp_fmp4_sample_t *samples, ngx_uint_t sample_mask, u_char *moof_pos, 
-    uint32_t next_sample_count, ngx_uint_t next_sample_mask, uint32_t isVideo, ngx_rtmp_session_t *s, ngx_rtmp_fmp4_last_sample_trun *truns);
+    uint32_t next_sample_count, ngx_rtmp_fmp4_sample_t *next_samples, ngx_uint_t next_sample_mask, uint32_t isVideo, ngx_rtmp_session_t *s, ngx_rtmp_fmp4_last_sample_trun *truns);
 ngx_int_t ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, uint32_t earliest_pres_time, uint32_t latest_pres_time,
  ngx_uint_t reference_size, uint32_t reference_id);
  ngx_uint_t ngx_rtmp_fmp4_write_mdat(ngx_buf_t *b, ngx_uint_t size);
