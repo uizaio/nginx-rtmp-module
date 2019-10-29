@@ -801,7 +801,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_uint_t              objtype, srindex, chconf;
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer + (isVideo ? 0 : 7);/*We reverse 7 first byte of audio frame to save its header*/
+    p = buffer + (isVideo ? 0 : 0);/*We reverse 7 first byte of audio frame to save its header*/
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
