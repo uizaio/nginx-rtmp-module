@@ -14,6 +14,18 @@
         "string_view": "c",
         "unordered_map": "c",
         "vector": "c",
-        "chrono": "c"
+        "chrono": "c",
+        "__tree": "c",
+        "bitset": "c",
+        "deque": "c",
+        "map": "c",
+        "queue": "c",
+        "random": "c",
+        "regex": "c",
+        "set": "c",
+        "stack": "c",
+        "unordered_set": "c",
+        "utility": "c",
+        "valarray": "c"
     }
 }
