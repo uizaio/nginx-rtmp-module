@@ -849,7 +849,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         //if this is aac, we must create aac header before each frame
         if(!isVideo){
-            if (ngx_rtmp_hls_parse_aac_header(s, &objtype, &srindex, &chconf) != NGX_OK)
+            if (ngx_rtmp_fmp4_parse_aac_header(s, &objtype, &srindex, &chconf) != NGX_OK)
             {
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                             "fmp4: aac header error");
