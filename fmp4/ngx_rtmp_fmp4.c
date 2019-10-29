@@ -875,7 +875,7 @@ ngx_int_t ngx_rtmp_fmp4_write_sidx(ngx_buf_t *b, uint32_t earliest_pres_time, ui
 
     pos = ngx_rtmp_fmp4_start_box(b, "sidx");
     //box version
-    ngx_rtmp_fmp4_field_32(b, 2);
+    ngx_rtmp_fmp4_field_32(b, 1000);
     //reference id
     ngx_rtmp_fmp4_field_32(b, reference_id);
     //timescale
