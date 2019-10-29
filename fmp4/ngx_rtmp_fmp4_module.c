@@ -586,7 +586,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
                      "#EXT-X-VERSION:7\n"
-                     "#EXT-X-TARGETDURATION:%ui\n",
+                     "#EXT-X-TARGETDURATION:%ui\n"
                      "#EXT-X-MEDIA-SEQUENCE:%uL\n"                     
                      ctx->frag, max_frag);
     p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
