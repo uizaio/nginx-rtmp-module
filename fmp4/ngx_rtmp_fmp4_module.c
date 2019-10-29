@@ -855,6 +855,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
                             "fmp4: aac header error");
                 return NGX_OK;
             }
+            size = size + 7;
             buffer[0] = 0xff;
             buffer[1] = 0xf1;
             buffer[2] = (u_char) (((objtype - 1) << 6) | (srindex << 2) |
@@ -862,8 +863,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
             buffer[3] = (u_char) (((chconf & 0x03) << 6) | ((size >> 11) & 0x03));
             buffer[4] = (u_char) (size >> 3);
             buffer[5] = (u_char) ((size << 5) | 0x1f);
-            buffer[6] = 0xfc;
-            size = size + 7;
+            buffer[6] = 0xfc;            
         }
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
