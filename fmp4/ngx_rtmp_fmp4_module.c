@@ -817,8 +817,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
 
     ngx_rtmp_fmp4_update_fragments(s, key, timestamp);
     //set earliest presentation time of fragment    
-    // if (t->sample_count == 0) {
-    //     t->earliest_pres_time = timestamp;
+    if (t->sample_count == 0) {
+        t->earliest_pres_time = timestamp;
     //     if(ctx->last_chunk_file.len){
     //         // f = fopen( (const char*)ctx->last_chunk_file.data, "r+b" );
     //         // if(isVideo == 1){
@@ -842,7 +842,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     //         // }
     //         // fclose(f);
     //     }
-    // }    
+    }    
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         //if this is aac, we must create aac header before each frame
