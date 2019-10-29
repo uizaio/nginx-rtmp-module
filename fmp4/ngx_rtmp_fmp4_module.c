@@ -589,7 +589,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
                      "#EXT-X-TARGETDURATION:%ui\n"
                      "#EXT-X-MEDIA-SEQUENCE:%uL\n",                     
                      max_frag, ctx->frag);
-    p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
+    // p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
     // p = ngx_slprintf(p, end, "#EXT-X-DISCONTINUITY\n");
     n = ngx_write_fd(fd, buffer, p - buffer);
@@ -618,10 +618,10 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
             return NGX_ERROR;
         }
     }
-    p = buffer;
-    end = p + sizeof(buffer);
-    p = ngx_slprintf(p, end, "#EXT-X-ENDLIST\n");
-    n = ngx_write_fd(fd, buffer, p - buffer);
+    // p = buffer;
+    // end = p + sizeof(buffer);
+    // p = ngx_slprintf(p, end, "#EXT-X-ENDLIST\n");
+    // n = ngx_write_fd(fd, buffer, p - buffer);
     ngx_close_file(fd);
     if (ngx_rtmp_fmp4_rename_file(ctx->playlist_bak.data, ctx->playlist.data)
         == NGX_FILE_ERROR)
