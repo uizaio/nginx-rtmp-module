@@ -1002,7 +1002,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         }
 
         if (sample_mask & NGX_RTMP_FMP4_SAMPLE_SIZE) {
-            // video_data_size += samples->size;
+            video_data_size += samples->size;
             ngx_rtmp_fmp4_field_32(b, samples->size);
         }
 
@@ -1015,7 +1015,7 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         }        
     }
     if(isVideo){
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: video size %d", video_data_size);
     }//else{
     //     ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
