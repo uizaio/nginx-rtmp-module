@@ -978,7 +978,9 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 88;               
     }else{
         for(i = 0; i < next_sample_count; i++, next_samples++){
-            video_data_size += next_samples->size;
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "fmp4: video sample size %d", next_samples->size);
+            video_data_size += next_samples->size;            
         }
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: video size %d video sample %d", video_data_size, next_sample_count);
