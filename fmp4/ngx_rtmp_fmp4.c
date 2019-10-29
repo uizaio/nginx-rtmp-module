@@ -977,10 +977,10 @@ ngx_rtmp_fmp4_write_trun(ngx_buf_t *b, uint32_t sample_count,
         //size_of_sample + 48  + (next_traf[8] + tfhd[28] + tfdt[20] + trun[20])        
         offset = (pos - moof_pos) + (sample_count * nitems * 4) + (next_sample_count * next_nitems * 4) + 88;               
     }else{
-        for(i = 0; i < next_sample_count; i++){
+        for(i = 0; i < next_sample_count; i++, next_samples++){
             video_data_size += next_samples->size;
         }
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                           "fmp4: video size %d video sample %d", video_data_size, next_sample_count);
         // = size_of_sample + 
         offset = (pos - moof_pos) + 20 + (sample_count * nitems * 4) + 8 + video_data_size;        
