@@ -586,11 +586,12 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
                      "#EXT-X-VERSION:7\n"
-                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"
                      "#EXT-X-TARGETDURATION:%ui\n",
+                     "#EXT-X-MEDIA-SEQUENCE:%uL\n"                     
                      ctx->frag, max_frag);
     p = ngx_slprintf(p, end, "#EXT-X-PLAYLIST-TYPE: EVENT\n");
     p = ngx_slprintf(p, end, "#EXT-X-MAP:URI=\"init.mp4\"\n");
+    p = ngx_slprintf(p, end, "#EXT-X-DISCONTINUITY\n");
     n = ngx_write_fd(fd, buffer, p - buffer);
     if (n < 0) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
