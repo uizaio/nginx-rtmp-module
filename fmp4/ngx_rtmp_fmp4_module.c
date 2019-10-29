@@ -272,7 +272,7 @@ ngx_rtmp_fmp4_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     /* skip RTMP & AAC headers */
 
-    in->buf->pos += 2;
+    in->buf->pos += 2 + 7;/*plus 7 byte of ADTS, we only use AAC LC*/
     ctx->audio.codec = codec_ctx;
     return ngx_rtmp_fmp4_append(s, in, &ctx->audio, 0, h->timestamp, 0, 0);
 }
@@ -801,7 +801,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_uint_t              objtype, srindex, chconf;
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
-    p = buffer + (isVideo ? 0 : 0);/*We reverse 7 first byte of audio frame to save its header*/
+    p = buffer + (isVideo ? 0 : 7);/*We reverse 7 first byte of audio frame to save its header*/
     size = 0;    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
@@ -848,23 +848,23 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
         //if this is aac, we must create aac header before each frame
-        // if(!isVideo){
-        //     if (ngx_rtmp_fmp4_parse_aac_header(s, &objtype, &srindex, &chconf) != NGX_OK)
-        //     {
-        //         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-        //                     "fmp4: aac header error");
-        //         return NGX_OK;
-        //     }
-        //     size = size + 7;
-        //     buffer[0] = 0xff;
-        //     buffer[1] = 0xf1;
-        //     buffer[2] = (u_char) (((objtype - 1) << 6) | (srindex << 2) |
-        //                     ((chconf & 0x04) >> 2));
-        //     buffer[3] = (u_char) (((chconf & 0x03) << 6) | ((size >> 11) & 0x03));
-        //     buffer[4] = (u_char) (size >> 3);
-        //     buffer[5] = (u_char) ((size << 5) | 0x1f);
-        //     buffer[6] = 0xfc;            
-        // }
+        if(!isVideo){
+            if (ngx_rtmp_fmp4_parse_aac_header(s, &objtype, &srindex, &chconf) != NGX_OK)
+            {
+                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                            "fmp4: aac header error");
+                return NGX_OK;
+            }
+            size = size + 7;
+            buffer[0] = 0xff;
+            buffer[1] = 0xf1;
+            buffer[2] = (u_char) (((objtype - 1) << 6) | (srindex << 2) |
+                            ((chconf & 0x04) >> 2));
+            buffer[3] = (u_char) (((chconf & 0x03) << 6) | ((size >> 11) & 0x03));
+            buffer[4] = (u_char) (size >> 3);
+            buffer[5] = (u_char) ((size << 5) | 0x1f);
+            buffer[6] = 0xfc;            
+        }
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: " ngx_write_fd_n " failed");
