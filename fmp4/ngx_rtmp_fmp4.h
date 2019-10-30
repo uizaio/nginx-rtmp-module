@@ -1,4 +1,6 @@
-
+/*
+* Copyright (C) 2019 Dalmatele
+*/
 
 #ifndef _NGX_RTMP_FMP4_H_INCLUDED_
 #define _NGX_RTMP_FMP4_H_INCLUDED_
