@@ -1,3 +1,6 @@
+/*
+* Copyright (C) 2019 Dalmatele
+*/
 #include <ngx_config.h>
 #include <ngx_rtmp.h>
 #include <ngx_rtmp_cmd_module.h>
