@@ -451,7 +451,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
 
     ngx_rtmp_fmp4_write_moof(&b, vt->earliest_pres_time, vt->sample_count,
                             vt->samples, vt->sample_mask, at->earliest_pres_time, at->sample_count,
-                            at->samples, at->sample_mask, vt->id, s, truns);   
+                            at->samples, at->sample_mask, vt->id, truns);   
     pos1 = b.last;
     b.last = pos;
     //we write box for data video
