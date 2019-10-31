@@ -68,8 +68,8 @@ typedef struct{
 typedef struct {
     unsigned                            opened:1;//is context opened?
     ngx_rtmp_fmp4_frag_t                *frags; /* circular 2 * winfrags + 1 */
-    ngx_uint_t                          nfrags; //number frag of a fragment
-    uint64_t                            frag; //current fragment, ex 2.m4s
+    ngx_uint_t                          nfrags; //point to the last fragment of playlist
+    uint64_t                            frag; //point to the first fragment of playlist
     ngx_str_t                           name;//name of stream
     ngx_str_t                           playlist;//link of playlist
     ngx_str_t                           playlist_bak;//playlist bak file name
@@ -648,6 +648,9 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
     return NGX_OK;
 }
 
+/**
+ * Create new fragment
+ **/ 
 static void
 ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_ctx_t         *ctx;
