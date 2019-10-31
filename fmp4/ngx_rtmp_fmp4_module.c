@@ -441,8 +441,6 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     ctx->last_chunk_file.len = strlen((const char*)ctx->stream.data);
     ctx->last_chunk_file.data = ngx_palloc(s->connection->pool, ctx->last_chunk_file.len);
     *ngx_cpymem(ctx->last_chunk_file.data, ctx->stream.data, ctx->last_chunk_file.len) = 0;
-    // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-    //                   "fmp4: create file %V", ctx->stream);
     fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
     if (fd == NGX_INVALID_FILE) {
