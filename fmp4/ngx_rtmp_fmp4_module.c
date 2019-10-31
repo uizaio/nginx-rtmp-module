@@ -13,6 +13,18 @@
 #define NGX_RTMP_FMP4_MAX_SAMPLES       1024
 #define NGX_RTMP_FMP4_DIR_ACCESS        0744
 
+#define NGX_RTMP_FMP4_NAMING_SEQUENTIAL  1
+#define NGX_RTMP_FMP4_NAMING_TIMESTAMP   2
+// #define NGX_RTMP_FMP4_NAMING_SYSTEM      3
+
+
+static ngx_conf_enum_t                  ngx_rtmp_fmp4_naming_slots[] = {
+    { ngx_string("sequential"),         NGX_RTMP_FMP4_NAMING_SEQUENTIAL },
+    { ngx_string("timestamp"),          NGX_RTMP_FMP4_NAMING_TIMESTAMP  },
+    // { ngx_string("system"),             NGX_RTMP_FMP4_NAMING_SYSTEM     },
+    { ngx_null_string,                  0 }
+};
+
 
 static ngx_rtmp_publish_pt              next_publish;
 static ngx_rtmp_close_stream_pt         next_close_stream;
@@ -36,8 +48,9 @@ typedef struct {
     char                                type;
     uint32_t                            earliest_pres_time;
     uint32_t                            latest_pres_time;
-    ngx_rtmp_fmp4_sample_t               samples[NGX_RTMP_FMP4_MAX_SAMPLES];
+    ngx_rtmp_fmp4_sample_t              samples[NGX_RTMP_FMP4_MAX_SAMPLES];
     ngx_rtmp_codec_ctx_t                *codec;//track codec
+    uint64_t                            system_time;
 } ngx_rtmp_fmp4_track_t;
 
 typedef struct{
@@ -47,6 +60,7 @@ typedef struct{
     ngx_msec_t                          fraglen;//len of fragment
     ngx_flag_t                          nested;
     ngx_msec_t                          playlen;//playlist length
+    ngx_uint_t                          naming;//fragment naming
 }ngx_rtmp_fmp4_app_conf_t;
 
 
@@ -137,6 +151,12 @@ static ngx_command_t ngx_rtmp_fmp4_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fmp4_app_conf_t, playlen),
       NULL },
+      { ngx_string("fmp4_fragment_naming"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_msec_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_fmp4_app_conf_t, naming),
+      &ngx_rtmp_fmp4_naming_slots },
     ngx_null_command
 };
 
@@ -169,33 +189,16 @@ ngx_module_t  ngx_rtmp_fmp4_module = {
     NGX_MODULE_V1_PADDING
 };
 
-/**
- * Allocate memory for location specific configuration
- * Every configs must be set here before using
- * */
-static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
-    ngx_rtmp_fmp4_app_conf_t *conf;
-    conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_fmp4_app_conf_t));
-    if (conf == NULL) {
-        return NULL;
-    }    
-    conf->fragmented_mp4 = NGX_CONF_UNSET;
-    conf->nested = NGX_CONF_UNSET;
-    conf->fraglen = NGX_CONF_UNSET_MSEC;
-    //if not set, it'll be 0
-    conf->playlen = NGX_CONF_UNSET_MSEC;
-    return conf;
-}
-
 static ngx_int_t
 ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_chain_t *in){
-    ngx_rtmp_fmp4_app_conf_t *acf;
-    ngx_rtmp_fmp4_ctx_t * ctx;
-    ngx_rtmp_codec_ctx_t      *codec_ctx;
-    uint8_t                    ftype, htype;
-    u_char                    *p;
-    uint32_t                   delay;
+    ngx_rtmp_fmp4_app_conf_t    *acf;
+    ngx_rtmp_fmp4_ctx_t         *ctx;
+    ngx_rtmp_codec_ctx_t        *codec_ctx;
+    uint8_t                     ftype, htype;
+    u_char                      *p;
+    uint32_t                    delay;
+
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
@@ -230,7 +233,6 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ctx->has_video = 1;
     in->buf->pos += 5;
     ctx->video.codec = codec_ctx;
-    u_char pp[4];
     // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
     //                    "fmp4: nal byte = %d", codec_ctx->avc_nal_bytes);
     return ngx_rtmp_fmp4_append(s, in, &ctx->video, ftype == 1, h->timestamp,
@@ -420,9 +422,20 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     ssize_t                         n;
     u_char                          *pos, *pos1;
     ngx_rtmp_fmp4_last_sample_trun  *truns;
+    uint64_t                        id;
+    ngx_rtmp_fmp4_app_conf_t        *facf;
+    
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module); 
-    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uD.m4s", ctx->id) = 0;    
+    facf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+    //we need to choose a naming for fragments
+    //if fmp4_naming is timestamp, we get the pts of the first audio frame of fragment to name fragment file
+    if(facf->naming == NGX_RTMP_FMP4_NAMING_TIMESTAMP){
+        id = (uint64_t)at->earliest_pres_time;
+    }else{
+        id = t->id;
+    }    
+    *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uL.m4s", id) = 0;    
     ctx->last_chunk_file.len = strlen((const char*)ctx->stream.data);
     ctx->last_chunk_file.data = ngx_palloc(s->connection->pool, ctx->last_chunk_file.len);
     *ngx_cpymem(ctx->last_chunk_file.data, ctx->stream.data, ctx->last_chunk_file.len) = 0;
@@ -822,50 +835,9 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     //set earliest presentation time of fragment    
     if (t->sample_count == 0) {
         t->earliest_pres_time = timestamp;
-    //     if(ctx->last_chunk_file.len){
-    //         // f = fopen( (const char*)ctx->last_chunk_file.data, "r+b" );
-    //         // if(isVideo == 1){
-    //         //     //video                
-    //         //     duration = timestamp - ctx->video_latest_timestamp;
-    //         //     fseek( f, ctx->last_sample_trun->last_video_trun, SEEK_SET);                
-    //         //     bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
-    //         //     bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
-    //         //     bytes[2] = ((uint32_t) duration >> 8) & 0xFF;
-    //         //     bytes[3] = (uint32_t) duration & 0xFF;
-    //         //     fwrite(bytes, sizeof(bytes), 1, f);
-    //         // }else{
-    //         //     //audio
-    //         //      duration = timestamp - ctx->audio_latest_timestamp;
-    //         //     fseek( f, ctx->last_sample_trun->last_audio_trun, SEEK_SET);                
-    //         //     bytes[0] = ((uint32_t) duration >> 24) & 0xFF;
-    //         //     bytes[1] = ((uint32_t) duration >> 16) & 0xFF;
-    //         //     bytes[2] = ((uint32_t) duration >> 8) & 0xFF;
-    //         //     bytes[3] = (uint32_t) duration & 0xFF;
-    //         //     fwrite(bytes, sizeof(bytes), 1, f);
-    //         // }
-    //         // fclose(f);
-    //     }
     }    
     t->latest_pres_time = timestamp;    
     if (t->sample_count < NGX_RTMP_FMP4_MAX_SAMPLES) {
-        //if this is aac, we must create aac header before each frame
-        // if(!isVideo){
-        //     if (ngx_rtmp_fmp4_parse_aac_header(s, &objtype, &srindex, &chconf) != NGX_OK)
-        //     {
-        //         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-        //                     "fmp4: aac header error");
-        //         return NGX_OK;
-        //     }
-        //     size = size + 7;
-        //     buffer[0] = 0xff;
-        //     buffer[1] = 0xf1;
-        //     buffer[2] = (u_char) (((objtype - 1) << 6) | (srindex << 2) |
-        //                     ((chconf & 0x04) >> 2));
-        //     buffer[3] = (u_char) (((chconf & 0x03) << 6) | ((size >> 11) & 0x03));
-        //     buffer[4] = (u_char) (size >> 3);
-        //     buffer[5] = (u_char) ((size << 5) | 0x1f);
-        //     buffer[6] = 0xfc;            
-        // }
         if (ngx_write_fd(t->fd, buffer, size) == NGX_ERROR) {
             ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                           "fmp4: " ngx_write_fd_n " failed");
@@ -875,7 +847,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         smpl = &t->samples[t->sample_count];
 
         smpl->delay = delay;
-        smpl->size = (uint32_t) size /*+ (isVideo == 1 ? 4 : 0)*/;//we add 4byte nal in video sample        
+        smpl->size = (uint32_t) size;       
         smpl->duration = t->codec->duration;
         smpl->timestamp = timestamp;
         smpl->key = (key ? 1 : 0);
@@ -908,8 +880,6 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);//get current fragment 
-    // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-    //                       "fmp4: %d - %d", timestamp, f->timestamp);
     d = (int32_t) (timestamp - f->timestamp);
     if (d >= 0) {
         f->duration = timestamp - f->timestamp;
@@ -953,9 +923,6 @@ ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_int_t n){
 
     acf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
-    // int test = (ctx->frag + n) % (acf->winfrags * 2 + 1);
-    // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-    //                       "fmp4: get frag: %d", test);
     return &ctx->frags[(ctx->frag + n) % (acf->winfrags * 2 + 1)];
 }
 
@@ -984,11 +951,13 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     ngx_uint_t id, char type, uint32_t timestamp){
     ngx_rtmp_fmp4_ctx_t   *ctx;
     ngx_rtmp_fmp4_frag_t      *f;
+    ngx_rtmp_fmp4_app_conf_t *facf;
 
     if (t->opened) {
         return NGX_OK;
     }
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+    facf = ngx_rtmp_conf_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "raw.m4%c", type) = 0;
 
     t->fd = ngx_open_file(ctx->stream.data, NGX_FILE_RDWR,
@@ -998,15 +967,20 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
                       "fmp4: error creating fragment file");
         return NGX_ERROR;
     }
-    t->id = id;
+    t->id = id;// to use in mfhd atom box of fragment
     t->type = type;
     t->sample_count = 0;    
     t->earliest_pres_time = 0;
     t->latest_pres_time = 0;
     t->mdat_size = 0;
-    t->opened = 1;
-    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);    
-    f->id = id;
+    t->opened = 1;x
+    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
+    //we use to generate play list 
+    if(facf->naming == NGX_RTMP_FMP4_NAMING_TIMESTAMP){
+        f->id = timestamp;
+    }else{
+        f->id = id;
+    }    
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION|
@@ -1155,6 +1129,26 @@ ngx_rtmp_fmp4_copy(ngx_rtmp_session_t *s, void *dst, u_char **src, size_t n,
     }
 }
 
+
+/**
+ * Allocate memory for location specific configuration
+ * Every configs must be set here before using
+ * */
+static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
+    ngx_rtmp_fmp4_app_conf_t *conf;
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_fmp4_app_conf_t));
+    if (conf == NULL) {
+        return NULL;
+    }    
+    conf->fragmented_mp4 = NGX_CONF_UNSET;
+    conf->nested = NGX_CONF_UNSET;
+    conf->fraglen = NGX_CONF_UNSET_MSEC;
+    //if not set, it'll be 0
+    conf->playlen = NGX_CONF_UNSET_MSEC;
+    conf->naming = NGX_CONF_UNSET_UINT;
+    return conf;
+}
+
 /**
  * Get app configs
  * */
@@ -1172,6 +1166,8 @@ static char * ngx_rtmp_fmp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *c
         conf->winfrags = conf->playlen / conf->fraglen;
     }
     ngx_conf_merge_str_value(conf->path, prev->path, "");
+    ngx_conf_merge_uint_value(conf->naming, prev->naming,
+                              NGX_RTMP_FMP4_NAMING_SEQUENTIAL);
     return NGX_CONF_OK;
 }
 
