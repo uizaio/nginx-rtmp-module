@@ -15,13 +15,13 @@
 
 #define NGX_RTMP_FMP4_NAMING_SEQUENTIAL  1
 #define NGX_RTMP_FMP4_NAMING_TIMESTAMP   2
-// #define NGX_RTMP_FMP4_NAMING_SYSTEM      3
+#define NGX_RTMP_FMP4_NAMING_SYSTEM      3
 
 
 static ngx_conf_enum_t                  ngx_rtmp_fmp4_naming_slots[] = {
     { ngx_string("sequential"),         NGX_RTMP_FMP4_NAMING_SEQUENTIAL },
     { ngx_string("timestamp"),          NGX_RTMP_FMP4_NAMING_TIMESTAMP  },
-    // { ngx_string("system"),             NGX_RTMP_FMP4_NAMING_SYSTEM     },
+    { ngx_string("system"),             NGX_RTMP_FMP4_NAMING_SYSTEM     },
     { ngx_null_string,                  0 }
 };
 
@@ -35,7 +35,7 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 typedef struct {
     uint32_t                            timestamp;//time that m4s is created
     uint32_t                            duration;//duration of a m4s
-    uint32_t                            id;
+    uint64_t                            id;
 } ngx_rtmp_fmp4_frag_t;
 
 typedef struct {
@@ -113,6 +113,8 @@ static ngx_int_t ngx_rtmp_fmp4_parse_aac_header(ngx_rtmp_session_t *s, ngx_uint_
     ngx_uint_t *srindex, ngx_uint_t *chconf);
 static ngx_int_t ngx_rtmp_fmp4_copy(ngx_rtmp_session_t *s, void *dst, u_char **src, size_t n,
     ngx_chain_t **in);
+static uint64_t
+ngx_rtmp_fmp4_get_fragment_id(ngx_rtmp_session_t *s, uint64_t ts);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
@@ -318,7 +320,7 @@ ngx_rtmp_fmp4_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     }
     if (ctx->frags == NULL) {
-        //we locate a mem that can hold all frag info of a playlist + 1
+        //we locate a mem that can hold all frags info of a playlist + 1
         ctx->frags = ngx_pcalloc(s->connection->pool,
                                  sizeof(ngx_rtmp_fmp4_frag_t) *
                                  (acf->winfrags * 2 + 1));
@@ -424,17 +426,15 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     ngx_rtmp_fmp4_last_sample_trun  *truns;
     uint64_t                        id;
     ngx_rtmp_fmp4_app_conf_t        *facf;
+    ngx_rtmp_fmp4_frag_t            *f;
     
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module); 
     facf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     //we need to choose a naming for fragments
-    //if fmp4_naming is timestamp, we get the pts of the first audio frame of fragment to name fragment file
-    if(facf->naming == NGX_RTMP_FMP4_NAMING_TIMESTAMP){
-        id = (uint64_t)at->earliest_pres_time;
-    }else{
-        id = t->id;
-    }    
+    //we collect it each current frag
+    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
+    id = f->id;
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uL.m4s", id) = 0;    
     ctx->last_chunk_file.len = strlen((const char*)ctx->stream.data);
     ctx->last_chunk_file.data = ngx_palloc(s->connection->pool, ctx->last_chunk_file.len);
@@ -976,11 +976,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->opened = 1;x
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
     //we use to generate play list 
-    if(facf->naming == NGX_RTMP_FMP4_NAMING_TIMESTAMP){
-        f->id = timestamp;
-    }else{
-        f->id = id;
-    }    
+    f->id = ngx_rtmp_fmp4_get_fragment_id(*s, timestamp);    
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION|
@@ -1126,6 +1122,29 @@ ngx_rtmp_fmp4_copy(ngx_rtmp_session_t *s, void *dst, u_char **src, size_t n,
         }
 
         *src = (*in)->buf->pos;
+    }
+}
+
+static uint64_t
+ngx_rtmp_fmp4_get_fragment_id(ngx_rtmp_session_t *s, uint64_t ts)
+{
+    ngx_rtmp_fmp4_ctx_t         *ctx;
+    ngx_rtmp_fmp4_app_conf_t    *facf;
+
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_fmp4_module);
+
+    facf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
+
+    switch (facf->naming) {
+
+    case NGX_RTMP_FMP4_NAMING_TIMESTAMP:
+        return ts;
+
+    case NGX_RTMP_FMP4_NAMING_SYSTEM:
+        return (uint64_t) ngx_cached_time->sec * 1000 + ngx_cached_time->msec;
+
+    default: /* NGX_RTMP_HLS_NAMING_SEQUENTIAL */
+        return ctx->frag + ctx->nfrags;
     }
 }
 
