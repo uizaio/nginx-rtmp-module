@@ -976,7 +976,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->opened = 1;
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
     //we use to generate play list 
-    f->id = ngx_rtmp_fmp4_get_fragment_id(*s, timestamp);    
+    f->id = ngx_rtmp_fmp4_get_fragment_id(s, timestamp);    
     if (type == 'v') {
         t->sample_mask = NGX_RTMP_FMP4_SAMPLE_SIZE|
                          NGX_RTMP_FMP4_SAMPLE_DURATION|
