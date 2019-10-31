@@ -404,8 +404,9 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
     ngx_rtmp_fmp4_close_fragment(s, &ctx->audio);
     //we write m4s data in here?    
-    ngx_rtmp_fmp4_next_frag(s);
+    // ngx_rtmp_fmp4_next_frag(s);
     ngx_rtmp_fmp4_write_playlist(s);
+    ngx_rtmp_fmp4_next_frag(s);
     ctx->opened = 0; //close context
     ctx->id++;
     return NGX_OK;
