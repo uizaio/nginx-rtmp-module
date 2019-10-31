@@ -62,10 +62,10 @@ typedef struct {
     ngx_str_t                           name;
     u_char                              key[16];
 
-    uint64_t                            frag;
+    uint64_t                            frag; //point to the first fragment in playlist
     uint64_t                            frag_ts;
     uint64_t                            key_id;
-    ngx_uint_t                          nfrags;
+    ngx_uint_t                          nfrags; //pont to the last fragment in playlist
     ngx_rtmp_hls_frag_t                *frags; /* circular 2 * winfrags + 1 */
 
     ngx_uint_t                          audio_cc;
@@ -1925,9 +1925,6 @@ ngx_rtmp_hls_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         }
 
         nal_type = src_nal_type & 0x1f;
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                       "hls: h264 NAL type=%ui, len=%uD",
-                       (ngx_uint_t) nal_type, len);
         ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                        "hls: h264 NAL type=%ui, len=%uD",
                        (ngx_uint_t) nal_type, len);
