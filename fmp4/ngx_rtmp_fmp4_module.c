@@ -433,7 +433,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     facf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     //we need to choose a naming for fragments
     //we collect it each current frag
-   ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
+    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
     id = f->id;
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uL.m4s", id) = 0;    
     ctx->last_chunk_file.len = strlen((const char*)ctx->stream.data);
