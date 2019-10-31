@@ -433,7 +433,7 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
     facf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_fmp4_module);
     //we need to choose a naming for fragments
     //we collect it each current frag
-    f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
+   ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
     id = f->id;
     *ngx_sprintf(ctx->stream.data + ctx->stream.len, "%uL.m4s", id) = 0;    
     ctx->last_chunk_file.len = strlen((const char*)ctx->stream.data);
@@ -973,7 +973,7 @@ ngx_rtmp_fmp4_open_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t,
     t->earliest_pres_time = 0;
     t->latest_pres_time = 0;
     t->mdat_size = 0;
-    t->opened = 1;x
+    t->opened = 1;
     f = ngx_rtmp_fmp4_get_frag(s, ctx->nfrags);   
     //we use to generate play list 
     f->id = ngx_rtmp_fmp4_get_fragment_id(*s, timestamp);    
