@@ -155,7 +155,7 @@ static ngx_command_t ngx_rtmp_fmp4_commands[] = {
       NULL },
       { ngx_string("fmp4_fragment_naming"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
+      ngx_conf_set_enum_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fmp4_app_conf_t, naming),
       &ngx_rtmp_fmp4_naming_slots },
