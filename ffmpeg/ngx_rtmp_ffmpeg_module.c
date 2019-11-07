@@ -88,7 +88,7 @@ static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, naming),
       &ngx_rtmp_ffmpeg_naming_slots },
-      { ngx_string("hls_cleanup"),
+      { ngx_string("ffmpeg_cleanup"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
