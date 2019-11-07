@@ -101,7 +101,7 @@ static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, dvr_path),
       NULL },
       ngx_null_command
-}
+};
 
 static ngx_rtmp_module_t  ngx_rtmp_ffmpeg_module_ctx = {
     NULL,                               /* preconfiguration */
