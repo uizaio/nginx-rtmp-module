@@ -5,6 +5,11 @@
 #include <ngx_core.h>
 #include <ngx_rtmp.h>
 
+static ngx_rtmp_publish_pt              next_publish;
+static ngx_rtmp_close_stream_pt         next_close_stream;
+static ngx_rtmp_stream_begin_pt         next_stream_begin;
+static ngx_rtmp_stream_eof_pt           next_stream_eof;
+
 static ngx_int_t ngx_rtmp_ffmpeg_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_ffmpeg_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_ffmpeg_merge_app_conf(ngx_conf_t *cf,
@@ -200,10 +205,6 @@ ngx_rtmp_ffmpeg_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 static ngx_int_t
 ngx_rtmp_ffmpeg_postconfiguration(ngx_conf_t *cf)
 {
-    ngx_rtmp_handler_pt        *h;
-    ngx_rtmp_core_main_conf_t  *cmcf;
-
-    cmcf = ngx_rtmp_conf_get_module_main_conf(cf, ngx_rtmp_core_module);
 
     next_publish = ngx_rtmp_publish;
     ngx_rtmp_publish = ngx_rtmp_ffmpeg_publish;
