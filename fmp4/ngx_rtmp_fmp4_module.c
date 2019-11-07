@@ -68,8 +68,8 @@ typedef struct{
 typedef struct {
     unsigned                            opened:1;//is context opened?
     ngx_rtmp_fmp4_frag_t                *frags; /* circular 2 * winfrags + 1 */
-    ngx_uint_t                          nfrags; //point to the last fragment of playlist
-    uint64_t                            frag; //point to the first fragment of playlist
+    ngx_uint_t                          nfrags; //point to the current processing fragment of playlist (we're putting data in here)
+    uint64_t                            frag; //point to the first fragment of playlist, and the last fragment in playlist is nfrags - 1
     ngx_str_t                           name;//name of stream
     ngx_str_t                           playlist;//link of playlist
     ngx_str_t                           playlist_bak;//playlist bak file name
@@ -217,7 +217,7 @@ ngx_rtmp_fmp4_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     if (in->buf->last - in->buf->pos < 5) {
         return NGX_ERROR;
     }
-    ftype = (in->buf->pos[0] & 0xf0) >> 4;
+    ftype = (in->buf->pos[0] & 0xf0) >> 4;//ftype = 1 --> IDR
 
     /* skip AVC config */
 
@@ -404,9 +404,8 @@ ngx_rtmp_fmp4_close_fragments(ngx_rtmp_session_t *s){
     ngx_rtmp_fmp4_close_fragment(s, &ctx->video);
     ngx_rtmp_fmp4_close_fragment(s, &ctx->audio);
     //we write m4s data in here?    
-    // ngx_rtmp_fmp4_next_frag(s);
-    ngx_rtmp_fmp4_write_playlist(s);
     ngx_rtmp_fmp4_next_frag(s);
+    ngx_rtmp_fmp4_write_playlist(s);    
     ctx->opened = 0; //close context
     ctx->id++;
     return NGX_OK;
@@ -650,7 +649,7 @@ ngx_rtmp_fmp4_write_playlist(ngx_rtmp_session_t *s){
 }
 
 /**
- * Create new fragment
+ * Create new empty fragment
  **/ 
 static void
 ngx_rtmp_fmp4_next_frag(ngx_rtmp_session_t *s){
@@ -887,6 +886,7 @@ ngx_rtmp_fmp4_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary, uint32
         f->duration = timestamp - f->timestamp;
         hit = (f->duration >= acf->fraglen);
     }else{
+        /* sometimes clients generate slightly unordered frames */
         hit = (-d > 1000);
     }
     
