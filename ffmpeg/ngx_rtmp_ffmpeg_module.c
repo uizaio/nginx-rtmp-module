@@ -29,7 +29,7 @@ static ngx_conf_enum_t                  ngx_rtmp_ffmpeg_naming_slots[] = {
 };
 
 typedef struct {
-    ngx_flag_t                          ffmpeg;
+    ngx_flag_t                          transcode;
     ngx_str_t                           path;
     ngx_flag_t                          nested;
     ngx_msec_t                          fraglen;
@@ -46,61 +46,61 @@ typedef struct {
 } ngx_rtmp_ffmpeg_ctx_t;
 
 static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
-    { ngx_string("ffmpeg"),
+    { ngx_string("transcode"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, ffmpeg),
       NULL },
-      { ngx_string("ffmpeg_path"),
+      { ngx_string("transcode_path"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, path),
       NULL },
-      { ngx_string("ffmpeg_nested"),
+      { ngx_string("transcode_nested"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, nested),
       NULL },
-      { ngx_string("ffmpeg_fragment"),
+      { ngx_string("transcode_fragment"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_msec_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, fraglen),
       NULL },
-      { ngx_string("ffmpeg_playlist_length"),
+      { ngx_string("transcode_playlist"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_msec_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, playlen),
       NULL },
-      { ngx_string("ffmpeg_format"),
+      { ngx_string("transcode_format"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, format),
       NULL },
-      { ngx_string("ffmpeg_fragment_naming"),
+      { ngx_string("transcode_fragment_naming"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_enum_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, naming),
       &ngx_rtmp_ffmpeg_naming_slots },
-      { ngx_string("ffmpeg_cleanup"),
+      { ngx_string("transcode_cleanup"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, cleanup),
       NULL },
-      { ngx_string("ffmpeg_dvr"),
+      { ngx_string("transcode_dvr"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, dvr),
       NULL },
-      { ngx_string("ffmpeg_dvr_path"),
+      { ngx_string("transcode_dvr_path"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_RTMP_APP_CONF_OFFSET,
@@ -150,7 +150,7 @@ ngx_rtmp_ffmpeg_create_app_conf(ngx_conf_t *cf)
         return NULL;
     }
 
-    conf->ffmpeg = NGX_CONF_UNSET;
+    conf->transcode = NGX_CONF_UNSET;
     conf->fraglen = NGX_CONF_UNSET_MSEC;
     conf->playlen = NGX_CONF_UNSET_MSEC;
     conf->cleanup = NGX_CONF_UNSET;
@@ -168,7 +168,7 @@ ngx_rtmp_ffmpeg_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_rtmp_ffmpeg_app_conf_t    *prev = parent;
     ngx_rtmp_ffmpeg_app_conf_t    *conf = child;    
 
-    ngx_conf_merge_value(conf->ffmpeg, prev->ffmpeg, 0);
+    ngx_conf_merge_value(conf->transcode, prev->transcode, 0);
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
     ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);
     ngx_conf_merge_value(conf->cleanup, prev->cleanup, 1);
