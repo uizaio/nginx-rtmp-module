@@ -50,7 +50,7 @@ static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
-      offsetof(ngx_rtmp_ffmpeg_app_conf_t, ffmpeg),
+      offsetof(ngx_rtmp_ffmpeg_app_conf_t, transcode),
       NULL },
       { ngx_string("transcode_path"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
@@ -188,6 +188,7 @@ ngx_rtmp_ffmpeg_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 static ngx_int_t
 ngx_rtmp_ffmpeg_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
+    
     return next_publish(s, v);
 }
 
