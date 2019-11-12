@@ -112,7 +112,7 @@ static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, hide_stream_key),
-      NULL }
+      NULL },
       ngx_null_command
 };
 
