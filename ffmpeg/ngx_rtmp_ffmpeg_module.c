@@ -39,6 +39,7 @@ typedef struct {
     ngx_flag_t                          cleanup;
     ngx_flag_t                          dvr;
     ngx_str_t                           dvr_path;
+    ngx_flag_t                          hide_stream_key;
 
 } ngx_rtmp_ffmpeg_app_conf_t;
 
@@ -106,6 +107,12 @@ static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, dvr_path),
       NULL },
+      { ngx_string("transcode_hide_stream_key"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_flag_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_ffmpeg_app_conf_t, hide_stream_key),
+      NULL }
       ngx_null_command
 };
 
@@ -158,6 +165,7 @@ ngx_rtmp_ffmpeg_create_app_conf(ngx_conf_t *cf)
     conf->naming = NGX_CONF_UNSET_UINT;
     conf->cleanup = NGX_CONF_UNSET;
     conf->dvr = NGX_CONF_UNSET;
+    conf->hide_stream_key = NGX_CONF_UNSET;
 
     return conf;
 }
@@ -174,6 +182,7 @@ ngx_rtmp_ffmpeg_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_value(conf->cleanup, prev->cleanup, 1);
     ngx_conf_merge_value(conf->nested, prev->nested, 0);
     ngx_conf_merge_value(conf->dvr, prev->dvr, 0);
+    ngx_conf_merge_value(conf->hide_stream_key, prev->hide_stream_key, 0);
 
     ngx_conf_merge_str_value(conf->path, prev->path, "");
     ngx_conf_merge_str_value(conf->dvr_path, prev->dvr_path, "");
