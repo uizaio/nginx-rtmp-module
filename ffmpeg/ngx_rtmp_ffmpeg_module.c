@@ -39,7 +39,9 @@ typedef struct {
     ngx_flag_t                          cleanup;
     ngx_flag_t                          dvr;
     ngx_str_t                           dvr_path;
+    ngx_msec_t                          dvr_fraglen;
     ngx_flag_t                          hide_stream_key;
+    ngx_uint_t                          gop_size;
 
 } ngx_rtmp_ffmpeg_app_conf_t;
 
@@ -113,6 +115,18 @@ static ngx_command_t ngx_rtmp_ffmpeg_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_ffmpeg_app_conf_t, hide_stream_key),
       NULL },
+      { ngx_string("transcode_dvr_fragment"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_msec_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_ffmpeg_app_conf_t, dvr_fraglen),
+      NULL },
+      { ngx_string("transcode_gop"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_num_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_ffmpeg_app_conf_t, gop_size),
+      NULL },
       ngx_null_command
 };
 
@@ -166,6 +180,8 @@ ngx_rtmp_ffmpeg_create_app_conf(ngx_conf_t *cf)
     conf->cleanup = NGX_CONF_UNSET;
     conf->dvr = NGX_CONF_UNSET;
     conf->hide_stream_key = NGX_CONF_UNSET;
+    conf->dvr_fraglen = NGX_CONF_UNSET_MSEC;
+    conf->gop_size = NGX_CONF_UNSET_UINT;
 
     return conf;
 }
@@ -189,6 +205,8 @@ ngx_rtmp_ffmpeg_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->naming, prev->naming,
                               NGX_RTMP_FFMPEG_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
+    ngx_conf_merge_str_value(conf->dvr_fraglent, prev->dvr_fraglen, 10);
+    ngx_conf_merge_uint_value(conf->gop_size, prev->gop_size, 12);
 
     return NGX_CONF_OK;
 }
