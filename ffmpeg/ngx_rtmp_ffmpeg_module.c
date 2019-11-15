@@ -205,7 +205,7 @@ ngx_rtmp_ffmpeg_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->naming, prev->naming,
                               NGX_RTMP_FFMPEG_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
-    ngx_conf_merge_str_value(conf->dvr_fraglen, prev->dvr_fraglen, 10);
+    ngx_conf_merge_msec_value(conf->dvr_fraglen, prev->dvr_fraglen, 10);
     ngx_conf_merge_uint_value(conf->gop_size, prev->gop_size, 12);
 
     return NGX_CONF_OK;
