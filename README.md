@@ -1,6 +1,16 @@
 # NGINX-based Media Streaming Server
 ## nginx-rtmp-module
 
+### Notice
+We fork this project for internal using.
+Now, we need to publish some internal feature for opensource community.
+
+For pulling request, please contact me `<ducla@uiza.io>`
+
+For updating new features/fixing bugs detail, please see RELEASE_NOTE.txt
+
+### Our homepage
+https://uiza.io
 
 ### Project blog
 
@@ -8,13 +18,7 @@
 
 ### Wiki manual
 
-  https://github.com/arut/nginx-rtmp-module/wiki/Directives
-
-### Google group
-
-  https://groups.google.com/group/nginx-rtmp
-
-  https://groups.google.com/group/nginx-rtmp-ru (Russian)
+  https://github.com/uizaio/nginx-rtmp-module/wiki/Directives
 
 ### Donation page (Paypal etc)
 
@@ -45,15 +49,15 @@
 * Advanced buffering techniques
   to keep memory allocations at a minimum
   level for faster streaming and low
-  memory footprint
+  memory footprint.
 
 * Proved to work with Wirecast, FMS, Wowza,
   JWPlayer, FlowPlayer, StrobeMediaPlayback,
   ffmpeg, avconv, rtmpdump, flvstreamer
-  and many more
+  and many more.
 
 * Statistics in XML/XSL in machine- & human-
-  readable form
+  readable form or Prometheus format.
 
 * Linux/FreeBSD/MacOS/Windows
 
@@ -285,9 +289,13 @@ rtmp_auto_push directive.
             # This URL provides RTMP statistics in XML
             location /stat {
                 rtmp_stat all;
-
-                # Use this stylesheet to view XML as web page
-                # in browser
+                # use prometheus format, if you is not set then default xml format.
+		rtmp_stat_display_format prometheus;
+		# addition text size for prometheus format only
+                # if not set then default 40K
+		rtmp_stat_prometheus_sizes 30720;
+                # If format is xml, Use this stylesheet to view XML
+                # as web page in browser
                 rtmp_stat_stylesheet stat.xsl;
             }
 

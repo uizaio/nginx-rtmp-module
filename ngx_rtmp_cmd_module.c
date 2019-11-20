@@ -409,7 +409,7 @@ ngx_rtmp_cmd_close_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         return NGX_ERROR;
     }
 
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "closeStream");
+    // ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "closeStream");
 
     return ngx_rtmp_close_stream(s, &v);
 }
