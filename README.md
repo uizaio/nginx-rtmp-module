@@ -276,6 +276,32 @@ rtmp_auto_push directive.
                 dash on;
                 dash_path /tmp/dash;
             }
+	    application fmp4 {
+	    	live on;
+		fragmented_mp4 on;
+		fmp4_path /tmp/fmp4;
+		fmp4_nested on;
+		fmp4_fragment 2;
+		fmp4_playlist_length 30m;
+		fmp4_fragment_naming sequential;
+	    }
+	    
+	    application transcode{
+	    	live on;
+		live on;
+            	transcode on; #on/off transcode
+	    	transcode_path /tmp; #path of live streaming data
+	    	transcode_nested on;
+	    	transcode_fragment 2; #Length of fragments
+	    	transcode_playlist 30m; #length of playlist
+	    	transcode_format fmp4; #output format
+	    	transcode_fragment_naming timestamp;
+	    	transcode_cleanup on;
+	    	transcode_dvr on; #enable/disable DVR
+	    	transcode_dvr_path /tmp/dvr; #DVR path
+	    	#transcode_dvr_fragment 10;
+	    	#transcode_gop 10;
+	    }
         }
     }
 
@@ -321,6 +347,17 @@ rtmp_auto_push directive.
                 root /tmp;
                 add_header Cache-Control no-cache;
             }
+	    location /fmp4 {
+		# Serve HLS fragments
+            	types {
+                	application/vnd.apple.mpegurl m3u8;
+                	video/mp2t ts;
+            	}
+            	root /tmp;
+            	add_header Cache-Control no-cache;
+            	add_header Access-Control-Allow-Origin *;
+
+	    }
         }
     }
 
