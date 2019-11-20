@@ -88,7 +88,7 @@ static ngx_command_t ngx_rtmp_transcode_commands[] = {
       ngx_conf_set_enum_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_transcode_app_conf_t, naming),
-      &ngx_rtmp_ffmpeg_naming_slots },
+      &ngx_rtmp_transcode_naming_slots },
       { ngx_string("transcode_cleanup"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
