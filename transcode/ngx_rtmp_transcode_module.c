@@ -51,7 +51,7 @@ static ngx_command_t ngx_rtmp_transcode_commands[] = {
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
-      offsetof(ngx_rtmp_transcodeg_app_conf_t, transcode),
+      offsetof(ngx_rtmp_transcode_app_conf_t, transcode),
       NULL },
       { ngx_string("transcode_path"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
