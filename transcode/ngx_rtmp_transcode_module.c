@@ -15,11 +15,13 @@ static ngx_int_t ngx_rtmp_transcode_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf,
        void *parent, void *child);
+static ngx_int_t ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
 #define NGX_RTMP_TRANSCODE_NAMING_TIMESTAMP   2
 #define NGX_RTMP_TRANSCODE_NAMING_SYSTEM      3
+#define NGX_RTMP_TRANSCODE_DIR_ACCESS        0744
 
 static ngx_conf_enum_t                  ngx_rtmp_transcode_naming_slots[] = {
     { ngx_string("sequential"),         NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL },
@@ -197,7 +199,9 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 static ngx_int_t
 ngx_rtmp_transcode_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
-    
+    if (ngx_rtmp_transcode_ensure_directory(s) != NGX_OK) {
+        return NGX_ERROR;
+    }
     return next_publish(s, v);
 }
 
@@ -217,6 +221,48 @@ static ngx_int_t
 ngx_rtmp_transcode_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {    
     return next_stream_eof(s, v);
+}
+
+static ngx_int_t
+ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
+{
+    size_t                     len;
+    ngx_file_info_t            fi;
+    ngx_rtmp_transcode_ctx_t       *ctx;
+    ngx_rtmp_transcode_app_conf_t  *tacf;
+
+    static u_char              path[NGX_MAX_PATH + 1];
+    tacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
+
+    *ngx_snprintf(path, sizeof(path) - 1, "%V", &tacf->path) = 0;
+    if (ngx_file_info(path, &fi) == NGX_FILE_ERROR) {
+        if (ngx_errno != NGX_ENOENT) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "transcode: " ngx_file_info_n " failed on '%V'",
+                          &dacf->path);
+            return NGX_ERROR;
+        }
+        if (ngx_create_dir(path, NGX_RTMP_TRANSCODE_DIR_ACCESS) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "transcode: " ngx_create_dir_n " failed on '%V'",
+                          &tacf->path);
+            return NGX_ERROR;
+        }
+
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                       "transcode: directory '%V' created", &tacf->path);
+    }else{
+        if (!ngx_is_dir(&fi)) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                          "transcode: '%V' exists and is not a directory",
+                          &tacf->path);
+            return  NGX_ERROR;
+        }
+
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+                       "transcode: directory '%V' exists", &tacf->path);
+    }
+    return NGX_OK;
 }
 
 static ngx_int_t
