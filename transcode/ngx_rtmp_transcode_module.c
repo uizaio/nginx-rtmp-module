@@ -233,7 +233,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
         if (cleanup2 == NULL) {
             return NGX_CONF_ERROR;
         }
-        cleanup2->path = conf->path;
+        cleanup2->path = conf->dvr_path;
         cleanup2->playlen = conf->playlen;
         conf->slot2 = ngx_pcalloc(cf->pool, sizeof(*conf->slot2));
         if (conf->slot2 == NULL) {
@@ -242,7 +242,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
         //http://nginx.org/en/docs/dev/development_guide.html keyword: ngx_path_t
         //this handler will be run time to time
         conf->slot2->manager = ngx_rtmp_transcode_cleanup;
-        conf->slot2->name = conf->path;
+        conf->slot2->name = conf->dvr_path;
         conf->slot2->data = cleanup2;
         conf->slot2->conf_file = cf->conf_file->file.name.data;
         conf->slot2->line = cf->conf_file->line;
