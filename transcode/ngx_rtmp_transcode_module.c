@@ -16,12 +16,18 @@ static void * ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf,
        void *parent, void *child);
 static ngx_int_t ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
 #define NGX_RTMP_TRANSCODE_NAMING_TIMESTAMP   2
 #define NGX_RTMP_TRANSCODE_NAMING_SYSTEM      3
 #define NGX_RTMP_TRANSCODE_DIR_ACCESS        0744
+
+typedef struct {
+    ngx_str_t                           path;
+    ngx_msec_t                          playlen;
+} ngx_rtmp_transcode_cleanup_t;
 
 static ngx_conf_enum_t                  ngx_rtmp_transcode_naming_slots[] = {
     { ngx_string("sequential"),         NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL },
@@ -177,6 +183,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 {
     ngx_rtmp_transcode_app_conf_t    *prev = parent;
     ngx_rtmp_transcode_app_conf_t    *conf = child;    
+    ngx_rtmp_transcode_cleanup_t     *cleanup;
 
     ngx_conf_merge_value(conf->transcode, prev->transcode, 0);
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
@@ -192,6 +199,27 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
                               NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
 
+    cleanup = ngx_pcalloc(cf->pool, sizeof(*cleanup));
+    if (cleanup == NULL) {
+        return NGX_CONF_ERROR;
+    }
+    cleanup->path = conf->path;
+    cleanup->playlen = conf->playlen;
+    conf->slot = ngx_pcalloc(cf->pool, sizeof(*conf->slot));
+    if (conf->slot == NULL) {
+        return NGX_CONF_ERROR;
+    }
+    //http://nginx.org/en/docs/dev/development_guide.html keyword: ngx_path_t
+    //this handler will be run time to time
+    conf->slot->manager = ngx_rtmp_transcode_cleanup;
+    conf->slot->name = conf->path;
+    conf->slot->data = cleanup;
+    conf->slot->conf_file = cf->conf_file->file.name.data;
+    conf->slot->line = cf->conf_file->line;
+
+    if (ngx_add_path(cf, &conf->slot) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
     return NGX_CONF_OK;
 }
 
@@ -231,6 +259,173 @@ static ngx_int_t
 ngx_rtmp_transcode_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {    
     return next_stream_eof(s, v);
+}
+
+/**
+ * Clean up stream directory
+ * @param ppath
+ * @param playlen
+ * @return 
+ */
+static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen){
+    // ngx_dir_t               dir;
+    // time_t                  mtime, max_age;
+    // ngx_err_t               err;
+    // ngx_str_t               name, spath;
+    // u_char                 *p;
+    // ngx_int_t               nentries, nerased;
+    // u_char                  path[NGX_MAX_PATH + 1];
+
+    // ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+    //                "transcode: cleanup path='%V' playlen=%M",
+    //                ppath, playlen);
+    // if (ngx_open_dir(ppath, &dir) != NGX_OK) {
+    //     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,
+    //                   "transcode: cleanup open dir failed '%V'", ppath);
+    //     return NGX_ERROR;
+    // }
+
+    // nentries = 0;
+    // nerased = 0;
+
+    // for ( ;; ) {
+    //     ngx_set_errno(0);
+    //     if (ngx_read_dir(&dir) == NGX_ERROR) {
+    //         err = ngx_errno;
+
+    //         if (ngx_close_dir(&dir) == NGX_ERROR) {
+    //             ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+    //                           "transcode: cleanup " ngx_close_dir_n " \"%V\" failed",
+    //                           ppath);
+    //         }
+
+    //         if (err == NGX_ENOMOREFILES) {
+    //             return nentries - nerased;
+    //         }
+
+    //         ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, err,
+    //                       "transcode: cleanup " ngx_read_dir_n
+    //                       " '%V' failed", ppath);
+    //         return NGX_ERROR;
+    //     }
+
+    //     name.data = ngx_de_name(&dir);
+    //     if (name.data[0] == '.') {
+    //         continue;
+    //     }
+
+    //     name.len = ngx_de_namelen(&dir);
+
+    //     p = ngx_snprintf(path, sizeof(path) - 1, "%V/%V", ppath, &name);
+    //     *p = 0;
+
+    //     spath.data = path;
+    //     spath.len = p - path;
+
+    //     nentries++;
+
+    //     if (!dir.valid_info && ngx_de_info(path, &dir) == NGX_FILE_ERROR) {
+    //         ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+    //                       "transcode: cleanup " ngx_de_info_n " \"%V\" failed",
+    //                       &spath);
+
+    //         continue;
+    //     }
+
+    //     if (ngx_de_is_dir(&dir)) {
+
+    //         if (ngx_rtmp_transcode_cleanup_dir(&spath, playlen) == 0) {
+    //             ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+    //                            "transcode: cleanup dir '%V'", &name);
+
+    //             /*
+    //              * null-termination gets spoiled in win32
+    //              * version of ngx_open_dir
+    //              */
+
+    //             *p = 0;
+
+    //             if (ngx_delete_dir(path) == NGX_FILE_ERROR) {
+    //                 ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
+    //                               "transcode: cleanup " ngx_delete_dir_n
+    //                               " failed on '%V'", &spath);
+    //             } else {
+    //                 nerased++;
+    //             }
+    //         }
+
+    //         continue;
+    //     }
+    //     if (!ngx_de_is_file(&dir)) {
+    //         continue;
+    //     }
+
+    //     if (name.len >= 4 && name.data[name.len - 4] == '.' &&
+    //                          name.data[name.len - 3] == 'm' &&
+    //                          name.data[name.len - 2] == '4' &&
+    //                          name.data[name.len -1 == 's'])
+    //     {
+    //         max_age = playlen / 500;
+
+    //     } else if (name.len >= 5 && name.data[name.len - 5] == '.' &&
+    //                                 name.data[name.len - 4] == 'm' &&
+    //                                 name.data[name.len - 3] == '3' &&
+    //                                 name.data[name.len - 2] == 'u' &&
+    //                                 name.data[name.len - 1] == '8')
+    //     {
+    //         max_age = playlen / 1000;
+
+    //     } else if (name.len >= 4 && name.data[name.len - 4] == '.' &&
+    //                                 name.data[name.len - 3] == 'k' &&
+    //                                 name.data[name.len - 2] == 'e' &&
+    //                                 name.data[name.len - 1] == 'y')
+    //     {
+    //         max_age = playlen / 500;
+
+    //     } else {
+    //         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+    //                        "transcode: cleanup skip unknown file type '%V'", &name);
+    //         continue;
+    //     }
+    //     mtime = ngx_de_mtime(&dir);
+    //     if (mtime + max_age > ngx_cached_time->sec) {
+    //         continue;
+    //     }
+
+    //     ngx_log_debug3(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+    //                    "transcode: cleanup '%V' mtime=%T age=%T",
+    //                    &name, mtime, ngx_cached_time->sec - mtime);
+    //     ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+    //                           "transcode: delete file %s", path);
+    //     if (ngx_delete_file(path) == NGX_FILE_ERROR) {
+    //         ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
+    //                       "transcode: cleanup " ngx_delete_file_n " failed on '%V'",
+    //                       &spath);
+    //         continue;
+    //     }
+
+    //     nerased++;
+    // }
+    return NGX_OK;
+}
+
+#if (nginx_version >= 1011005)
+static ngx_msec_t
+#else
+static time_t
+#endif
+ngx_rtmp_transcode_cleanup(void *data){
+    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
+                              "transcode: cleanup started");
+    ngx_rtmp_transcode_cleanup_t *cleanup = data;
+
+    ngx_rtmp_transcode_cleanup_dir(&cleanup->path, cleanup->playlen);
+
+#if (nginx_version >= 1011005)
+    return cleanup->playlen * 2;
+#else
+    return cleanup->playlen / 500;
+#endif
 }
 
 static ngx_int_t
