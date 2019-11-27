@@ -207,7 +207,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
 
     if (conf->transcode && conf->path.len && conf->dvr_path.len){
-        cleanup1 = ngx_pcalloc(cf->pool, sizeof(*cleanup));
+        cleanup1 = ngx_pcalloc(cf->pool, sizeof(*cleanup1));
         if (cleanup == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -229,7 +229,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
             return NGX_CONF_ERROR;
         }
 
-        cleanup2 = ngx_pcalloc(cf->pool, sizeof(*cleanup));
+        cleanup2 = ngx_pcalloc(cf->pool, sizeof(*cleanup2));
         if (cleanup == NULL) {
             return NGX_CONF_ERROR;
         }
