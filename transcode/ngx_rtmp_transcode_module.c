@@ -54,7 +54,8 @@ typedef struct {
     ngx_flag_t                          dvr;
     ngx_str_t                           dvr_path;
     ngx_flag_t                          hide_stream_key;
-    ngx_path_t                         *slot;
+    ngx_path_t                         *slot1;
+    ngx_path_t                         *slot2;
 } ngx_rtmp_transcode_app_conf_t;
 
 typedef struct {
@@ -189,7 +190,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 {
     ngx_rtmp_transcode_app_conf_t    *prev = parent;
     ngx_rtmp_transcode_app_conf_t    *conf = child;    
-    ngx_rtmp_transcode_cleanup_t     *cleanup;
+    ngx_rtmp_transcode_cleanup_t     *cleanup1, *cleanup2;
 
     ngx_conf_merge_value(conf->transcode, prev->transcode, 0);
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
@@ -205,26 +206,48 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
                               NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
 
-    if (conf->transcode && conf->path.len){
-        cleanup = ngx_pcalloc(cf->pool, sizeof(*cleanup));
+    if (conf->transcode && conf->path.len && conf->dvr_path.len){
+        cleanup1 = ngx_pcalloc(cf->pool, sizeof(*cleanup));
         if (cleanup == NULL) {
             return NGX_CONF_ERROR;
         }
-        cleanup->path = conf->path;
-        cleanup->playlen = conf->playlen;
-        conf->slot = ngx_pcalloc(cf->pool, sizeof(*conf->slot));
-        if (conf->slot == NULL) {
+        cleanup1->path = conf->path;
+        cleanup1->playlen = conf->playlen;
+        conf->slot1 = ngx_pcalloc(cf->pool, sizeof(*conf->slot1));
+        if (conf->slot1 == NULL) {
             return NGX_CONF_ERROR;
         }
         //http://nginx.org/en/docs/dev/development_guide.html keyword: ngx_path_t
         //this handler will be run time to time
-        conf->slot->manager = ngx_rtmp_transcode_cleanup;
-        conf->slot->name = conf->path;
-        conf->slot->data = cleanup;
-        conf->slot->conf_file = cf->conf_file->file.name.data;
-        conf->slot->line = cf->conf_file->line;
+        conf->slot1->manager = ngx_rtmp_transcode_cleanup;
+        conf->slot1->name = conf->path;
+        conf->slot1->data = cleanup1;
+        conf->slot1->conf_file = cf->conf_file->file.name.data;
+        conf->slot1->line = cf->conf_file->line;
 
-        if (ngx_add_path(cf, &conf->slot) != NGX_OK) {
+        if (ngx_add_path(cf, &conf->slot1) != NGX_OK) {
+            return NGX_CONF_ERROR;
+        }
+
+        cleanup2 = ngx_pcalloc(cf->pool, sizeof(*cleanup));
+        if (cleanup == NULL) {
+            return NGX_CONF_ERROR;
+        }
+        cleanup2->path = conf->path;
+        cleanup2->playlen = conf->playlen;
+        conf->slot2 = ngx_pcalloc(cf->pool, sizeof(*conf->slot2));
+        if (conf->slot2 == NULL) {
+            return NGX_CONF_ERROR;
+        }
+        //http://nginx.org/en/docs/dev/development_guide.html keyword: ngx_path_t
+        //this handler will be run time to time
+        conf->slot2->manager = ngx_rtmp_transcode_cleanup;
+        conf->slot2->name = conf->path;
+        conf->slot2->data = cleanup2;
+        conf->slot2->conf_file = cf->conf_file->file.name.data;
+        conf->slot2->line = cf->conf_file->line;
+
+        if (ngx_add_path(cf, &conf->slot2) != NGX_OK) {
             return NGX_CONF_ERROR;
         }
     }    
