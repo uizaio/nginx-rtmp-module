@@ -17,6 +17,12 @@ static char * ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf,
        void *parent, void *child);
 static ngx_int_t ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen);
+#if (nginx_version >= 1011005)
+static ngx_msec_t
+#else
+static time_t
+#endif
+ngx_rtmp_transcode_cleanup(void *data);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
