@@ -48,7 +48,7 @@ typedef struct {
     ngx_flag_t                          dvr;
     ngx_str_t                           dvr_path;
     ngx_flag_t                          hide_stream_key;
-
+    ngx_path_t                         *slot;
 } ngx_rtmp_transcode_app_conf_t;
 
 typedef struct {
