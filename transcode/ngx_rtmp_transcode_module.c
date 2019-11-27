@@ -205,10 +205,14 @@ ngx_rtmp_transcode_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     if (tacf == NULL || !tacf->transcode || tacf->path.len == 0) {
         goto next;
     }
+    if (s->auto_pushed) {
+        goto next;
+    }
     if (ngx_rtmp_transcode_ensure_directory(s) != NGX_OK) {
         return NGX_ERROR;
     }
-    return next_publish(s, v);
+    next:
+        return next_publish(s, v);
 }
 
 static ngx_int_t
