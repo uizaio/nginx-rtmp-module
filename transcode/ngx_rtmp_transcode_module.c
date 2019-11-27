@@ -208,7 +208,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 
     if (conf->transcode && conf->path.len && conf->dvr_path.len){
         cleanup1 = ngx_pcalloc(cf->pool, sizeof(*cleanup1));
-        if (cleanup == NULL) {
+        if (cleanup1 == NULL) {
             return NGX_CONF_ERROR;
         }
         cleanup1->path = conf->path;
@@ -230,7 +230,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
         }
 
         cleanup2 = ngx_pcalloc(cf->pool, sizeof(*cleanup2));
-        if (cleanup == NULL) {
+        if (cleanup2 == NULL) {
             return NGX_CONF_ERROR;
         }
         cleanup2->path = conf->path;
