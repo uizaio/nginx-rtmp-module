@@ -205,7 +205,7 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
                               NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
 
-    if (conf->hls && conf->path.len){
+    if (conf->transcode && conf->path.len){
         cleanup = ngx_pcalloc(cf->pool, sizeof(*cleanup));
         if (cleanup == NULL) {
             return NGX_CONF_ERROR;
