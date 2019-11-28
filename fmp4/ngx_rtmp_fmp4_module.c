@@ -1275,7 +1275,9 @@ static ngx_int_t ngx_rtmp_fmp4_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
         if (name.len >= 4 && name.data[name.len - 4] == '.' &&
                              name.data[name.len - 3] == 'm' &&
                              name.data[name.len - 2] == '4' &&
-                             name.data[name.len - 1] == 's'){
+                             (name.data[name.len - 1] == 's' || 
+                             name.data[name.len - 1] == 'a' || 
+                             name.data[name.len - 1] == 'v')){
             max_age = playlen / 500;
         }else if (name.len >= 5 && name.data[name.len - 5] == '.' &&
                                     name.data[name.len - 4] == 'm' &&
