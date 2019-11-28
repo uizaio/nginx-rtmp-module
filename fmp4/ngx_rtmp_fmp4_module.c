@@ -1163,7 +1163,6 @@ ngx_rtmp_fmp4_get_fragment_id(ngx_rtmp_session_t *s, uint64_t ts)
     }
 }
 
-
 /**
  * Allocate memory for location specific configuration
  * Every configs must be set here before using
@@ -1323,7 +1322,7 @@ ngx_rtmp_fmp4_cleanup(void *data)
 {
     ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
                               "fmp4: cleanup started");
-    ngx_rtmp_hls_cleanup_t *cleanup = data;
+    ngx_rtmp_fmp4_cleanup_t *cleanup = data;
 
     ngx_rtmp_fmp4_cleanup_dir(&cleanup->path, cleanup->playlen);
 
