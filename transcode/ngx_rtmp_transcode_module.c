@@ -299,144 +299,154 @@ ngx_rtmp_transcode_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
  * @return 
  */
 static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen){
-    // ngx_dir_t               dir;
-    // time_t                  mtime, max_age;
-    // ngx_err_t               err;
-    // ngx_str_t               name, spath;
-    // u_char                 *p;
-    // ngx_int_t               nentries, nerased;
-    // u_char                  path[NGX_MAX_PATH + 1];
+    ngx_dir_t               dir;
+    time_t                  mtime, max_age;
+    ngx_err_t               err;
+    ngx_str_t               name, spath;
+    u_char                 *p;
+    ngx_int_t               nentries, nerased;
+    u_char                  path[NGX_MAX_PATH + 1];
 
-    // ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
-    //                "transcode: cleanup path='%V' playlen=%M",
-    //                ppath, playlen);
-    // if (ngx_open_dir(ppath, &dir) != NGX_OK) {
-    //     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,
-    //                   "transcode: cleanup open dir failed '%V'", ppath);
-    //     return NGX_ERROR;
-    // }
+    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                   "transcode: cleanup path='%V' playlen=%M",
+                   ppath, playlen);
+    if (ngx_open_dir(ppath, &dir) != NGX_OK) {
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,
+                      "transcode: cleanup open dir failed '%V'", ppath);
+        return NGX_ERROR;
+    }
 
-    // nentries = 0;
-    // nerased = 0;
+    nentries = 0;
+    nerased = 0;
 
-    // for ( ;; ) {
-    //     ngx_set_errno(0);
-    //     if (ngx_read_dir(&dir) == NGX_ERROR) {
-    //         err = ngx_errno;
+    for ( ;; ) {
+        ngx_set_errno(0);
+        if (ngx_read_dir(&dir) == NGX_ERROR) {
+            err = ngx_errno;
 
-    //         if (ngx_close_dir(&dir) == NGX_ERROR) {
-    //             ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
-    //                           "transcode: cleanup " ngx_close_dir_n " \"%V\" failed",
-    //                           ppath);
-    //         }
+            if (ngx_close_dir(&dir) == NGX_ERROR) {
+                ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                              "transcode: cleanup " ngx_close_dir_n " \"%V\" failed",
+                              ppath);
+            }
 
-    //         if (err == NGX_ENOMOREFILES) {
-    //             return nentries - nerased;
-    //         }
+            if (err == NGX_ENOMOREFILES) {
+                return nentries - nerased;
+            }
 
-    //         ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, err,
-    //                       "transcode: cleanup " ngx_read_dir_n
-    //                       " '%V' failed", ppath);
-    //         return NGX_ERROR;
-    //     }
+            ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, err,
+                          "transcode: cleanup " ngx_read_dir_n
+                          " '%V' failed", ppath);
+            return NGX_ERROR;
+        }
 
-    //     name.data = ngx_de_name(&dir);
-    //     if (name.data[0] == '.') {
-    //         continue;
-    //     }
+        name.data = ngx_de_name(&dir);
+        if (name.data[0] == '.') {
+            continue;
+        }
 
-    //     name.len = ngx_de_namelen(&dir);
+        name.len = ngx_de_namelen(&dir);
 
-    //     p = ngx_snprintf(path, sizeof(path) - 1, "%V/%V", ppath, &name);
-    //     *p = 0;
+        p = ngx_snprintf(path, sizeof(path) - 1, "%V/%V", ppath, &name);
+        *p = 0;
 
-    //     spath.data = path;
-    //     spath.len = p - path;
+        spath.data = path;
+        spath.len = p - path;
 
-    //     nentries++;
+        nentries++;
 
-    //     if (!dir.valid_info && ngx_de_info(path, &dir) == NGX_FILE_ERROR) {
-    //         ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
-    //                       "transcode: cleanup " ngx_de_info_n " \"%V\" failed",
-    //                       &spath);
+        if (!dir.valid_info && ngx_de_info(path, &dir) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                          "transcode: cleanup " ngx_de_info_n " \"%V\" failed",
+                          &spath);
 
-    //         continue;
-    //     }
+            continue;
+        }
 
-    //     if (ngx_de_is_dir(&dir)) {
+        if (ngx_de_is_dir(&dir)) {
 
-    //         if (ngx_rtmp_transcode_cleanup_dir(&spath, playlen) == 0) {
-    //             ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
-    //                            "transcode: cleanup dir '%V'", &name);
+            if (ngx_rtmp_transcode_cleanup_dir(&spath, playlen) == 0) {
+                ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                               "transcode: cleanup dir '%V'", &name);
 
-    //             /*
-    //              * null-termination gets spoiled in win32
-    //              * version of ngx_open_dir
-    //              */
+                /*
+                 * null-termination gets spoiled in win32
+                 * version of ngx_open_dir
+                 */
 
-    //             *p = 0;
+                *p = 0;
 
-    //             if (ngx_delete_dir(path) == NGX_FILE_ERROR) {
-    //                 ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
-    //                               "transcode: cleanup " ngx_delete_dir_n
-    //                               " failed on '%V'", &spath);
-    //             } else {
-    //                 nerased++;
-    //             }
-    //         }
+                if (ngx_delete_dir(path) == NGX_FILE_ERROR) {
+                    ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
+                                  "transcode: cleanup " ngx_delete_dir_n
+                                  " failed on '%V'", &spath);
+                } else {
+                    nerased++;
+                }
+            }
 
-    //         continue;
-    //     }
-    //     if (!ngx_de_is_file(&dir)) {
-    //         continue;
-    //     }
+            continue;
+        }
+        if (!ngx_de_is_file(&dir)) {
+            continue;
+        }
 
-    //     if (name.len >= 4 && name.data[name.len - 4] == '.' &&
-    //                          name.data[name.len - 3] == 'm' &&
-    //                          name.data[name.len - 2] == '4' &&
-    //                          name.data[name.len -1 == 's'])
-    //     {
-    //         max_age = playlen / 500;
+        if (name.len >= 4 && name.data[name.len - 4] == '.' &&
+                             name.data[name.len - 3] == 'm' &&
+                             name.data[name.len - 2] == '4' &&
+                             name.data[name.len -1] == 's')
+        {
+            max_age = playlen / 500;
 
-    //     } else if (name.len >= 5 && name.data[name.len - 5] == '.' &&
-    //                                 name.data[name.len - 4] == 'm' &&
-    //                                 name.data[name.len - 3] == '3' &&
-    //                                 name.data[name.len - 2] == 'u' &&
-    //                                 name.data[name.len - 1] == '8')
-    //     {
-    //         max_age = playlen / 1000;
+        } else if (name.len >= 5 && name.data[name.len - 5] == '.' &&
+                                    name.data[name.len - 4] == 'm' &&
+                                    name.data[name.len - 3] == '3' &&
+                                    name.data[name.len - 2] == 'u' &&
+                                    name.data[name.len - 1] == '8')
+        {
+            max_age = playlen / 1000;
 
-    //     } else if (name.len >= 4 && name.data[name.len - 4] == '.' &&
-    //                                 name.data[name.len - 3] == 'k' &&
-    //                                 name.data[name.len - 2] == 'e' &&
-    //                                 name.data[name.len - 1] == 'y')
-    //     {
-    //         max_age = playlen / 500;
+        } else if (name.len >= 4 && name.data[name.len - 4] == '.' &&
+                                    name.data[name.len - 3] == 'm' &&
+                                    name.data[name.len - 2] == 'p' &&
+                                    name.data[name.len - 1] == 'd')
+        {
+            max_age = playlen / 1000;
 
-    //     } else {
-    //         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
-    //                        "transcode: cleanup skip unknown file type '%V'", &name);
-    //         continue;
-    //     }
-    //     mtime = ngx_de_mtime(&dir);
-    //     if (mtime + max_age > ngx_cached_time->sec) {
-    //         continue;
-    //     }
+        }else if(name.len >=4 && name.data[name.len - 4] == '.' &&
+                                 name.data[name.len - 3] == 'm' &&
+                                 name.data[name.len - 2] == 'p' &&
+                                 name.data[name.len - 1] == '4'){
+            max_age = playlen / 500;
+        }else if(name.len >=4 && name.data[name.len - 4] == '.' &&
+                                 name.data[name.len - 3] == 't' &&
+                                 name.data[name.len - 2] == 'm' &&
+                                 name.data[name.len - 1] == 'p'){
+            max_age = playlen / 1000;
+        } else {
+            ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                           "transcode: cleanup skip unknown file type '%V'", &name);
+            continue;
+        }
+        mtime = ngx_de_mtime(&dir);
+        if (mtime + max_age > ngx_cached_time->sec) {
+            continue;
+        }
 
-    //     ngx_log_debug3(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
-    //                    "transcode: cleanup '%V' mtime=%T age=%T",
-    //                    &name, mtime, ngx_cached_time->sec - mtime);
-    //     ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
-    //                           "transcode: delete file %s", path);
-    //     if (ngx_delete_file(path) == NGX_FILE_ERROR) {
-    //         ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
-    //                       "transcode: cleanup " ngx_delete_file_n " failed on '%V'",
-    //                       &spath);
-    //         continue;
-    //     }
+        ngx_log_debug3(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                       "transcode: cleanup '%V' mtime=%T age=%T",
+                       &name, mtime, ngx_cached_time->sec - mtime);
+        ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                              "transcode: delete file %s", path);
+        if (ngx_delete_file(path) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
+                          "transcode: cleanup " ngx_delete_file_n " failed on '%V'",
+                          &spath);
+            continue;
+        }
 
-    //     nerased++;
-    // }
+        nerased++;
+    }
     return NGX_OK;
 }
 
