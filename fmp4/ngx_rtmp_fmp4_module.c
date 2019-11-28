@@ -1321,8 +1321,8 @@ static time_t
 #endif
 ngx_rtmp_fmp4_cleanup(void *data)
 {
-    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
-                              "fmp4: cleanup started");
+    // ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
+    //                           "fmp4: cleanup started");
     ngx_rtmp_fmp4_cleanup_t *cleanup = data;
 
     ngx_rtmp_fmp4_cleanup_dir(&cleanup->path, cleanup->playlen);
