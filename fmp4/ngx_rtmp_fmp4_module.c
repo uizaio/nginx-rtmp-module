@@ -170,7 +170,7 @@ static ngx_command_t ngx_rtmp_fmp4_commands[] = {
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
-      offsetof(ngx_rtmp_transcode_app_conf_t, cleanup),
+      offsetof(ngx_rtmp_fmp4_app_conf_t, cleanup),
       NULL },
     ngx_null_command
 };
@@ -826,7 +826,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     ngx_rtmp_fmp4_sample_t  *smpl;
     ngx_rtmp_fmp4_ctx_t     *ctx;
     FILE                    *f;
-    uint32_t                duration;        
+    // uint32_t                duration;        
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
     p = buffer;/*We reverse 7 first byte of audio frame to save its header*/
