@@ -17,6 +17,10 @@
 #define NGX_RTMP_FMP4_NAMING_TIMESTAMP   2
 #define NGX_RTMP_FMP4_NAMING_SYSTEM      3
 
+typedef struct {
+    ngx_str_t                           path;
+    ngx_msec_t                          playlen;
+} ngx_rtmp_fmp4_cleanup_t;
 
 static ngx_conf_enum_t                  ngx_rtmp_fmp4_naming_slots[] = {
     { ngx_string("sequential"),         NGX_RTMP_FMP4_NAMING_SEQUENTIAL },
@@ -61,6 +65,8 @@ typedef struct{
     ngx_flag_t                          nested;
     ngx_msec_t                          playlen;//playlist length
     ngx_uint_t                          naming;//fragment naming
+    ngx_flag_t                          cleanup;//toggle cleanup option
+    ngx_path_t                         *slot;
 }ngx_rtmp_fmp4_app_conf_t;
 
 
@@ -115,6 +121,7 @@ static ngx_int_t ngx_rtmp_fmp4_copy(ngx_rtmp_session_t *s, void *dst, u_char **s
     ngx_chain_t **in);
 static uint64_t
 ngx_rtmp_fmp4_get_fragment_id(ngx_rtmp_session_t *s, uint64_t ts);
+static ngx_int_t ngx_rtmp_fmp4_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen);
 
 static ngx_command_t ngx_rtmp_fmp4_commands[] = {
     {
@@ -159,6 +166,12 @@ static ngx_command_t ngx_rtmp_fmp4_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_fmp4_app_conf_t, naming),
       &ngx_rtmp_fmp4_naming_slots },
+      { ngx_string("fmp4_cleanup"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_flag_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_fmp4_app_conf_t, cleanup),
+      NULL },
     ngx_null_command
 };
 
@@ -812,8 +825,8 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     size_t                  size, bsize;
     ngx_rtmp_fmp4_sample_t  *smpl;
     ngx_rtmp_fmp4_ctx_t     *ctx;
-    FILE                    *f;
-    uint32_t                duration;        
+    // FILE                    *f;
+    // uint32_t                duration;        
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
     p = buffer;/*We reverse 7 first byte of audio frame to save its header*/
@@ -1150,7 +1163,6 @@ ngx_rtmp_fmp4_get_fragment_id(ngx_rtmp_session_t *s, uint64_t ts)
     }
 }
 
-
 /**
  * Allocate memory for location specific configuration
  * Every configs must be set here before using
@@ -1167,8 +1179,164 @@ static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
     //if not set, it'll be 0
     conf->playlen = NGX_CONF_UNSET_MSEC;
     conf->naming = NGX_CONF_UNSET_UINT;
+    conf->cleanup = NGX_CONF_UNSET;
     return conf;
 }
+
+static ngx_int_t ngx_rtmp_fmp4_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen){
+
+    time_t           mtime, max_age;
+    u_char          *p;
+    u_char           path[NGX_MAX_PATH + 1];
+    ngx_dir_t        dir;
+    ngx_err_t        err;
+    ngx_str_t        name, spath;
+    ngx_int_t        nentries, nerased;
+    ngx_file_info_t  fi;
+
+    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                   "fmp4: cleanup path='%V' playlen=%M", ppath, playlen);
+
+    if (ngx_open_dir(ppath, &dir) != NGX_OK) {
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, ngx_errno,
+                       "fmp4: cleanup open dir failed '%V'", ppath);
+        return NGX_ERROR;
+    }
+
+    nentries = 0;
+    nerased = 0;
+
+    for ( ;; ) {
+        ngx_set_errno(0);
+        if (ngx_read_dir(&dir) == NGX_ERROR) {
+            err = ngx_errno;
+            if (ngx_close_dir(&dir) == NGX_ERROR) {
+                ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                              "fmp4: cleanup " ngx_close_dir_n " \"%V\" failed",
+                              ppath);
+            }
+            if (err == NGX_ENOMOREFILES) {
+                return nentries - nerased;
+            }
+
+            ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, err,
+                          "fmp4: cleanup " ngx_read_dir_n
+                          " '%V' failed", ppath);
+            return NGX_ERROR;
+        }
+        name.data = ngx_de_name(&dir);
+        if (name.data[0] == '.') {
+            continue;
+        }
+        name.len = ngx_de_namelen(&dir);
+        p = ngx_snprintf(path, sizeof(path) - 1, "%V/%V", ppath, &name);
+        *p = 0;
+
+        spath.data = path;
+        spath.len = p - path;
+
+        nentries++;
+
+        if (!dir.valid_info && ngx_de_info(path, &dir) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                          "fmp4: cleanup " ngx_de_info_n " \"%V\" failed",
+                          &spath);
+
+            continue;
+        }
+        if (ngx_de_is_dir(&dir)) {
+            if (ngx_rtmp_fmp4_cleanup_dir(&spath, playlen) == 0) {
+                ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                               "fmp4: cleanup dir '%V'", &name);
+
+                /*
+                 * null-termination gets spoiled in win32
+                 * version of ngx_open_dir
+                 */
+
+                *p = 0;
+
+                if (ngx_delete_dir(path) == NGX_FILE_ERROR) {
+                    ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
+                                  "fmp4: cleanup " ngx_delete_dir_n
+                                  " failed on '%V'", &spath);
+                } else {
+                    nerased++;
+                }
+            }
+
+            continue;
+        }
+
+        if (!ngx_de_is_file(&dir)) {
+            continue;
+        }
+
+        if (name.len >= 4 && name.data[name.len - 4] == '.' &&
+                             name.data[name.len - 3] == 'm' &&
+                             name.data[name.len - 2] == '4' &&
+                             (name.data[name.len - 1] == 's' || 
+                             name.data[name.len - 1] == 'a' || 
+                             name.data[name.len - 1] == 'v')){
+            max_age = playlen / 500;
+        }else if (name.len >= 5 && name.data[name.len - 5] == '.' &&
+                                    name.data[name.len - 4] == 'm' &&
+                                    name.data[name.len - 3] == '3' &&
+                                    name.data[name.len - 2] == 'u' &&
+                                    name.data[name.len - 1] == '8'){
+            max_age = playlen / 1000;
+        }else if (name.len >=4 && name.data[name.len - 4] == '.' &&
+                                    name.data[name.len - 3] == 'm' &&
+                                    name.data[name.len - 2] == 'p' &&
+                                    name.data[name.len - 1] == '4'){
+            max_age = playlen / 500;
+        }else {
+            ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                           "fmp4: cleanup skip unknown file type '%V'", &name);
+            continue;
+        }
+        mtime = ngx_de_mtime(&dir);
+        //http://www.luwenpeng.cn/2019/02/19/nginx时间缓存/ <-- what and how to use ngx_cached_time
+        if (mtime + max_age > ngx_cached_time->sec) {
+            continue;
+        }
+        ngx_log_debug3(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
+                       "fmp4: cleanup '%V' mtime=%T age=%T",
+                       &name, mtime, ngx_cached_time->sec - mtime);
+        ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, ngx_errno,
+                              "fmp4: delete file %s", path);
+        if (ngx_delete_file(path) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, ngx_cycle->log, ngx_errno,
+                          "fmp4: cleanup " ngx_delete_file_n " failed on '%V'",
+                          &spath);
+            continue;
+        }
+
+        nerased++;
+
+    }
+}
+
+#if (nginx_version >= 1011005)
+static ngx_msec_t
+#else
+static time_t
+#endif
+ngx_rtmp_fmp4_cleanup(void *data)
+{
+    // ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
+    //                           "fmp4: cleanup started");
+    ngx_rtmp_fmp4_cleanup_t *cleanup = data;
+
+    ngx_rtmp_fmp4_cleanup_dir(&cleanup->path, cleanup->playlen);
+
+#if (nginx_version >= 1011005)
+    return cleanup->playlen * 2;
+#else
+    return cleanup->playlen / 500;
+#endif
+}
+
 
 /**
  * Get app configs
@@ -1176,6 +1344,7 @@ static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
 static char * ngx_rtmp_fmp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *child){
     ngx_rtmp_fmp4_app_conf_t *prev = parent;
     ngx_rtmp_fmp4_app_conf_t *conf = child;
+    ngx_rtmp_fmp4_cleanup_t     *cleanup;
 
     ngx_conf_merge_value(conf->fragmented_mp4, prev->fragmented_mp4, 0);
     //fraglen default is 5000ms
@@ -1189,6 +1358,33 @@ static char * ngx_rtmp_fmp4_merge_app_conf(ngx_conf_t *cf, void *parent, void *c
     ngx_conf_merge_str_value(conf->path, prev->path, "");
     ngx_conf_merge_uint_value(conf->naming, prev->naming,
                               NGX_RTMP_FMP4_NAMING_SEQUENTIAL);
+    if (conf->fragmented_mp4 && conf->path.len && conf->cleanup){
+        if (conf->path.data[conf->path.len - 1] == '/') {
+            conf->path.len--;
+        }
+        cleanup = ngx_pcalloc(cf->pool, sizeof(*cleanup));
+        if (cleanup == NULL) {
+            return NGX_CONF_ERROR;
+        }
+        cleanup->path = conf->path;
+        cleanup->playlen = conf->playlen;
+
+        conf->slot = ngx_pcalloc(cf->pool, sizeof(*conf->slot));
+        if (conf->slot == NULL) {
+            return NGX_CONF_ERROR;
+        }
+        //http://nginx.org/en/docs/dev/development_guide.html keyword: ngx_path_t
+        //this handler will be run time to time
+        conf->slot->manager = ngx_rtmp_fmp4_cleanup;
+        conf->slot->name = conf->path;
+        conf->slot->data = cleanup;
+        conf->slot->conf_file = cf->conf_file->file.name.data;
+        conf->slot->line = cf->conf_file->line;
+
+        if (ngx_add_path(cf, &conf->slot) != NGX_OK) {
+            return NGX_CONF_ERROR;
+        }
+    }
     return NGX_CONF_OK;
 }
 

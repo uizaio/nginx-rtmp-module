@@ -446,8 +446,8 @@ static ngx_msec_t
 static time_t
 #endif
 ngx_rtmp_transcode_cleanup(void *data){
-    ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
-                              "transcode: cleanup started");
+    // ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
+    //                           "transcode: cleanup started");
     ngx_rtmp_transcode_cleanup_t *cleanup = data;
 
     ngx_rtmp_transcode_cleanup_dir(&cleanup->path, cleanup->playlen);
