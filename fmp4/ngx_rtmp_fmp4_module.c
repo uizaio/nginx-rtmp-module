@@ -825,7 +825,7 @@ ngx_rtmp_fmp4_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
     size_t                  size, bsize;
     ngx_rtmp_fmp4_sample_t  *smpl;
     ngx_rtmp_fmp4_ctx_t     *ctx;
-    FILE                    *f;
+    // FILE                    *f;
     // uint32_t                duration;        
 
     static u_char           buffer[NGX_RTMP_FMP4_BUFSIZE];
