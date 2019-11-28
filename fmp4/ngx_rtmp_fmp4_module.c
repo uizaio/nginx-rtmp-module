@@ -1179,6 +1179,7 @@ static void * ngx_rtmp_fmp4_create_app_conf(ngx_conf_t *cf){
     //if not set, it'll be 0
     conf->playlen = NGX_CONF_UNSET_MSEC;
     conf->naming = NGX_CONF_UNSET_UINT;
+    conf->cleanup = NGX_CONF_UNSET;
     return conf;
 }
 
