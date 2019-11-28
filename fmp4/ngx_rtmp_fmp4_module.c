@@ -1294,6 +1294,7 @@ static ngx_int_t ngx_rtmp_fmp4_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
             continue;
         }
         mtime = ngx_de_mtime(&dir);
+        //http://www.luwenpeng.cn/2019/02/19/nginx时间缓存/ <-- what and how to use ngx_cached_time
         if (mtime + max_age > ngx_cached_time->sec) {
             continue;
         }
