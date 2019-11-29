@@ -414,11 +414,6 @@ static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t pla
             max_age = playlen / 1000;
 
         }else if(name.len >=4 && name.data[name.len - 4] == '.' &&
-                                 name.data[name.len - 3] == 'm' &&
-                                 name.data[name.len - 2] == 'p' &&
-                                 name.data[name.len - 1] == '4'){
-            max_age = playlen / 500;
-        }else if(name.len >=4 && name.data[name.len - 4] == '.' &&
                                  name.data[name.len - 3] == 't' &&
                                  name.data[name.len - 2] == 'm' &&
                                  name.data[name.len - 1] == 'p'){
