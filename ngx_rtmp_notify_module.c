@@ -1185,7 +1185,7 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
     while (count--) {
         ins = (u_char*)ngx_strstr(orig, rep);
         len_front = ins - orig;
-        tmp = ngx_cpystrn(tmp, orig, len_front);
+        tmp = ngx_cpystrn(tmp, orig, len_front + 1);
         tmp = ngx_cpymem(tmp, with, len_with);
         orig += len_front + len_rep; // move to next "end of rep"
     }
