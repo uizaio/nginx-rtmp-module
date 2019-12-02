@@ -1217,7 +1217,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             headers = ngx_rtmp_notify_get_http_header(s, in);
             for(i = 0; i < headers.count; i++){
                 if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
-                    content_length = ngx_atoi(headers.hs[i].value, ngx_strlen(headers.hs[i].value));
+                    content_length = atoi((const char*)headers.hs[i].value);
                     break;
                 }
             }
