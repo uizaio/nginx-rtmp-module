@@ -1162,11 +1162,11 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
         return NULL;
     }
     if(!with){
-        with = "";
+        with = (u_char*)"";
     }
     len_with = ngx_strlen(with);
     ins = orig;    
-    for(count = 0; tmp = (u_char*)ngx_strstr(ins, rep); ++count){
+    for (count = 0; tmp = (u_char*)ngx_strstr(ins, rep); ++count){
         ins = tmp + len_rep;
     }
     tmp = result = ngx_pcalloc(s->connection->pool, ngx_strlen(orig) + (len_with - len_rep) * count + 1);
@@ -1174,7 +1174,7 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
         return NULL;
     }
     while (count--) {
-        ins = ngx_strstr(orig, rep);
+        ins = (u_char*)ngx_strstr(orig, rep);
         len_front = ins - orig;
         tmp = ngx_cpystrn(tmp, orig, len_front) + len_front;
         tmp = ngx_cpymem(tmp, with, len_with) + len_with;
