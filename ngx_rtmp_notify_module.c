@@ -1218,6 +1218,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             for(i = 0; i < headers.count; i++){
                 if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
                     content_length = atoi((const char*)headers.hs[i].value);
+                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                        "notify: %s", headers.hs[i].value);
                     break;
                 }
             }
