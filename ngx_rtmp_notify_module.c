@@ -1232,11 +1232,9 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             }
             if(content_length > 0){                
                 body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
-                if(body.len > 0){  
-                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s", body.data);                      
+                if(body.len > 0){                     
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
-                    if(ctx != NULL){                              
-                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist data %s", ctx->playlist.data);
+                    if(ctx != NULL){
                         p = str_replace(s, ctx->playlist.data, ctx->name.data, body.data);                        
                         if(p != NULL){
                             ngx_pfree(s->connection->pool, ctx->playlist.data);                            
@@ -1244,7 +1242,6 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                             ctx->playlist.len = ctx->playlist.len - ctx->name.len + body.len;
                             ctx->playlist.data = ngx_palloc(s->connection->pool, ctx->playlist.len + 1);
                             *ngx_cpymem(ctx->playlist.data, p, ctx->playlist.len + 1) = 0;
-                            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist data %s", ctx->playlist.data);
                         }                
                         p = str_replace(s, ctx->playlist_bak.data, ctx->name.data, body.data);
                         if(p != NULL){
