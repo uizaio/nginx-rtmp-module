@@ -1166,7 +1166,8 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
     }
     len_with = ngx_strlen(with);
     ins = orig;
-    for(count = 0; tmp = ngx_strstr(ins, rep); ++count){
+    count = 0;
+    for(count; tmp = ngx_strstr(ins, rep); ++count){
         ins = tmp + len_rep;
     }
     tmp = result = ngx_pcalloc(s->connection->pool, ngx_strlen(orig) + (len_with - len_rep) * count + 1);
@@ -1180,7 +1181,7 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
         tmp = ngx_cpymem(tmp, with, len_with) + len_with;
         orig += len_front + len_rep; // move to next "end of rep"
     }
-    ngx_cpymem(tmp, orig, ngx_strlen(orig));
+    *ngx_cpymem(tmp, orig, ngx_strlen(orig)) = 0;
     return result;
 }
 
@@ -1217,7 +1218,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             headers = ngx_rtmp_notify_get_http_header(s, in);
             for(i = 0; i < headers.count; i++){
                 if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
-                    content_length = ngx_atoi(headers.hs[i].value);
+                    content_length = ngx_atoi(headers.hs[i].value, ngx_strlen(headers.hs[i].value));
                     break;
                 }
             }
