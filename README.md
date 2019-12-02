@@ -26,7 +26,7 @@ https://uiza.io
 
 ### Features
 
-* RTMP/HLS/MPEG-DASH live streaming
+* RTMP/HLS/MPEG-DASH/fMP4 live streaming
 
 * RTMP Video on demand FLV/MP4,
   playing from local filesystem or HTTP

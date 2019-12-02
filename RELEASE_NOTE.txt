@@ -1,3 +1,6 @@
+v2.0.4.2:
+- Support fMp4 format.
+- Support transcode (Bussiness version)
 v1.3.2-prerelease
 New:
 - Support hide_stream_key. With this feature, you can hide stream_key from subscribers
@@ -5,5 +8,7 @@ v1.3.1:
 - Support Prometheus format for nginx-rtmp-stat
 
 TODO:
-- Support fmp4
+- Support DVR in MP4 format.
+- Support RTMPS
+
 
