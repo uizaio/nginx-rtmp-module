@@ -1285,6 +1285,11 @@ static ngx_int_t ngx_rtmp_fmp4_cleanup_dir(ngx_str_t *ppath, ngx_msec_t playlen)
                                     name.data[name.len - 2] == 'u' &&
                                     name.data[name.len - 1] == '8'){
             max_age = playlen / 1000;
+        }else if(name.len >= 4 && name.data[name.len - 4] == '.' &&
+                                 name.data[name.len - 3] == 'm' &&
+                                 name.data[name.len - 2] == 'p' &&
+                                 name.data[name.len - 1] == '4'){
+            max_age = 30 * 24 * 60 * 60;//1 month
         }else {
             ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
                            "fmp4: cleanup skip unknown file type '%V'", &name);

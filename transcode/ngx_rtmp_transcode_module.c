@@ -407,7 +407,7 @@ static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t pla
             if(name.data[name.len - 6] == '0' || name.data[name.len - 6] == '1' || name.data[name.len - 6] == '2'){
                 max_age = playlen / 1000;
             }else{
-                continue;
+                max_age = 30 * 24 * 60 * 60;//1 month
             }
 
         } else if (name.len >= 4 && name.data[name.len - 4] == '.' &&
@@ -422,6 +422,11 @@ static ngx_int_t ngx_rtmp_transcode_cleanup_dir(ngx_str_t *ppath, ngx_msec_t pla
                                  name.data[name.len - 2] == 'm' &&
                                  name.data[name.len - 1] == 'p'){
             max_age = playlen / 1000;
+        }else if(name.len >= 4 && name.data[name.len - 4] == '.' &&
+                                 name.data[name.len - 3] == 'm' &&
+                                 name.data[name.len - 2] == 'p' &&
+                                 name.data[name.len - 1] == '4'){
+            max_age = 30 * 24 * 60 * 60;//1 month
         } else {
             ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ngx_cycle->log, 0,
                            "transcode: cleanup skip unknown file type '%V'", &name);
