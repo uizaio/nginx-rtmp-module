@@ -1230,6 +1230,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                     if(ctx != NULL){                              
                         p = str_replace(s, ctx->playlist.data, ctx->name.data, body.data);
+                        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: playlist %s", ctx->playlist.data);
                         if(p != NULL){
                             ngx_pfree(s->connection->pool, ctx->playlist.data);                            
                             // ctx->playlist.data = p;
