@@ -1218,18 +1218,15 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         if(hacf != NULL && hacf->hide_stream_key){
             headers = ngx_rtmp_notify_get_http_header(s, in);
             for(i = 0; i <= headers.count; i++){
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                        "notify: %s", headers.hs[i].name);
                 if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
-                    content_length = atoi((const char*)headers.hs[i].value); 
-                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                        "notify: %d", content_length);                   
+                    content_length = atoi((const char*)headers.hs[i].value);                   
                     break;
                 }
             }
             if(content_length > 0){                
                 body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
-                if(body.len > 0){                        
+                if(body.len > 0){  
+                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: %s", body.data);                      
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                     if(ctx != NULL){                              
                         p = str_replace(s, ctx->playlist.data, ctx->name.data, body.data);
