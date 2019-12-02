@@ -990,9 +990,11 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
                 for(k = 0; k < j; k++){
                     headers.hs[h].name[k] = buff[k];
                 }
+                headers.hs[h].name[k + 1] = '\0';
                 for(k = 0; k + j < i; k++){
                     headers.hs[h].value[k] = buff[k + j + 1];
                 }
+                headers.hs[h].value[k + 1] = '\0';
                 h++;//next header
                 i = 0;//reset buff
             }
@@ -1215,11 +1217,15 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
         if(hacf != NULL && hacf->hide_stream_key){
             headers = ngx_rtmp_notify_get_http_header(s, in);
+            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                        "notify: number header %d", headers.count); 
             for(i = 0; i <= headers.count; i++){
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                         "notify: %s", headers.hs[i].name);
                 if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
-                    content_length = atoi((const char*)headers.hs[i].value);                    
+                    content_length = atoi((const char*)headers.hs[i].value); 
+                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                        "notify: %d", content_length);                   
                     break;
                 }
             }
