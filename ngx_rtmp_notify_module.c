@@ -1169,7 +1169,7 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
     len_with = ngx_strlen(with);
     ins = orig;
     count = 0;  
-    while(true){
+    while(1){
         tmp = (u_char*)ngx_strstr(ins, rep);
         if(tmp != NULL){
             count++;
