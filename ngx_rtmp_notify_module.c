@@ -958,7 +958,7 @@ static http_headers ngx_rtmp_notify_get_http_header(ngx_rtmp_session_t* s, ngx_c
     http_headers headers;
     char        buff[256];
     ngx_buf_t   *b;
-    char        *p;
+    u_char        *p;
     char        c1,c2,c3,c4;//header always end with \r\n\r\n    
     int         i = 0;    
     int         j = 0;
@@ -1165,9 +1165,8 @@ u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *wi
         with = "";
     }
     len_with = ngx_strlen(with);
-    ins = orig;
-    count = 0;
-    for(count; tmp = ngx_strstr(ins, rep); ++count){
+    ins = orig;    
+    for(count = 0; tmp = (u_char*)ngx_strstr(ins, rep); ++count){
         ins = tmp + len_rep;
     }
     tmp = result = ngx_pcalloc(s->connection->pool, ngx_strlen(orig) + (len_with - len_rep) * count + 1);
