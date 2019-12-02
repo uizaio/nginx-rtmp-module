@@ -1148,7 +1148,7 @@ ngx_rtmp_notify_set_name(u_char *dst, size_t dst_len, u_char *src,
 u_char *str_replace(ngx_rtmp_session_t *s, u_char *orig, u_char *rep, u_char *with)
 {
     u_char *result;
-    char *ins;
+    u_char *ins;
     u_char *tmp;
     size_t len_rep;
     size_t len_with;
@@ -1201,7 +1201,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     u_char                      *p;
     http_headers                headers;
     int                         i = 0;
-    int                         content_length = 0;
+    ngx_int_t                   content_length = 0;
     ngx_rtmp_hls_app_conf_t     *hacf;
 
     static ngx_str_t    location = ngx_string("location");
@@ -1216,8 +1216,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         if(hacf != NULL && hacf->hide_stream_key){
             headers = ngx_rtmp_notify_get_http_header(s, in);
             for(i = 0; i < headers.count; i++){
-                if(strcmp(headers.hs[i].name, "Content-Length") == 0){
-                    content_length = atoi(headers.hs[i].value);
+                if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
+                    content_length = ngx_atoi(headers.hs[i].value);
                     break;
                 }
             }
