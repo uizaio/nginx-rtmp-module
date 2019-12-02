@@ -1215,7 +1215,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
         hacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_hls_module);
         if(hacf != NULL && hacf->hide_stream_key){
             headers = ngx_rtmp_notify_get_http_header(s, in);
-            for(i = 0; i < headers.count; i++){
+            for(i = 0; i <= headers.count; i++){
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                         "notify: %s", headers.hs[i].name);
                 if(ngx_strcmp(headers.hs[i].name, "Content-Length") == 0){
