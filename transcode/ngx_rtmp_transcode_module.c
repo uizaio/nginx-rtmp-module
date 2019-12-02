@@ -476,9 +476,9 @@ ngx_rtmp_transcode_cleanup(void *data){
 static ngx_int_t
 ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
 {
-    size_t                     len;
+    // size_t                     len;
     ngx_file_info_t            fi;
-    ngx_rtmp_transcode_ctx_t       *ctx;
+    // ngx_rtmp_transcode_ctx_t       *ctx;
     ngx_rtmp_transcode_app_conf_t  *tacf;
 
     static u_char              path[NGX_MAX_PATH + 1];
