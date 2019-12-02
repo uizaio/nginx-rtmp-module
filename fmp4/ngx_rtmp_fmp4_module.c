@@ -115,8 +115,8 @@ static ngx_rtmp_fmp4_frag_t * ngx_rtmp_fmp4_get_frag(ngx_rtmp_session_t *s, ngx_
 static void ngx_rtmp_fmp4_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_fmp4_track_t *t);
 static void ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx_rtmp_fmp4_track_t *at);
 static ngx_int_t ngx_rtmp_fmp4_rename_file(u_char *src, u_char *dst);
-static ngx_int_t ngx_rtmp_fmp4_parse_aac_header(ngx_rtmp_session_t *s, ngx_uint_t *objtype,
-    ngx_uint_t *srindex, ngx_uint_t *chconf);
+// static ngx_int_t ngx_rtmp_fmp4_parse_aac_header(ngx_rtmp_session_t *s, ngx_uint_t *objtype,
+//     ngx_uint_t *srindex, ngx_uint_t *chconf);
 static ngx_int_t ngx_rtmp_fmp4_copy(ngx_rtmp_session_t *s, void *dst, u_char **src, size_t n,
     ngx_chain_t **in);
 static uint64_t
@@ -533,11 +533,10 @@ ngx_rtmp_fmp4_write_data(ngx_rtmp_session_t *s,  ngx_rtmp_fmp4_track_t *vt,  ngx
         aleft -= n;
     }
     done:
-
         if (fd != NGX_INVALID_FILE) {
             ngx_close_file(fd);
         }      
-        ctx->last_sample_trun =   truns;
+        // ctx->last_sample_trun =   truns;
 }
 
 static ngx_int_t 
@@ -1029,64 +1028,64 @@ ngx_rtmp_fmp4_rename_file(u_char *src, u_char *dst){
 }
 
 
-static ngx_int_t
-ngx_rtmp_fmp4_parse_aac_header(ngx_rtmp_session_t *s, ngx_uint_t *objtype,
-    ngx_uint_t *srindex, ngx_uint_t *chconf)
-{
-    ngx_rtmp_codec_ctx_t   *codec_ctx;
-    ngx_chain_t            *cl;
-    u_char                 *p, b0, b1;
+// static ngx_int_t
+// ngx_rtmp_fmp4_parse_aac_header(ngx_rtmp_session_t *s, ngx_uint_t *objtype,
+//     ngx_uint_t *srindex, ngx_uint_t *chconf)
+// {
+//     ngx_rtmp_codec_ctx_t   *codec_ctx;
+//     ngx_chain_t            *cl;
+//     u_char                 *p, b0, b1;
 
-    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+//     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
 
-    cl = codec_ctx->aac_header;
+//     cl = codec_ctx->aac_header;
 
-    p = cl->buf->pos;
+//     p = cl->buf->pos;
 
-    if (ngx_rtmp_fmp4_copy(s, NULL, &p, 2, &cl) != NGX_OK) {
-        return NGX_ERROR;
-    }
+//     if (ngx_rtmp_fmp4_copy(s, NULL, &p, 2, &cl) != NGX_OK) {
+//         return NGX_ERROR;
+//     }
 
-    if (ngx_rtmp_fmp4_copy(s, &b0, &p, 1, &cl) != NGX_OK) {
-        return NGX_ERROR;
-    }
+//     if (ngx_rtmp_fmp4_copy(s, &b0, &p, 1, &cl) != NGX_OK) {
+//         return NGX_ERROR;
+//     }
 
-    if (ngx_rtmp_fmp4_copy(s, &b1, &p, 1, &cl) != NGX_OK) {
-        return NGX_ERROR;
-    }
+//     if (ngx_rtmp_fmp4_copy(s, &b1, &p, 1, &cl) != NGX_OK) {
+//         return NGX_ERROR;
+//     }
 
-    *objtype = b0 >> 3;
-    if (*objtype == 0 || *objtype == 0x1f) {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "fmp4: unsupported adts object type:%ui", *objtype);
-        return NGX_ERROR;
-    }
+//     *objtype = b0 >> 3;
+//     if (*objtype == 0 || *objtype == 0x1f) {
+//         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+//                        "fmp4: unsupported adts object type:%ui", *objtype);
+//         return NGX_ERROR;
+//     }
 
-    if (*objtype > 4) {
+//     if (*objtype > 4) {
 
-        /*
-         * Mark all extended profiles as LC
-         * to make Android as happy as possible.
-         */
+//         /*
+//          * Mark all extended profiles as LC
+//          * to make Android as happy as possible.
+//          */
 
-        *objtype = 2;
-    }
+//         *objtype = 2;
+//     }
 
-    *srindex = ((b0 << 1) & 0x0f) | ((b1 & 0x80) >> 7);
-    if (*srindex == 0x0f) {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "fmp4: unsupported adts sample rate:%ui", *srindex);
-        return NGX_ERROR;
-    }
+//     *srindex = ((b0 << 1) & 0x0f) | ((b1 & 0x80) >> 7);
+//     if (*srindex == 0x0f) {
+//         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+//                        "fmp4: unsupported adts sample rate:%ui", *srindex);
+//         return NGX_ERROR;
+//     }
 
-    *chconf = (b1 >> 3) & 0x0f;
+//     *chconf = (b1 >> 3) & 0x0f;
 
-    ngx_log_debug3(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "fmp4: aac object_type:%ui, sample_rate_index:%ui, "
-                   "channel_config:%ui", *objtype, *srindex, *chconf);
+//     ngx_log_debug3(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
+//                    "fmp4: aac object_type:%ui, sample_rate_index:%ui, "
+//                    "channel_config:%ui", *objtype, *srindex, *chconf);
 
-    return NGX_OK;
-}
+//     return NGX_OK;
+// }
 
 
 static ngx_int_t
