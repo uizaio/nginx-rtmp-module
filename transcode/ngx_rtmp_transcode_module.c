@@ -289,6 +289,11 @@ ngx_rtmp_transcode_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *
 static ngx_int_t
 ngx_rtmp_transcode_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {    
+    ngx_rtmp_transcode_ctx_t *ctx;
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_transcode_module);
+
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "transcode: close stream %V", ctx->name);
     return next_stream_eof(s, v);
 }
 
