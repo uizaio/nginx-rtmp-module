@@ -1216,6 +1216,11 @@ ngx_rtmp_dash_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v)
 static ngx_int_t
 ngx_rtmp_dash_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
 {
+    ngx_rtmp_dash_ctx_t *ctx;
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
+
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "dash: close stream %V", ctx->name);
     ngx_rtmp_dash_close_fragments(s);
 
     return next_stream_eof(s, v);
