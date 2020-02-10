@@ -197,7 +197,14 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 static ngx_int_t
 ngx_rtmp_transcode_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
-    
+    ngx_rtmp_codec_ctx_t    *codec_ctx;
+    ngx_uint_t              video_rate;
+
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+    video_rate = codec_ctx->video_data_rate;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "transcode: video rate: %d", video_rate);
+
     return next_publish(s, v);
 }
 

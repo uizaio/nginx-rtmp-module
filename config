@@ -21,7 +21,6 @@ RTMP_CORE_MODULES="                                         \
                 ngx_rtmp_limit_module                       \
                 ngx_rtmp_hls_module                         \
                 ngx_rtmp_dash_module                        \
-                ngx_rtmp_fmp4_module               \
                 ngx_rtmp_transcode_module                      \
                 "
 
@@ -52,7 +51,6 @@ RTMP_DEPS="                                                 \
                 $ngx_addon_dir/hls/ngx_rtmp_mpegts.h        \
                 $ngx_addon_dir/hls/ngx_rtmp_hls_module.h    \
                 $ngx_addon_dir/dash/ngx_rtmp_mp4.h          \
-                $ngx_addon_dir/fmp4/ngx_rtmp_fmp4.h \
                 "
 
 
