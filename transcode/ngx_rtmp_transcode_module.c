@@ -202,9 +202,14 @@ ngx_rtmp_transcode_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_uint_t              video_rate;
 
     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
-    video_rate = codec_ctx->video_data_rate;
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+    if(codec_ctx != null){
+        video_rate = codec_ctx->video_data_rate;
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "transcode: video rate: %d", video_rate);
+    }else{
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                      "transcode: No video rate");
+    }    
 
     return next_publish(s, v);
 }
