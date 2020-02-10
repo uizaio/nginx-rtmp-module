@@ -198,18 +198,6 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 static ngx_int_t
 ngx_rtmp_transcode_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
-    ngx_rtmp_codec_ctx_t    *codec_ctx;
-    ngx_uint_t              video_rate;
-
-    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
-    if(codec_ctx != NULL){
-        video_rate = codec_ctx->video_data_rate;
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "transcode: video rate: %d", video_rate);
-    }else{
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
-                      "transcode: No video rate");
-    }    
 
     return next_publish(s, v);
 }
@@ -222,6 +210,19 @@ ngx_rtmp_transcode_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *
 
 static ngx_int_t
 ngx_rtmp_transcode_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v)
+{    
+    return next_stream_begin(s, v);
+}
+
+static ngx_int_t
+ngx_rtmp_transcode_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
+{    
+    return next_stream_eof(s, v);
+}
+
+static ngx_int_t
+ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
+    ngx_chain_t *in)
 {
     ngx_rtmp_codec_ctx_t    *codec_ctx;
     ngx_uint_t              video_rate;
@@ -234,19 +235,15 @@ ngx_rtmp_transcode_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *
     }else{
         ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
                       "transcode: No video rate");
-    }
-    return next_stream_begin(s, v);
-}
-
-static ngx_int_t
-ngx_rtmp_transcode_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v)
-{    
-    return next_stream_eof(s, v);
+    }  
+    return NGX_OK;
 }
 
 static ngx_int_t
 ngx_rtmp_transcode_postconfiguration(ngx_conf_t *cf)
 {
+    h = ngx_array_push(&cmcf->events[NGX_RTMP_MSG_VIDEO]);
+    *h = ngx_rtmp_transcode_video;
 
     next_publish = ngx_rtmp_publish;
     ngx_rtmp_publish = ngx_rtmp_transcode_publish;
