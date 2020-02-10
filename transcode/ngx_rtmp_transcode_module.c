@@ -4,6 +4,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_rtmp.h>
+#include <ngx_rtmp_codec_module.h>
 #include <ngx_rtmp_cmd_module.h>
 
 static ngx_rtmp_publish_pt              next_publish;
@@ -88,7 +89,7 @@ static ngx_command_t ngx_rtmp_transcode_commands[] = {
       ngx_conf_set_enum_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_transcode_app_conf_t, naming),
-      &ngx_rtmp_ffmpeg_naming_slots },
+      &ngx_rtmp_transcode_naming_slots },
       { ngx_string("transcode_cleanup"),
       NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_flag_slot,
