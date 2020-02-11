@@ -1613,7 +1613,18 @@ ngx_rtmp_notify_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_rtmp_notify_app_conf_t     *nacf;
     ngx_rtmp_netcall_init_t         ci;
     ngx_url_t                      *url;
+    ngx_rtmp_codec_ctx_t    *codec_ctx;
+    ngx_uint_t              video_rate;
 
+    codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+    if(codec_ctx != NULL){
+        video_rate = codec_ctx->video_data_rate;
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "notify: video rate: %d", video_rate);
+    }else{
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "nofity: No video rate");
+    }
     if (s->auto_pushed) {
         goto next;
     }
