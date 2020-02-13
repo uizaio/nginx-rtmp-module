@@ -248,7 +248,7 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
                         "transcode: Video rate is over limit!");
             }
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: video rate: %d %d", video_rate);
+                        "transcode: video rate: %d", video_rate);
                         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: limit: %d", limits[0]);
         }else{
