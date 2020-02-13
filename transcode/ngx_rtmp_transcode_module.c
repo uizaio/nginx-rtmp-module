@@ -277,8 +277,8 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_rtmp_bandwidth_t          *limits;
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
-    limits = tscf->limit_ingest;
-    if(limits->nelts > 0){
+    limits = tscf->limit_ingest.elts;
+    if(tscf->limit_ingest->nelts > 0){
         codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
         if(codec_ctx != NULL){
             video_rate = codec_ctx->video_data_rate;
