@@ -161,7 +161,7 @@ ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf)
 {
     ngx_rtmp_transcode_app_conf_t *conf;
 
-    conf = ngx_pclloc(cf->pool, sizeof(ngx_rtmp_transcode_app_conf_t));
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_transcode_app_conf_t));
     if (conf == NULL) {
         return NULL;
     }
