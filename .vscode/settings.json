@@ -14,6 +14,21 @@
         "string_view": "c",
         "vector": "c",
         "__locale": "c",
-        "filesystem": "c"
+        "filesystem": "c",
+        "__functional_base": "c",
+        "__node_handle": "c",
+        "algorithm": "c",
+        "atomic": "c",
+        "bitset": "c",
+        "chrono": "c",
+        "__memory": "c",
+        "functional": "c",
+        "limits": "c",
+        "memory": "c",
+        "optional": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "tuple": "c",
+        "type_traits": "c"
     }
 }

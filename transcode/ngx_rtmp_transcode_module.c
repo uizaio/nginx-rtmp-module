@@ -278,18 +278,18 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
     limits = tscf->limit_ingest.elts;
-    if(tscf->limit_ingest->nelts > 0){
+    if(tscf->limit_ingest.nelts > 0){
         codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
         if(codec_ctx != NULL){
             video_rate = codec_ctx->video_data_rate;
-            if(video_rate > limits[0]->value){
+            if(video_rate > limits[0].value){
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: Video rate is over limit!");
             }
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: video rate: %d", video_rate);
                         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: limit: %d", limits[0]->value);
+                        "transcode: limit: %d", limits[0].value);
         }else{
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: No video rate");
