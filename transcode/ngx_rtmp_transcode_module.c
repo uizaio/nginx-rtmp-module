@@ -17,6 +17,8 @@ static void * ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf,
        void *parent, void *child);
 char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static ngx_int_t
+ngx_rtmp_transcode_merge_limit_ingest(ngx_array_t *prev, ngx_array_t *ingest_limit);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
@@ -179,8 +181,38 @@ ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf)
     conf->cleanup = NGX_CONF_UNSET;
     conf->dvr = NGX_CONF_UNSET;
     conf->hide_stream_key = NGX_CONF_UNSET;
+    if (ngx_array_init(&conf->limit_ingest, cf->pool, 1,
+                       sizeof(ngx_rtmp_limit_bandwidth_t))
+        != NGX_OK)
+    {
+        return NULL;
+    }
 
     return conf;
+}
+
+static ngx_int_t
+ngx_rtmp_transcode_merge_limit_ingest(ngx_array_t *prev, ngx_array_t *ingest_limit)
+{
+    void   *p;
+
+    if (prev->nelts == 0) {
+        return NGX_OK;
+    }
+
+    if (ingest_limit->nelts == 0) {
+        *ingest_limit = *prev;
+        return NGX_OK;
+    }
+
+    p = ngx_array_push_n(ingest_limit, prev->nelts);
+    if (p == NULL) {
+        return NGX_ERROR;
+    }
+
+    ngx_memcpy(p, prev->elts, prev->size * prev->nelts);
+
+    return NGX_OK;
 }
 
 static char *
@@ -202,6 +234,9 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->naming, prev->naming,
                               NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
+    if (ngx_rtmp_transcode_merge_limit_ingest(&prev->limit_ingest, &conf->limit_ingest) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
 
     return NGX_CONF_OK;
 }
