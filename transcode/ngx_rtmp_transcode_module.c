@@ -271,10 +271,10 @@ static ngx_int_t
 ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_chain_t *in)
 {
-    ngx_rtmp_codec_ctx_t        *codec_ctx;
-    ngx_uint_t                  video_rate;
-    ngx_rtmp_transcode_app_conf_t *tscf;
-    ngx_rtmp_bandwidth_t          *limits;
+    ngx_rtmp_codec_ctx_t            *codec_ctx;
+    ngx_uint_t                      video_rate;
+    ngx_rtmp_transcode_app_conf_t   *tscf;
+    ngx_rtmp_limit_bandwidth_t      *limits;
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
     limits = tscf->limit_ingest.elts;
@@ -304,7 +304,7 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
     ngx_str_t                       *value;
     ngx_uint_t                      i;
     ngx_uint_t                      v;
-    ngx_rtmp_bandwidth_t            *vbt;
+    ngx_rtmp_limit_bandwidth_t      *vbt;
 
     value = cf->args->elts;
     for(i = 1; i < cf->args->nelts; i++){
