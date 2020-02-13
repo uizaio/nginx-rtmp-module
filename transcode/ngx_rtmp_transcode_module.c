@@ -277,7 +277,7 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
         if(vv == NULL){
             return NGX_CONF_ERROR;
         }
-        vv = v;
+        *vv = v;
     }
     return NGX_CONF_OK;
 }
