@@ -31,6 +31,10 @@ static ngx_conf_enum_t                  ngx_rtmp_transcode_naming_slots[] = {
 };
 
 typedef struct {
+    ngx_uint_t value;
+} ngx_rtmp_limit_bandwidth_t;
+
+typedef struct {
     ngx_flag_t                          transcode;
     ngx_str_t                           path;
     ngx_flag_t                          nested;
@@ -42,7 +46,7 @@ typedef struct {
     ngx_flag_t                          dvr;
     ngx_str_t                           dvr_path;
     ngx_flag_t                          hide_stream_key;
-    ngx_uint_t                          limit_ingest[4];
+    ngx_array_t                         limit_ingest;
 } ngx_rtmp_transcode_app_conf_t;
 
 typedef struct {
@@ -232,25 +236,25 @@ static ngx_int_t
 ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_chain_t *in)
 {
-    ngx_rtmp_codec_ctx_t    *codec_ctx;
-    ngx_uint_t              video_rate;
+    ngx_rtmp_codec_ctx_t        *codec_ctx;
+    ngx_uint_t                  video_rate;
     ngx_rtmp_transcode_app_conf_t *tscf;
-    ngx_uint_t              *limits;
+    ngx_rtmp_bandwidth_t          *limits;
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
     limits = tscf->limit_ingest;
-    if(limits != NULL){
+    if(limits->nelts > 0){
         codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
         if(codec_ctx != NULL){
             video_rate = codec_ctx->video_data_rate;
-            if(video_rate > limits[0]){
+            if(video_rate > limits[0]->value){
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: Video rate is over limit!");
             }
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: video rate: %d", video_rate);
                         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: limit: %d", limits[0]);
+                        "transcode: limit: %d", limits[0]->value);
         }else{
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: No video rate");
@@ -265,7 +269,7 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
     ngx_str_t                       *value;
     ngx_uint_t                      i;
     ngx_uint_t                      v;
-    ngx_uint_t                      *vv;
+    ngx_rtmp_bandwidth_t            *vbt;
 
     value = cf->args->elts;
     for(i = 1; i < cf->args->nelts; i++){
@@ -273,11 +277,11 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
         if(v == NGX_ERROR){
             return NGX_CONF_ERROR;
         }
-        vv = ngx_array_push(&tscf->limit_ingest);
-        if(vv == NULL){
+        vbt = ngx_array_push(&tscf->limit_ingest);
+        if(vbt == NULL){
             return NGX_CONF_ERROR;
         }
-        *vv = v;
+        vbt->value = v;
     }
     return NGX_CONF_OK;
 }
