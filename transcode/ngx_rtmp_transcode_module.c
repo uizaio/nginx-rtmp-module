@@ -16,6 +16,7 @@ static ngx_int_t ngx_rtmp_transcode_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf,
        void *parent, void *child);
+char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
@@ -41,7 +42,7 @@ typedef struct {
     ngx_flag_t                          dvr;
     ngx_str_t                           dvr_path;
     ngx_flag_t                          hide_stream_key;
-
+    ngx_uint_t                          limit_ingest[4];
 } ngx_rtmp_transcode_app_conf_t;
 
 typedef struct {
@@ -114,6 +115,13 @@ static ngx_command_t ngx_rtmp_transcode_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_transcode_app_conf_t, hide_stream_key),
       NULL },
+      { ngx_string("transcode_limit_bandwidth"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_1MORE,
+      ngx_rtmp_transcode_limit_bandwidth,
+      NGX_RTMP_APP_CONF_OFFSET,
+      0,
+      NULL
+      },
       ngx_null_command
 };
 
@@ -153,7 +161,7 @@ ngx_rtmp_transcode_create_app_conf(ngx_conf_t *cf)
 {
     ngx_rtmp_transcode_app_conf_t *conf;
 
-    conf = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_transcode_app_conf_t));
+    conf = ngx_pclloc(cf->pool, sizeof(ngx_rtmp_transcode_app_conf_t));
     if (conf == NULL) {
         return NULL;
     }
@@ -237,6 +245,29 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
                       "transcode: No video rate");
     }  
     return NGX_OK;
+}
+
+char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+    ngx_rtmp_transcode_app_conf_t   *tscf = conf;
+    ngx_str_t                       *value;
+    ngx_uint_t                      i;
+    ngx_uint_t                      v;
+    ngx_uint_t                      *vv;
+
+    value = cf->args->elts;
+    for(i = 1; i < cf->args->nelts; i++){
+        v = ngx_atoi(value[i].data, value[i].len);
+        if(v == NGX_ERROR){
+            return NGX_CONF_ERROR;
+        }
+        vv = ngx_array_push(&tscf->limit_ingest);
+        if(vv == NULL){
+            return NGX_CONF_ERROR;
+        }
+        vv = v;
+    }
+    return NGX_CONF_OK;
 }
 
 static ngx_int_t
