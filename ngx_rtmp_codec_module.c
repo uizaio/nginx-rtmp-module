@@ -8,7 +8,8 @@
 #include <ngx_core.h>
 #include "ngx_rtmp_codec_module.h"
 #include "ngx_rtmp_live_module.h"
-#include "ngx_rtmp_cmd_module.h"#include "ngx_rtmp_bitop.h"
+#include "ngx_rtmp_cmd_module.h"
+#include "ngx_rtmp_bitop.h"
 
 
 
