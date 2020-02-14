@@ -234,8 +234,6 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->naming, prev->naming,
                               NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
-    ngx_log_error(NGX_LOG_ERR, cf->log, 0,
-                        "transcode: 2");
     if (ngx_rtmp_transcode_merge_limit_ingest(&prev->limit_ingest, &conf->limit_ingest) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
@@ -287,7 +285,7 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
             if(video_rate > limits[0].value){
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: Video rate is over limit!");
-                return NGX_ERR;
+                return NGX_ERROR;
             }
             ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                         "transcode: video rate: %d", video_rate);
