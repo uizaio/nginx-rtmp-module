@@ -234,6 +234,8 @@ ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_uint_value(conf->naming, prev->naming,
                               NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL);
     ngx_conf_merge_str_value(conf->format, prev->format, "fmp4");
+    ngx_log_error(NGX_LOG_ERR, cf->log, 0,
+                        "transcode: 2");
     if (ngx_rtmp_transcode_merge_limit_ingest(&prev->limit_ingest, &conf->limit_ingest) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
@@ -305,7 +307,8 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
     ngx_uint_t                      i;
     ngx_uint_t                      v;
     ngx_rtmp_limit_bandwidth_t      *vbt;
-
+    ngx_log_error(NGX_LOG_ERR, cf->log, 0,
+                        "transcode: 1");
     value = cf->args->elts;
     for(i = 1; i < cf->args->nelts; i++){
         v = ngx_atoi(value[i].data, value[i].len);
