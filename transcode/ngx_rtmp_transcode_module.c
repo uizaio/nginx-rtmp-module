@@ -311,6 +311,8 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
                         "transcode: 1");
     value = cf->args->elts;
     for(i = 1; i < cf->args->nelts; i++){
+        ngx_log_error(NGX_LOG_ERR, cf->log, 0,
+                        "transcode: b");
         v = ngx_atoi(value[i].data, value[i].len);
         if(v == NGX_ERROR){
             return NGX_CONF_ERROR;
@@ -323,6 +325,8 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
         ngx_log_error(NGX_LOG_ERR, cf->log, 0,
                         "transcode: %d", v);
     }
+    ngx_log_error(NGX_LOG_ERR, cf->log, 0,
+                        "transcode: a");
     return NGX_CONF_OK;
 }
 
