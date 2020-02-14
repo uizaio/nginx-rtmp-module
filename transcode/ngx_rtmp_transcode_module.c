@@ -317,7 +317,7 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
             return NGX_CONF_ERROR;
         }
         vbt->value = v;
-        ngx_log_error(NGX_LOG_ERR, cf->connection->log, 0,
+        ngx_log_error(NGX_LOG_ERR, cf->log, 0,
                         "transcode: %d", v);
     }
     return NGX_CONF_OK;
