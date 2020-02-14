@@ -315,9 +315,13 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
                         "transcode: b");
         v = ngx_atoi(value[i].data, value[i].len);
         if(v == NGX_ERROR){
+            ngx_log_error(NGX_LOG_ERR, cf->log, 0,
+                        "transcode: c");
             return NGX_CONF_ERROR;
         }
         vbt = ngx_array_push(&tscf->limit_ingest);
+        ngx_log_error(NGX_LOG_ERR, cf->log, 0,
+                        "transcode: d");
         if(vbt == NULL){
             return NGX_CONF_ERROR;
         }
