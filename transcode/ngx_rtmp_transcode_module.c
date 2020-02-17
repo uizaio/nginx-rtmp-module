@@ -26,6 +26,7 @@ ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s);
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
 #define NGX_RTMP_TRANSCODE_NAMING_TIMESTAMP   2
 #define NGX_RTMP_TRANSCODE_NAMING_SYSTEM      3
+#define NGX_RTMP_TRANSCODE_DIR_ACCESS        0744
 
 static ngx_conf_enum_t                  ngx_rtmp_transcode_naming_slots[] = {
     { ngx_string("sequential"),         NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL },
