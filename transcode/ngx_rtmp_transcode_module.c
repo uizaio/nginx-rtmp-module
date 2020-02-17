@@ -20,7 +20,7 @@ char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, voi
 static ngx_int_t
 ngx_rtmp_transcode_merge_limit_ingest(ngx_array_t *prev, ngx_array_t *ingest_limit);
 static ngx_int_t
-ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
+ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
