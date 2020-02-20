@@ -266,6 +266,8 @@ ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
     tacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
 
     *ngx_snprintf(path, sizeof(path) - 1, "%V", &tacf->path) = 0;
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                        "transcode: %V", &tacf->path);
     if (ngx_file_info(path, &fi) == NGX_FILE_ERROR) {
         if (ngx_errno != NGX_ENOENT) {
             return NGX_ERROR;
