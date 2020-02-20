@@ -270,6 +270,9 @@ ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
                         "transcode: %V", &tacf->path);
     if (ngx_file_info(path, &fi) == NGX_FILE_ERROR) {
         if (ngx_errno != NGX_ENOENT) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "transcode: " ngx_file_info_n " failed on '%V'",
+                          &tacf->path);
             return NGX_ERROR;
         }
         if (ngx_create_dir(path, NGX_RTMP_TRANSCODE_DIR_ACCESS) == NGX_FILE_ERROR) {
