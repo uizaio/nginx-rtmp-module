@@ -276,6 +276,9 @@ ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
             return NGX_ERROR;
         }
         if (ngx_create_dir(path, NGX_RTMP_TRANSCODE_DIR_ACCESS) == NGX_FILE_ERROR) {
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, ngx_errno,
+                          "transcode: " ngx_create_dir_n " failed on '%V'",
+                          &tacf->path);
             return NGX_ERROR;
         }
     }else{
