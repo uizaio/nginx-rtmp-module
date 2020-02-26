@@ -2017,14 +2017,16 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     pp = str.data;
     j = 0;
     for(i = 0; i < str.len; i++){  
-        ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
-                        "notify: %c", *p);      
+        // ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
+        //                 "notify: %c", *p);      
         if(*p == '\n'){
             k2 = i;
             s = ngx_array_push(strs);
             s->len = k2 - k1;
+            s->data = ngx_palloc(s->connection->pool, s->len + 1);
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %s", pp);
+            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
             *ngx_cpymem(s->data, pp, s->len) = 0;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: b");
             k1 = k2 + 1;
