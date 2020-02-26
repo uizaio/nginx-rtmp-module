@@ -1293,7 +1293,7 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 if(body.len > 0){
                     params = ngx_str_concat(s, body);
                     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: params: %d"), params.nelts;
+                      "notify: params: %d", params->nelts);
                 }
             }
         }           
