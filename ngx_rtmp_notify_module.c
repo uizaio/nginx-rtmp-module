@@ -2029,7 +2029,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: b");
             k1 = k2 + 1;
             j++;
-            pp = str.data + p + 1;
+            pp = str.data + k + 1;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
                         "notify: param: %V", s);
             if(j == 2){
