@@ -2024,11 +2024,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             s = ngx_array_push(strs);
             s->len = k2 - k1;
             s->data = ngx_palloc(session->connection->pool, s->len + 1);
-            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
-            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %s", pp);
-            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
             *ngx_cpymem(s->data, pp, s->len) = 0;
-            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: b");
             k1 = k2 + 1;
             j++;
             pp = str.data + k1 + 1;
@@ -2039,6 +2035,14 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             }
         }
         p++;
+    }
+    if(j == 1){
+        s = ngx_array_push(strs);
+        s->len = str.len - k1;
+        s->data = ngx_palloc(session->connection->pool, s->len + 1);
+        *ngx_cpymem(s->data, pp, s->len) = 0;
+        ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
+                        "notify: param: %V", s);
     }
     return strs;
 }
