@@ -1984,14 +1984,14 @@ ngx_rtmp_notify_postconfiguration(ngx_conf_t *cf)
     return NGX_OK;
 }
 
-ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *s, ngx_str_t str){
+ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     ngx_array_t *strs;
     ngx_str_t *s;
     size_t i,j;
     size_t k1,k2;
     u_char *p;
     
-    strs = ngx_array_create(s->connection->pool, 2, sizeof(ngx_str_t));
+    strs = ngx_array_create(session->connection->pool, 2, sizeof(ngx_str_t));
     if(strs == NULL){
         return NULL;
     }
@@ -2006,7 +2006,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *s, ngx_str_t str){
             ngx_memcpy(s.data, p, s.len);
             k1 = k2 + 1;
             j++;
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
                         "notify: param: %V", s);
             if(j == 2){
                 break;//we only get 2 params
