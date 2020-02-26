@@ -284,7 +284,7 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
 
     notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
-    if(notify_ctx->params->nelts > 2){
+    if(notify_ctx->params->nelts > 1){
         stier = notify_ctx->params->elts;
         tier = ngx_atoi(stier[1].data, stier[1].len);        
     }else{
