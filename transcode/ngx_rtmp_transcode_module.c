@@ -6,6 +6,7 @@
 #include <ngx_rtmp.h>
 #include <ngx_rtmp_codec_module.h>
 #include <ngx_rtmp_cmd_module.h>
+#include <ngx_rtmp_transcode_module.h>
 
 static ngx_rtmp_publish_pt              next_publish;
 static ngx_rtmp_close_stream_pt         next_close_stream;
@@ -52,8 +53,6 @@ typedef struct {
     ngx_array_t                         limit_ingest;
 } ngx_rtmp_transcode_app_conf_t;
 
-typedef struct {
-} ngx_rtmp_transcode_ctx_t;
 
 static ngx_command_t ngx_rtmp_transcode_commands[] = {
     { ngx_string("transcode"),

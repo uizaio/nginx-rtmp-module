@@ -1204,6 +1204,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     int                         i = 0;
     int                         content_length = 0;
     ngx_rtmp_hls_app_conf_t     *hacf;
+    ngx_str_t                   *param;
+    ngx_array_t                 *params;
 
     static ngx_str_t    location = ngx_string("location");
 
@@ -1288,10 +1290,10 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             }            
             if(content_length > 0){ 
                 body = ngx_rtmp_notify_parse_http_body(s, in, content_length);
-                if(body.len > 0){        
+                if(body.len > 0){
+                    params = ngx_str_concat(s, body);
                     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: body_len: %d", body.len);
-                    ngx_str_concat(s, body);
+                      "notify: params: %d"), params.nelts;
                 }
             }
         }           
@@ -2027,8 +2029,6 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             k1 = k2;
             j++;
             pp = str.data + k1 + 1;
-            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
-                        "notify: param: %V", s);
             if(j == 2){
                 break;//we only get 2 params
             }
@@ -2038,12 +2038,9 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     if(j == 1){
         s = ngx_array_push(strs);
         s->len = str.len - k1 - 1;
-        ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
-                        "notify: param: %s", pp);
         s->data = ngx_palloc(session->connection->pool, s->len + 1);
         *ngx_cpymem(s->data, pp, s->len) = 0;
         ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
-                        "notify: param: %V", s);
     }
     return strs;
 }
