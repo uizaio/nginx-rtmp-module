@@ -1285,14 +1285,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                     content_length = atoi(headers.hs[i].value);
                     break;
                 }
-            }
-            ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: body_len: %d", content_length);
+            }            
             if(content_length > 0){ 
-                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);     
-                ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "notify: body_len: %d", body.len);      
+                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);
                 if(body.len > 0){        
+                    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
+                      "notify: body_len: %d", body.len);
                     ngx_str_concat(s, body);
                 }
             }
@@ -2010,9 +2008,13 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     u_char *p;
     
     strs = ngx_array_create(session->connection->pool, 2, sizeof(ngx_str_t));
+    ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
+                        "notify: 1");
     if(strs == NULL){
         return NULL;
     }
+    ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
+                        "notify: 2");
     k1 = 0;
     p = str.data;
     j = 0;
