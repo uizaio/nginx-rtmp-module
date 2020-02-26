@@ -42,7 +42,7 @@ static ngx_int_t ngx_rtmp_notify_done(ngx_rtmp_session_t *s, char *cbname,
 
 ngx_str_t   ngx_rtmp_notify_urlencoded =
             ngx_string("application/x-www-form-urlencoded");
-ngx_array_t *ngx_str_concat(ngx_pool_t *pool, ngx_str_t str);            
+ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str);          
 
 
 #define NGX_RTMP_NOTIFY_PUBLISHING              0x01
@@ -1986,7 +1986,7 @@ ngx_rtmp_notify_postconfiguration(ngx_conf_t *cf)
 
 ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     ngx_array_t *strs;
-    ngx_str_t s;
+    ngx_str_t *s;
     size_t i,j;
     size_t k1,k2;
     u_char *p;
@@ -2003,7 +2003,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             k2 = i;
             s = ngx_array_push(strs);
             s.len = k2 - k1;
-            ngx_memcpy(s.data, p, s.len);
+            ngx_memcpy(s->data, p, s->len);
             k1 = k2 + 1;
             j++;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
