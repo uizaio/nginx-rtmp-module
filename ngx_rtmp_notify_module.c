@@ -2010,8 +2010,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     strs = ngx_array_create(session->connection->pool, 2, sizeof(ngx_str_t));    
     if(strs == NULL){
         return NULL;
-    }
-    ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: 2");
+    }    
     k1 = 0;
     p = str.data;
     pp = str.data;
@@ -2038,7 +2037,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     }
     if(j == 1){
         s = ngx_array_push(strs);
-        s->len = str.len - k1;
+        s->len = str.len - k1 - 1;
         s->data = ngx_palloc(session->connection->pool, s->len + 1);
         *ngx_cpymem(s->data, pp, s->len) = 0;
         ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
