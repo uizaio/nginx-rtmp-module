@@ -2024,11 +2024,12 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             s = ngx_array_push(strs);
             s->len = k2 - k1;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
-            ngx_memcpy(s->data, pp, s->len);
+            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %s", pp);
+            *ngx_cpymem(s->data, pp, s->len) = 0;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: b");
             k1 = k2 + 1;
             j++;
-            pp = p + 1;
+            pp = str.data + p + 1;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
                         "notify: param: %V", s);
             if(j == 2){
