@@ -278,30 +278,40 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_rtmp_transcode_app_conf_t   *tscf;
     ngx_rtmp_limit_bandwidth_t      *limits;
     ngx_rtmp_notify_ctx_t           *notify_ctx;
+    ngx_str_t                       stier;
+    size_t                          tier;
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
 
     notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
+    if(notify_ctx->params->nelts > 2){
+        stier = notify_ctx->params.elts[1];
+        tier = ngx_atoi(stier.data, stier.len);        
+    }else{
+        tier = 0;
+    }
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: params: %d", notify_ctx->params->nelts);
-    limits = tscf->limit_ingest.elts;
-    if(tscf->limit_ingest.nelts > 0){
-        codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
-        if(codec_ctx != NULL){
-            video_rate = codec_ctx->video_data_rate;
-            if(video_rate > limits[0].value){
+                        "transcode: params: %d", tier);
+    if(tier != 0 && tier <= tscf->limit_ingest.nelts){
+        limits = tscf->limit_ingest.elts;
+        if(tscf->limit_ingest.nelts > 0){
+            codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
+            if(codec_ctx != NULL){
+                video_rate = codec_ctx->video_data_rate;
+                if(video_rate > limits[tier].value){
+                    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                            "transcode: Video rate is over limit!");
+                    return NGX_ERROR;
+                }
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: Video rate is over limit!");
-                return NGX_ERROR;
-            }
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: video rate: %d", video_rate);
-                        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: limit: %d", limits[0].value);
-        }else{
-            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: No video rate");
-        }  
+                            "transcode: video rate: %d", video_rate);
+                            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                            "transcode: limit: %d", limits[0].value);
+            }else{
+                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                            "transcode: No video rate");
+            }  
+        }   
     }    
     return NGX_OK;
 }
