@@ -42,6 +42,7 @@ static ngx_int_t ngx_rtmp_notify_done(ngx_rtmp_session_t *s, char *cbname,
 
 ngx_str_t   ngx_rtmp_notify_urlencoded =
             ngx_string("application/x-www-form-urlencoded");
+ngx_array_t *ngx_str_concat(ngx_pool_t *pool, ngx_str_t str);            
 
 
 #define NGX_RTMP_NOTIFY_PUBLISHING              0x01
@@ -1223,7 +1224,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             }
             if(content_length > 0){                
                 body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
-                if(body.len > 0){                        
+                if(body.len > 0){        
+                    ngx_str_concat(s, body);
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                     if(ctx != NULL){                              
                         p = (u_char*)str_replace(s, ctx->playlist.data, ctx->name.data, body.data);
@@ -1980,4 +1982,37 @@ ngx_rtmp_notify_postconfiguration(ngx_conf_t *cf)
     ngx_rtmp_record_done = ngx_rtmp_notify_record_done;
 
     return NGX_OK;
+}
+
+ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *s, ngx_str_t str){
+    ngx_array_t *strs;
+    ngx_str_t *s;
+    size_t i,j;
+    size_t k1,k2;
+    u_char *p;
+    
+    strs = ngx_array_create(s->connection->pool, 2, sizeof(ngx_str_t));
+    if(strs == NULL){
+        return NULL;
+    }
+    k1 = 0;
+    p = str.data;
+    j = 0;
+    for(i = 0; i < str.len; i++){        
+        if(*p == '\n'){
+            k2 = i;
+            s = ngx_array_push(strs);
+            s.len = k2 - k1;
+            ngx_memcpy(s.data, p, s.len);
+            k1 = k2 + 1;
+            j++;
+            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                        "notify: param: %V", s);
+            if(j == 2){
+                break;//we only get 2 params
+            }
+        }
+        p++;
+    }
+    return strs;
 }
