@@ -2023,7 +2023,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
             k2 = i;
             s = ngx_array_push(strs);
             s->len = k2 - k1;
-            s->data = ngx_palloc(s->connection->pool, s->len + 1);
+            s->data = ngx_palloc(session->connection->pool, s->len + 1);
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %s", pp);
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: %d", s->len);
