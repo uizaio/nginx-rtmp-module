@@ -2040,7 +2040,6 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
         s->len = str.len - k1 - 1;
         s->data = ngx_palloc(session->connection->pool, s->len + 1);
         *ngx_cpymem(s->data, pp, s->len) = 0;
-        ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
     }
     return strs;
 }
