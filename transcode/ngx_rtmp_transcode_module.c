@@ -285,7 +285,7 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
     if(notify_ctx->params->nelts > 2){
-        stier = notify_ctx->params.elts[1];
+        stier = notify_ctx->params->elts[1];
         tier = ngx_atoi(stier.data, stier.len);        
     }else{
         tier = 0;
