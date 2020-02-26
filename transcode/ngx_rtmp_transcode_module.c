@@ -290,8 +290,6 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     }else{
         tier = 0;
     }
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: params: %d", tier);
     if(tier != 0 && tier <= tscf->limit_ingest.nelts){
         limits = tscf->limit_ingest.elts;
         if(tscf->limit_ingest.nelts > 0){
@@ -303,10 +301,6 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
                             "transcode: Video rate is over limit!");
                     return NGX_ERROR;
                 }
-                ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                            "transcode: video rate: %d", video_rate);
-                            ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                            "transcode: limit: %d", limits[0].value);
             }else{
                 ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                             "transcode: No video rate");
