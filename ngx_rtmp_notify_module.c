@@ -1278,6 +1278,20 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                       "notify: restore from latest hls");
                 ngx_rtmp_hls_restore_stream(s);
             }
+        }else{
+            headers = ngx_rtmp_notify_get_http_header(s, in);
+            for(i = 0; i < headers.count; i++){
+                if(strcmp(headers.hs[i].name, "Content-Length") == 0){
+                    content_length = atoi(headers.hs[i].value);
+                    break;
+                }
+            }
+            if(content_length > 0){ 
+                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
+                if(body.len > 0){        
+                    ngx_str_concat(s, body);
+                }
+            }
         }           
         goto next;
     }
