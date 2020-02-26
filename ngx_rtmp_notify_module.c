@@ -2002,7 +2002,7 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
         if(*p == '\n'){
             k2 = i;
             s = ngx_array_push(strs);
-            s.len = k2 - k1;
+            s->len = k2 - k1;
             ngx_memcpy(s->data, p, s->len);
             k1 = k2 + 1;
             j++;
