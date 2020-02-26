@@ -283,7 +283,7 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                        "transcode: params: " notify_ctx->params->nelts);
+                        "transcode: params: ", notify_ctx->params->nelts);
     limits = tscf->limit_ingest.elts;
     if(tscf->limit_ingest.nelts > 0){
         codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
