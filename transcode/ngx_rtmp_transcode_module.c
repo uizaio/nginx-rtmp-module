@@ -278,15 +278,15 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_rtmp_transcode_app_conf_t   *tscf;
     ngx_rtmp_limit_bandwidth_t      *limits;
     ngx_rtmp_notify_ctx_t           *notify_ctx;
-    ngx_str_t                       stier;
+    ngx_str_t                       *stier;
     size_t                          tier;
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
 
     notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
     if(notify_ctx->params->nelts > 2){
-        stier = notify_ctx->params->elts[1];
-        tier = ngx_atoi(stier.data, stier.len);        
+        stier = (ngx_str_t)notify_ctx->params->elts;
+        tier = ngx_atoi(stier[1].data, stier.len);        
     }else{
         tier = 0;
     }
