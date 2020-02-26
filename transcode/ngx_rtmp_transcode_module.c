@@ -19,8 +19,6 @@ static char * ngx_rtmp_transcode_merge_app_conf(ngx_conf_t *cf,
 char* ngx_rtmp_transcode_limit_bandwidth(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t
 ngx_rtmp_transcode_merge_limit_ingest(ngx_array_t *prev, ngx_array_t *ingest_limit);
-static ngx_int_t
-ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s);
 
 
 #define NGX_RTMP_TRANSCODE_NAMING_SEQUENTIAL  1
@@ -250,49 +248,7 @@ static ngx_int_t
 ngx_rtmp_transcode_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 {
 
-    if (ngx_rtmp_transcode_ensure_directory(s) != NGX_OK) {
-        return NGX_ERROR;
-    }
     return next_publish(s, v);
-}
-
-static ngx_int_t
-ngx_rtmp_transcode_ensure_directory(ngx_rtmp_session_t *s)
-{
-    ngx_file_info_t            fi;
-    ngx_rtmp_transcode_app_conf_t  *tacf;
-
-    static u_char              path[NGX_MAX_PATH + 1];
-    static u_char              dvr_path[NGX_MAX_PATH] + 1;
-    tacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
-
-    *ngx_snprintf(path, sizeof(path) - 1, "%V", &tacf->path) = 0;
-    *ngx_snprintf(dvr_path, sizeof(dvr_path) - 1, "%V", &tacf->dvr_path) = 0;
-    if (ngx_file_info(path, &fi) == NGX_FILE_ERROR) {
-        if (ngx_errno != NGX_ENOENT) {
-            return NGX_ERROR;
-        }
-        if (ngx_create_dir(path, NGX_RTMP_TRANSCODE_DIR_ACCESS) == NGX_FILE_ERROR) {
-            return NGX_ERROR;
-        }
-    }else{
-        if (!ngx_is_dir(&fi)) {
-            return  NGX_ERROR;
-        }
-    }
-    if (ngx_file_info(dvr_path, &fi) == NGX_FILE_ERROR) {
-        if (ngx_errno != NGX_ENOENT) {
-            return NGX_ERROR;
-        }
-        if (ngx_create_dir(dvr_path, NGX_RTMP_TRANSCODE_DIR_ACCESS) == NGX_FILE_ERROR) {
-            return NGX_ERROR;
-        }
-    }else{
-        if (!ngx_is_dir(&fi)) {
-            return  NGX_ERROR;
-        }
-    }
-    return NGX_OK;
 }
 
 static ngx_int_t
