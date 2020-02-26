@@ -2007,23 +2007,24 @@ ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     size_t k1,k2;
     u_char *p;
     
-    strs = ngx_array_create(session->connection->pool, 2, sizeof(ngx_str_t));
-    ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
-                        "notify: 1");
+    strs = ngx_array_create(session->connection->pool, 2, sizeof(ngx_str_t));    
     if(strs == NULL){
         return NULL;
     }
-    ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
-                        "notify: 2");
+    ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: 2");
     k1 = 0;
     p = str.data;
     j = 0;
-    for(i = 0; i < str.len; i++){        
+    for(i = 0; i < str.len; i++){  
+        ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
+                        "notify: %c", *p);      
         if(*p == '\n'){
             k2 = i;
             s = ngx_array_push(strs);
             s->len = k2 - k1;
+            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: a");
             ngx_memcpy(s->data, p, s->len);
+            ngx_log_error(NGX_LOG_ERR, session->connection->log, 0, "notify: b");
             k1 = k2 + 1;
             j++;
             ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
