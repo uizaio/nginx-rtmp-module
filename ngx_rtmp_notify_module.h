@@ -7,7 +7,7 @@ typedef struct {
     u_char                                      args[NGX_RTMP_MAX_ARGS];
     ngx_event_t                                 update_evt;
     time_t                                      start;
-    ngx_array_t                                 params;
+    ngx_array_t                                 *params;
 } ngx_rtmp_notify_ctx_t;
 
 #endif /* NGX_RTMP_NOTIFY_MODULE_H */
