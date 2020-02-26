@@ -6,3 +6,5 @@ typedef struct {
 } ngx_rtmp_transcode_ctx_t;
 
 extern ngx_module_t  ngx_rtmp_transcode_module;
+
+#endif /* NGX_RTMP_TRANSCODE_MODULE_H */
