@@ -10,4 +10,6 @@ typedef struct {
     ngx_array_t                                 *params;
 } ngx_rtmp_notify_ctx_t;
 
+extern ngx_module_t  ngx_rtmp_notify_module;
+
 #endif /* NGX_RTMP_NOTIFY_MODULE_H */
