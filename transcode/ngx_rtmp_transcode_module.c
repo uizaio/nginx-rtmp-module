@@ -7,6 +7,7 @@
 #include <ngx_rtmp_codec_module.h>
 #include <ngx_rtmp_cmd_module.h>
 #include "ngx_rtmp_transcode_module.h"
+#include "ngx_rtmp_notify_module.h"
 
 static ngx_rtmp_publish_pt              next_publish;
 static ngx_rtmp_close_stream_pt         next_close_stream;
@@ -276,8 +277,13 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     ngx_uint_t                      video_rate;
     ngx_rtmp_transcode_app_conf_t   *tscf;
     ngx_rtmp_limit_bandwidth_t      *limits;
+    ngx_rtmp_notify_ctx_t           *notify_ctx;
 
     tscf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_transcode_module);
+
+    notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                        "transcode: params: " notify_ctx->params->nelts);
     limits = tscf->limit_ingest.elts;
     if(tscf->limit_ingest.nelts > 0){
         codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
