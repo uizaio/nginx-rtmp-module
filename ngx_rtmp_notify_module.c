@@ -1986,7 +1986,7 @@ ngx_rtmp_notify_postconfiguration(ngx_conf_t *cf)
 
 ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
     ngx_array_t *strs;
-    ngx_str_t *s;
+    ngx_str_t s;
     size_t i,j;
     size_t k1,k2;
     u_char *p;
