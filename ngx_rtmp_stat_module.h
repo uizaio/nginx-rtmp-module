@@ -103,9 +103,9 @@
                     "# TYPE node_rtmp_meta_video_fps gauge\n"   \
                     "node_rtmp_meta_video_fps{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\",codec=\"%s %s %.1f\",res=\"%uix%ui\"} %ui\n"
 
-#define RTMP_META_VIDEO_TIME_FMT    "# HELP node_meta_video_time_milliseconds This is the total number of milliseconds time.\n"    \
-                    "# TYPE node_meta_video_time_milliseconds counter\n" \
-                    "node_meta_video_time_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\",codec=\"%s %s %.1f\",res=\"%uix%ui\",fps=\"%ui\"} %i\n"
+#define RTMP_META_VIDEO_TIME_FMT    "# HELP node_rtmp_meta_video_time_milliseconds This is the total number of milliseconds time.\n"    \
+                    "# TYPE node_rtmp_meta_video_time_milliseconds counter\n" \
+                    "node_rtmp_meta_video_time_milliseconds{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\",codec=\"%s %s %.1f\",res=\"%uix%ui\",fps=\"%ui\"} %i\n"
 
 #define RTMP_META_VIDEO_COMPAT_FMT  "# HELP node_rtmp_meta_video_compat.\n"    \
                     "# TYPE node_rtmp_meta_video_compat untyped\n"   \
