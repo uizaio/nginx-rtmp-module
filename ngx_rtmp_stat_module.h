@@ -52,27 +52,27 @@
 
 #define RTMP_STREAM_BW_IN_FMT   "# HELP node_rtmp_stream_bw_in_bits Bandwidth inputted of stream.\n" \
                     "# TYPE node_rtmp_stream_bw_in_bits gauge\n"   \
-                    "node_rtmp_stream_bw_in_bits{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\"} %uL\n"
+                    "node_rtmp_stream_bw_in_bits{pid=\"%ui\",app_name=\"%V\",stream_name=\"%s\"} %uL\n"
 
 #define RTMP_STREAM_BYTES_IN_FMT    "# HELP node_rtmp_stream_bytes_in_bytes Bytes inputted of stream and still.\n" \
                     "# TYPE node_rtmp_stream_bytes_in_bytes gauge\n"   \
-                    "node_rtmp_stream_bytes_in_bytes{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\"} %i\n"
+                    "node_rtmp_stream_bytes_in_bytes{pid=\"%ui\",app_name=\"%V\",stream_name=\"%s\"} %i\n"
 
 #define RTMP_STREAM_BW_OUT_FMT  "# HELP node_rtmp_stream_bw_out_bits Bandwidth outputted of stream.\n" \
                     "# TYPE node_rtmp_stream_bw_out_bits gauge\n"   \
-                    "node_rtmp_stream_bw_out_bits{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\"} %uL\n"
+                    "node_rtmp_stream_bw_out_bits{pid=\"%ui\",app_name=\"%V\",stream_name=\"%s\"} %uL\n"
 
 #define RTMP_STREAM_BYTES_OUT_FMT   "# HELP node_rtmp_stream_bytes_out_bytes Bytes outputted of stream and still.\n" \
                     "# TYPE node_rtmp_stream_bytes_out_bytes gauge\n"   \
-                    "node_rtmp_stream_bytes_out_bytes{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\"} %i\n"
+                    "node_rtmp_stream_bytes_out_bytes{pid=\"%ui\",app_name=\"%V\",stream_name=\"%s\"} %i\n"
 
 #define RTMP_STREAM_BW_AUDIO_FMT    "# HELP node_rtmp_stream_bw_audio_bits Audio bandwidth of stream.\n" \
                     "# TYPE node_rtmp_stream_bw_audio_bits gauge\n"   \
-                    "node_rtmp_stream_bw_audio_bits{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\"} %uL\n"
+                    "node_rtmp_stream_bw_audio_bits{pid=\"%ui\",app_name=\"%V\",stream_name=\"%s\"} %uL\n"
 
 #define RTMP_STREAM_BW_VIDEO_FMT    "# HELP node_rtmp_stream_bw_video_bits Video bandwidth of stream.\n" \
                     "# TYPE node_rtmp_stream_bw_video_bits gauge\n"   \
-                    "node_rtmp_stream_bw_video_bits{pid=\"%ui\",app_name=\"%V\",session_id=\"\",stream_name=\"%s\"} %uL\n"
+                    "node_rtmp_stream_bw_video_bits{pid=\"%ui\",app_name=\"%V\",stream_name=\"%s\"} %uL\n"
 
 #define RTMP_STREAM_NCLIENTS_FMT    "# HELP node_rtmp_stream_nclients Total client of stream.\n"  \
                     "# TYPE node_rtmp_stream_nclients counter\n"  \

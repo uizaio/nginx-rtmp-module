@@ -527,7 +527,7 @@ ngx_rtmp_stat_live_prometheus(ngx_http_request_t *r, ngx_rtmp_live_app_conf_t *l
                         cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->frame_rate);
                     buf = ngx_sprintf(buf, RTMP_META_VIDEO_TIME_FMT, pid, app_name, stream->name, 
                         cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->frame_rate,
-                        (ngx_int_t) (ngx_current_msec - stream->epoch));
+                        (ngx_int_t) (ngx_current_msec - s->epoch));
                     // comment => unuse video_compat
                     // buf = ngx_sprintf(buf, RTMP_META_VIDEO_COMPAT_FMT, pid, app_name, stream->name, 
                         // cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->frame_rate, codec->avc_compat);
