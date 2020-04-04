@@ -296,7 +296,7 @@ ngx_rtmp_transcode_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
             codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
             if(codec_ctx != NULL){
                 video_rate = codec_ctx->video_data_rate;
-                if(video_rate > limits[tier].value){
+                if(video_rate > limits[tier-1].value){
                     ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                             "transcode: Video rate is over limit!");
                     return NGX_ERROR;
