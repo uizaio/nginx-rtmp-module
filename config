@@ -21,6 +21,7 @@ RTMP_CORE_MODULES="                                         \
                 ngx_rtmp_limit_module                       \
                 ngx_rtmp_hls_module                         \
                 ngx_rtmp_dash_module                        \
+                ngx_rtmp_transcode_module                      \
                 "
 
 
@@ -50,6 +51,8 @@ RTMP_DEPS="                                                 \
                 $ngx_addon_dir/hls/ngx_rtmp_mpegts.h        \
                 $ngx_addon_dir/hls/ngx_rtmp_hls_module.h    \
                 $ngx_addon_dir/dash/ngx_rtmp_mp4.h          \
+                $ngx_addon_dir/transcode/ngx_rtmp_transcode_module.h    \
+                $ngx_addon_dir/ngx_rtmp_notify_module.h     \
                 "
 
 
@@ -86,6 +89,7 @@ RTMP_CORE_SRCS="                                            \
                 $ngx_addon_dir/dash/ngx_rtmp_dash_module.c  \
                 $ngx_addon_dir/hls/ngx_rtmp_mpegts.c        \
                 $ngx_addon_dir/dash/ngx_rtmp_mp4.c          \
+                $ngx_addon_dir/transcode/ngx_rtmp_transcode_module.c \
                 "
 
 

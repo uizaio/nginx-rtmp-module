@@ -189,8 +189,7 @@ ngx_rtmp_dash_next_frag(ngx_rtmp_session_t *s)
     ngx_rtmp_dash_app_conf_t  *dacf;
 
     dacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_dash_module);
-    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
-
+    ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);     
     if (ctx->nfrags == dacf->winfrags) {
         ctx->frag++;
     } else {
@@ -238,11 +237,13 @@ ngx_rtmp_dash_write_playlist(ngx_rtmp_session_t *s)
     if (dacf == NULL || ctx == NULL || codec_ctx == NULL) {
         return NGX_ERROR;
     }
-
     if (ctx->id == 0) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "dash: init segments");
         ngx_rtmp_dash_write_init_segments(s);
     }
-
+    ngx_log_error(NGX_LOG_DEBUG, s->connection->log, 0,
+                      "dash: Create bak playlist %s", ctx->playlist_bak.data);
     fd = ngx_open_file(ctx->playlist_bak.data, NGX_FILE_WRONLY,
                        NGX_FILE_TRUNCATE, NGX_FILE_DEFAULT_ACCESS);
 
@@ -406,8 +407,7 @@ ngx_rtmp_dash_write_playlist(ngx_rtmp_session_t *s)
                          codec_ctx->sample_rate,
                          (ngx_uint_t) (codec_ctx->audio_data_rate * 1000),
                          name, sep,
-                         name, sep);
-
+                         name, sep);        
         for (i = 0; i < ctx->nfrags; i++) {
             f = ngx_rtmp_dash_get_frag(s, i);
             p = ngx_slprintf(p, last, NGX_RTMP_DASH_MANIFEST_TIME,
@@ -597,7 +597,7 @@ ngx_rtmp_dash_close_fragment(ngx_rtmp_session_t *s, ngx_rtmp_dash_track_t *t)
         goto done;
     }
 #endif
-
+    //write sound/video data to file
     while (left > 0) {
 
         n = ngx_read_fd(t->fd, buffer, ngx_min(sizeof(buffer), left));
@@ -871,8 +871,7 @@ ngx_rtmp_dash_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
         }
     }
 
-    ctx->id = 0;
-
+    ctx->id = 0;    
     if (ngx_strstr(v->name, "..")) {
         ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
                       "dash: bad stream name: '%s'", v->name);
@@ -989,7 +988,7 @@ ngx_rtmp_dash_update_fragments(ngx_rtmp_session_t *s, ngx_int_t boundary,
 
     dacf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_dash_module);
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_dash_module);
-    f = ngx_rtmp_dash_get_frag(s, ctx->nfrags);
+    f = ngx_rtmp_dash_get_frag(s, ctx->nfrags);//get current fragment
 
     d = (int32_t) (timestamp - f->timestamp);
 
@@ -1079,7 +1078,7 @@ ngx_rtmp_dash_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
                           "dash: " ngx_write_fd_n " failed");
             return NGX_ERROR;
         }
-
+        //only the first sample has this info
         smpl = &t->samples[t->sample_count];
 
         smpl->delay = delay;
@@ -1087,7 +1086,7 @@ ngx_rtmp_dash_append(ngx_rtmp_session_t *s, ngx_chain_t *in,
         smpl->duration = 0;
         smpl->timestamp = timestamp;
         smpl->key = (key ? 1 : 0);
-
+        //other sample does not have any  thing
         if (t->sample_count > 0) {
             smpl = &t->samples[t->sample_count - 1];
             smpl->duration = timestamp - smpl->timestamp;

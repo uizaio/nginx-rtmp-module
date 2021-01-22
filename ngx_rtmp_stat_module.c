@@ -460,8 +460,8 @@ ngx_rtmp_stat_live_prometheus(ngx_http_request_t *r, ngx_rtmp_live_app_conf_t *l
     for (n = 0; n < lacf->nbuckets; ++n) {
         for (stream = lacf->streams[n]; stream; stream = stream->next) {
             // stream time
-            buf = ngx_sprintf(buf, RTMP_STREAM_TIME_FMT, pid, app_name, stream->name,
-                (ngx_int_t) (ngx_current_msec - stream->epoch));
+            // buf = ngx_sprintf(buf, RTMP_STREAM_TIME_FMT, pid, app_name, stream->name,
+            //     (ngx_int_t) (ngx_current_msec - stream->epoch));
             // bw_in
             ngx_rtmp_update_bandwidth(&stream->bw_in, 0);
             if (NGX_RTMP_STAT_BW_BYTES & NGX_RTMP_STAT_BW) {
@@ -499,27 +499,20 @@ ngx_rtmp_stat_live_prometheus(ngx_http_request_t *r, ngx_rtmp_live_app_conf_t *l
             codec = NULL;
             for (ctx = stream->ctx; ctx; ctx = ctx->next, ++nclients) {
                 s = ctx->session;
-                if (slcf->stat & NGX_RTMP_STAT_CLIENTS) {
-                    buf = ngx_rtmp_stat_client_prometheus(r, s, buf, app_name, stream->name);
+                // if (slcf->stat & NGX_RTMP_STAT_CLIENTS) {
+                    // buf = ngx_rtmp_stat_client_prometheus(r, s, buf, app_name, stream->name);
                     // dropped
-                    buf = ngx_sprintf(buf, RTMP_CLIENT_DROPPED_FMT, pid, app_name, stream->name,
-                        &s->connection->addr_text, ctx->ndropped);
+                    // buf = ngx_sprintf(buf, RTMP_CLIENT_DROPPED_FMT, pid, app_name, stream->name,
+                        // &s->connection->addr_text, ctx->ndropped);
                     // avsync
-                    if (!lacf->interleave) {
-                        buf = ngx_sprintf(buf, RTMP_CLIENT_AVSYNC_FMT, pid, app_name, stream->name,
-                        &s->connection->addr_text, ctx->cs[1].timestamp -ctx->cs[0].timestamp);
-                    }
+                    // if (!lacf->interleave) {
+                        // buf = ngx_sprintf(buf, RTMP_CLIENT_AVSYNC_FMT, pid, app_name, stream->name,
+                        // &s->connection->addr_text, ctx->cs[1].timestamp -ctx->cs[0].timestamp);
+                    // }
                     //
-                    buf = ngx_sprintf(buf, RTMP_CLIENT_TIMESTAMP_FMT, pid, app_name, stream->name,
-                        &s->connection->addr_text, s->current_time);
-                    // if (ctx->publishing) {
-                    //     NGX_RTMP_STAT_L("<publishing/>");
-                    // }
-
-                    // if (ctx->active) {
-                    //     NGX_RTMP_STAT_L("<active/>");
-                    // }
-                }
+                    // buf = ngx_sprintf(buf, RTMP_CLIENT_TIMESTAMP_FMT, pid, app_name, stream->name,
+                        // &s->connection->addr_text, s->current_time);
+                // }
                 if (ctx->publishing) {
                     codec = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
                 }
@@ -532,8 +525,12 @@ ngx_rtmp_stat_live_prometheus(ngx_http_request_t *r, ngx_rtmp_live_app_conf_t *l
                     char* profile = ngx_rtmp_stat_get_avc_profile(codec->avc_profile);
                     buf = ngx_sprintf(buf, RTMP_META_VIDEO_FPS_FMT, pid, app_name, stream->name, 
                         cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->frame_rate);
-                    buf = ngx_sprintf(buf, RTMP_META_VIDEO_COMPAT_FMT, pid, app_name, stream->name, 
-                        cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->avc_compat);
+                    buf = ngx_sprintf(buf, RTMP_META_VIDEO_TIME_FMT, pid, app_name, stream->name, 
+                        cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->frame_rate,
+                        (ngx_int_t) (ngx_current_msec - s->epoch));
+                    // comment => unuse video_compat
+                    // buf = ngx_sprintf(buf, RTMP_META_VIDEO_COMPAT_FMT, pid, app_name, stream->name, 
+                        // cname, profile, codec->avc_level / 10. , codec->width, codec->height, codec->frame_rate, codec->avc_compat);
                 }
                 // audio
                 cname = ngx_rtmp_get_audio_codec_name(codec->audio_codec_id);
@@ -549,21 +546,11 @@ ngx_rtmp_stat_live_prometheus(ngx_http_request_t *r, ngx_rtmp_live_app_conf_t *l
                     }
                 }
             }
-            buf = ngx_sprintf(buf, RTMP_STREAM_NCLIENTS_FMT,
-                (ngx_uint_t) ngx_getpid(), app_name, stream->name, nclients);
-            // if (stream->publishing) {
-            //     NGX_RTMP_STAT_L("<publishing/>\r\n");
-            // }
-            // if (stream->active) {
-            //     NGX_RTMP_STAT_L("<active/>\r\n");
-            // }
+            // comment => unuse node_rtmp_stream_nclients
+            // buf = ngx_sprintf(buf, RTMP_STREAM_NCLIENTS_FMT,
+                // (ngx_uint_t) ngx_getpid(), app_name, stream->name, nclients);
         }
     }
-    // NGX_RTMP_STAT_L("<nclients>");
-    // NGX_RTMP_STAT(buf, ngx_snprintf(buf, sizeof(buf),
-    //               "%ui", total_nclients) - buf);
-    // NGX_RTMP_STAT_L("</nclients>\r\n");
-    // NGX_RTMP_STAT_L("</live>\r\n");
     return buf;
 }
 

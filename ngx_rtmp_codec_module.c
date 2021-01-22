@@ -12,6 +12,7 @@
 #include "ngx_rtmp_bitop.h"
 
 
+
 #define NGX_RTMP_CODEC_META_OFF     0
 #define NGX_RTMP_CODEC_META_ON      1
 #define NGX_RTMP_CODEC_META_COPY    2
@@ -189,7 +190,7 @@ ngx_rtmp_codec_disconnect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     return NGX_OK;
 }
 
-
+// http://www.mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
 static ngx_int_t
 ngx_rtmp_codec_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         ngx_chain_t *in)
@@ -866,7 +867,15 @@ ngx_rtmp_codec_meta_data(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
             ? NGX_RTMP_AUDIO_UNCOMPRESSED : (ngx_uint_t) v.audio_codec_id_n);
     ngx_memcpy(ctx->profile, v.profile, sizeof(v.profile));
     ngx_memcpy(ctx->level, v.level, sizeof(v.level));
-
+    // ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+    //                       "codec: data frame: "
+    //         "width=%ui height=%ui duration=%ui frame_rate=%ui "
+    //         "video=%s (%ui) audio=%s (%ui)",
+    //         ctx->width, ctx->height, ctx->duration, ctx->frame_rate,
+    //         ngx_rtmp_get_video_codec_name(ctx->video_codec_id),
+    //         ctx->video_codec_id,
+    //         ngx_rtmp_get_audio_codec_name(ctx->audio_codec_id),
+    //         ctx->audio_codec_id);
     ngx_log_debug8(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
             "codec: data frame: "
             "width=%ui height=%ui duration=%ui frame_rate=%ui "

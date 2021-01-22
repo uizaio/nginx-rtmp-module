@@ -13,6 +13,7 @@
 #include "ngx_rtmp_record_module.h"
 #include "ngx_rtmp_relay_module.h"
 #include "hls/ngx_rtmp_hls_module.h"
+#include "ngx_rtmp_notify_module.h"
 
 
 static ngx_rtmp_connect_pt                      next_connect;
@@ -42,6 +43,7 @@ static ngx_int_t ngx_rtmp_notify_done(ngx_rtmp_session_t *s, char *cbname,
 
 ngx_str_t   ngx_rtmp_notify_urlencoded =
             ngx_string("application/x-www-form-urlencoded");
+ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str);          
 
 
 #define NGX_RTMP_NOTIFY_PUBLISHING              0x01
@@ -93,13 +95,13 @@ typedef struct {
 } ngx_rtmp_notify_srv_conf_t;
 
 
-typedef struct {
-    ngx_uint_t                                  flags;
-    u_char                                      name[NGX_RTMP_MAX_NAME];
-    u_char                                      args[NGX_RTMP_MAX_ARGS];
-    ngx_event_t                                 update_evt;
-    time_t                                      start;
-} ngx_rtmp_notify_ctx_t;
+// typedef struct {
+//     ngx_uint_t                                  flags;
+//     u_char                                      name[NGX_RTMP_MAX_NAME];
+//     u_char                                      args[NGX_RTMP_MAX_ARGS];
+//     ngx_event_t                                 update_evt;
+//     time_t                                      start;
+// } ngx_rtmp_notify_ctx_t;
 
 
 typedef struct {
@@ -1202,8 +1204,12 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
     http_headers                headers;
     int                         i = 0;
     int                         content_length = 0;
-    ngx_rtmp_hls_app_conf_t     *hacf;
-
+    ngx_rtmp_hls_app_conf_t     *hacf;    
+    ngx_str_t                   *param;
+    ngx_array_t                 *params;
+    ngx_rtmp_notify_ctx_t      *notify_ctx;
+    
+    notify_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_notify_module);
     static ngx_str_t    location = ngx_string("location");
 
     rc = ngx_rtmp_notify_parse_http_retcode(s, in);
@@ -1223,7 +1229,8 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
             }
             if(content_length > 0){                
                 body = ngx_rtmp_notify_parse_http_body(s, in, content_length);           
-                if(body.len > 0){                        
+                if(body.len > 0){        
+                    ngx_str_concat(s, body);
                     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_hls_module);   
                     if(ctx != NULL){                              
                         p = (u_char*)str_replace(s, ctx->playlist.data, ctx->name.data, body.data);
@@ -1275,6 +1282,21 @@ ngx_rtmp_notify_publish_handle(ngx_rtmp_session_t *s,
                 ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
                       "notify: restore from latest hls");
                 ngx_rtmp_hls_restore_stream(s);
+            }
+        }else{
+            headers = ngx_rtmp_notify_get_http_header(s, in);
+            for(i = 0; i < headers.count; i++){
+                if(strcmp(headers.hs[i].name, "Content-Length") == 0){
+                    content_length = atoi(headers.hs[i].value);
+                    break;
+                }
+            }            
+            if(content_length > 0){ 
+                body = ngx_rtmp_notify_parse_http_body(s, in, content_length);
+                if(body.len > 0){
+                    params = ngx_str_concat(s, body);
+                    notify_ctx->params = params;
+                }
             }
         }           
         goto next;
@@ -1613,7 +1635,6 @@ ngx_rtmp_notify_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
     ngx_rtmp_notify_app_conf_t     *nacf;
     ngx_rtmp_netcall_init_t         ci;
     ngx_url_t                      *url;
-
     if (s->auto_pushed) {
         goto next;
     }
@@ -1981,4 +2002,46 @@ ngx_rtmp_notify_postconfiguration(ngx_conf_t *cf)
     ngx_rtmp_record_done = ngx_rtmp_notify_record_done;
 
     return NGX_OK;
+}
+
+ngx_array_t *ngx_str_concat(ngx_rtmp_session_t *session, ngx_str_t str){
+    ngx_array_t *strs;
+    ngx_str_t *s;
+    size_t i,j;
+    size_t k1,k2;
+    u_char *p,*pp;
+    
+    strs = ngx_array_create(session->connection->pool, 2, sizeof(ngx_str_t));    
+    if(strs == NULL){
+        return NULL;
+    }    
+    k1 = 0;
+    p = str.data;
+    pp = str.data;
+    j = 0;
+    for(i = 0; i < str.len; i++){  
+        // ngx_log_error(NGX_LOG_ERR, session->connection->log, 0,
+        //                 "notify: %c", *p);      
+        if(*p == '\n'){
+            k2 = i;
+            s = ngx_array_push(strs);
+            s->len = k2 - k1;
+            s->data = ngx_palloc(session->connection->pool, s->len + 1);
+            *ngx_cpymem(s->data, pp, s->len) = 0;
+            k1 = k2;
+            j++;
+            pp = str.data + k1 + 1;
+            if(j == 2){
+                break;//we only get 2 params
+            }
+        }
+        p++;
+    }
+    if(j == 1){
+        s = ngx_array_push(strs);
+        s->len = str.len - k1 - 1;
+        s->data = ngx_palloc(session->connection->pool, s->len + 1);
+        *ngx_cpymem(s->data, pp, s->len) = 0;
+    }
+    return strs;
 }

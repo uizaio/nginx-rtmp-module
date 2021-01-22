@@ -34,6 +34,7 @@ static ngx_int_t ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s,
 #define NGX_RTMP_HLS_DIR_ACCESS         0744
 
 
+
 typedef struct {
     ngx_str_t                           path;
     ngx_msec_t                          playlen;
@@ -253,14 +254,6 @@ static ngx_command_t ngx_rtmp_hls_commands[] = {
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_hls_app_conf_t, frags_per_key),
       NULL },
-    { ngx_string("hide_stream_key"),
-      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_flag_slot,
-      NGX_RTMP_APP_CONF_OFFSET,
-      offsetof(ngx_rtmp_hls_app_conf_t, hide_stream_key),
-      NULL
-    },
-
     ngx_null_command
 };
 
@@ -471,8 +464,7 @@ ngx_rtmp_hls_write_playlist(ngx_rtmp_session_t *s)
     }
 
     p = buffer;
-    end = p + sizeof(buffer);
-
+    end = p + sizeof(buffer);    
     p = ngx_slprintf(p, end,
                      "#EXTM3U\n"
                      "#EXT-X-VERSION:3\n"
@@ -536,8 +528,7 @@ ngx_rtmp_hls_write_playlist(ngx_rtmp_session_t *s)
                              key_sep, f->key_id, f->key_id);
         }
 
-        prev_key_id = f->key_id;
-
+        prev_key_id = f->key_id;        
         p = ngx_slprintf(p, end,
                          "#EXTINF:%.3f,\n"
                          "%V%V%s%uL.ts\n",
@@ -966,8 +957,7 @@ ngx_rtmp_hls_open_fragment(ngx_rtmp_session_t *s, uint64_t ts,
         return NGX_ERROR;
     }
 
-    ctx->opened = 1;
-
+    ctx->opened = 1;    
     f = ngx_rtmp_hls_get_frag(s, ctx->nfrags);
 
     ngx_memzero(f, sizeof(*f));
@@ -1479,8 +1469,7 @@ ngx_rtmp_hls_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 
     if (hacf->continuous && !hacf->hide_stream_key) {        
         ngx_rtmp_hls_restore_stream(s);
-    }
-
+    }    
 next:
     return next_publish(s, v);
 }
@@ -1942,7 +1931,6 @@ ngx_rtmp_hls_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         }
 
         nal_type = src_nal_type & 0x1f;
-
         ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
                        "hls: h264 NAL type=%ui, len=%uD",
                        (ngx_uint_t) nal_type, len);
@@ -2004,7 +1992,6 @@ ngx_rtmp_hls_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         *out.last++ = 0;
         *out.last++ = 1;
         *out.last++ = src_nal_type;
-
         /* NAL body */
 
         if (out.end - out.last < (ngx_int_t) len) {
